@@ -1,0 +1,45 @@
+<html>
+	<head>
+		<title>Autocomplete Test</title>
+		<link href="css/smoothness/jquery-ui-1.10.2.custom.css" rel="stylesheet">
+		<script type="text/javascript" src="js/jquery/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="js/jquery/jquery-ui-1.10.2.custom.min.js"></script>
+		<script type="text/javascript" src="js/autoCombobox.js"></script>
+		<!--<style>
+			.ui-button { margin-left: -1px; }
+			.ui-button-icon-only .ui-button-text { padding: 0.35em; } 
+			.ui-autocomplete-input { margin: 12px 0px 0 0px; padding: 0.48em 0 0.47em 0.45em; width: 65% }*/
+		</style>-->
+
+		<script>
+
+			$(document).ready(function() {
+
+			   var choices = ["alpha", "beta", "gamma", "delta"];
+			   for(key in choices) {
+			        var choice = choices[key];
+			        console.log("adding choice: " + choice);
+			        $("#mySelect").append("<option>"+choice+"</option>");
+			   }
+			   $("#mySelect").autocombobox();
+
+			   $("#showSelection").button();
+			   $("#showSelection").click(function() {
+			        var val  = $("#mySelect").val();
+			        alert("val is " + val);
+			    });
+			});
+		</script>
+	</head>
+
+	<body>
+		<select id="mySelect">
+		  <option value="0"></option>
+		  <!--<option>one</option>
+		  <option>two</option>
+		  <option>three</option>-->
+		</select>   
+
+		<button id="showSelection">Show Selection</button>
+	</body>
+</html>

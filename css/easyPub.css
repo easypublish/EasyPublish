@@ -1,0 +1,28 @@
+textarea {
+	font-family: Verdana,Arial,sans-serif;
+	font-size: 0.9em;
+}
+
+input[type=text] {
+	font-family: Verdana,Arial,sans-serif;
+	font-size: 0.9em;
+}
+.ui-widget {
+font-family: Verdana,Arial,sans-serif;
+font-size: 0.9em;
+}
+
+#drop_zone {
+	width:200px;
+	height:200px;
+	border-radius: 15px;
+	background-color:lightblue;
+	float:right;
+	display: table;
+}
+
+#drop_zone  p {
+  display: table-cell; 
+  vertical-align: middle; 
+  text-align: center; 
+}
