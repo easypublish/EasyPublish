@@ -2,7 +2,6 @@ textarea {
 	font-family: Verdana,Arial,sans-serif;
 	font-size: 0.9em;
 }
-
 input[type=text] {
 	font-family: Verdana,Arial,sans-serif;
 	font-size: 0.9em;
@@ -13,14 +12,14 @@ font-size: 0.9em;
 }
 
 #easyPub  {
-  width:800;
+  width:700;
 }
 
 #drop_zone {
 	width:200px;
 	height:200px;
 	border-radius: 15px;
-	background-color:lightblue;
+	background-color:gainsboro;
 	float:right;
 	display: table;
 }
@@ -29,4 +28,34 @@ font-size: 0.9em;
   display: table-cell; 
   vertical-align: middle; 
   text-align: center; 
+}
+
+fieldset {
+  padding: 1em;
+  font:80%/1 sans-serif;
+}
+label {
+	float:left;
+	width:25%;
+	margin-right:0.5em;
+	padding-top:0.2em;
+	text-align:right;
+	font-weight:bold;
+}
+fieldset { 
+	border:0px solid green;
+	background-color:gainsboro;
+	border-radius: 15px;
+	margin: 15px;
+}
+
+legend {
+	padding: 0.2em 0.5em;
+	border:0px solid gray;
+	border-radius: 15px;
+	background-color:gainsboro;
+	color:forestgreen;
+	font-size:150%;
+	text-align:left;
+	font-weight:bold;
 }

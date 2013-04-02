@@ -12,12 +12,12 @@ function EasyPublish() {
 
 	function buildForm(name, fields) {
 		//var form = $("#"+name+"Form");
-		var formTableBody = $("#"+name+"FormTableBody");
+		var formSection = $("#"+name+"Form");
 
 		for(key in fields) {
 			var nextField = fields[key];
 			var nextRow = new FieldEditorRow(nextField);
-			nextRow.elem.appendTo(formTableBody);	
+			nextRow.elem.appendTo(formSection);	
 			//have to construct combo boxes after they've been added to DOM
 			if(nextField.type==Field.CHOICE) {
 				$("#"+nextField.id).autocombobox();
@@ -248,10 +248,8 @@ function EasyPublish() {
     				);
 
     		} else {
-
     			// We found a non-quoted value.
     			var strMatchedValue = arrMatches[ 3 ];
-
     		}
 
 
@@ -268,7 +266,29 @@ function EasyPublish() {
 }
 
 
+FieldEditorRow = function(field) {
 
+	this.elem = $('<div>');
+	var label = $('<label>', {
+		text: field.name,
+		for: field.id
+	});
+	label.appendTo(this.elem);
+	if(field.required) {
+		//console.log("required: " + field.required);
+		var requiredStar = $('<span>', {
+			text: '*',
+			title: 'Required field'
+		});
+		requiredStar.css("color", "red");
+		requiredStar.appendTo(label);
+	}
+	field.input.appendTo(this.elem);
+	$('<br>').appendTo(this.elem);
+}
+
+
+/*
 FieldEditorRow = function(field) {
 
 	this.elem = $('<tr>');
@@ -291,4 +311,4 @@ FieldEditorRow = function(field) {
 	field.input.appendTo(inputTD);
 	inputTD.appendTo(this.elem); 
 
-}
+}*/

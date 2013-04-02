@@ -115,6 +115,7 @@ Field = function(name, type, options) {
 		this.input = $('<input>', {
 			type: "text",
 			id: this.id,
+			name: this.id,
 			title : this.tip,
 			class: "text ui-widget-content ui-corner-all"
 		});
@@ -124,15 +125,18 @@ Field = function(name, type, options) {
 			rows: 3,
 			cols: 50,
 			id: this.id,
+			name: this.id,
 			title : this.tip
 		});
 	}else if(type==Field.DATE) {
 		this.input = $('<input>', {
 			type: "text",
 			id: this.id,
+			name: this.id,
 			title : this.tip,
 			class: "text ui-widget-content ui-corner-all"
 		});
+		this.input.attr("size", "50");
 		this.input.datepicker( {
 			dateFormat:"yy-mm-dd" 
 		});		
@@ -140,11 +144,13 @@ Field = function(name, type, options) {
 		this.input = $('<input>', {
 			type: "checkbox",
 			id: this.id,
+			name: this.id,
 			title : this.tip
 		});
 	}else if(type==Field.CHOICE) {
 		this.input = $('<select>', {
 			id: this.id,
+			name: this.id,
 			title : this.tip
 		});
 		this.input.append("<option></option>");
