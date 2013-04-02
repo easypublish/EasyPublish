@@ -931,8 +931,6 @@ $.fn.extend({
 // validity:
 function validate($obj, regimen, message) {
 
-    //console.log("validate line 935: " + message);
-
     var 
         // If a reduced set is attached, use it Also, remove any unsupported 
         // elements.
@@ -941,21 +939,16 @@ function validate($obj, regimen, message) {
         // Array to store only elements that pass the regimen.
         elements = [];
 
-    //console.log("reduction: ");
-    //console.log($reduction);
     // For each in the reduction.
     $reduction.each(
         function() {
-            //console.log("next reduction");
             // If the element passes the regimen, include it in the reduction.
             if (regimen(this)) {
-                //console.log("not raising error line 950");
                 elements.push(this);
             }
 
             // Else give the element an error message.
             else {
-                //console.log("raise error line 956");
                 raiseError(
                     this,
                     format(message, {
@@ -1106,10 +1099,6 @@ __private = {
 
         raise:function($obj, msg) {
             var pos = $obj.offset();
-            console.log("validityObj: ");
-            console.log($obj);
-            console.log("validityPos: ");
-            console.log(pos);
             pos.left += $obj.width() + 18;
             pos.top += 8;
             
@@ -1176,7 +1165,6 @@ __private = {
 
             // Otherwize create a new one and stick it after the input:
             else {
-                console.log()
                 $("<label/>")
                     .attr("for", getIdentifier($obj))
                     .addClass($.validity.outputs.label.cssClass)
@@ -1239,7 +1227,6 @@ __private = {
                         top:parseInt(off.top - 10, 10) + "px"
                     };
                     
-                console.log("validityOff: " + off);
                 // Create one and position it next to the input.
                 $("<div/>")
                     .addClass(errorClass)

@@ -80,9 +80,6 @@ function FieldManager() {
 		this.fieldDictionary[field.id] = field;
 	}
 
-	console.log("fieldDictionary:");
-	console.log(this.fieldDictionary);
-
 	this.runTests = function() {
 		Field.dateTest();
 		Field.durationTest();
@@ -111,7 +108,6 @@ Field = function(name, type, options) {
 		}
 	}
 	this.id = this.objectName.replace(/ /g, "-");
-	console.log("this.id: " + this.id);
 
 
 	if(type==Field.STRING || type==Field.NUMBER || type==Field.INTEGER || type==Field.URI  ||
@@ -122,12 +118,11 @@ Field = function(name, type, options) {
 			title : this.tip,
 			class: "text ui-widget-content ui-corner-all"
 		});
-		this.input.attr("size", "40");
-		//console.log("created text input for field: " + this.name);
+		this.input.attr("size", "50");
 	} else if(type==Field.LONG_STRING) {
 		this.input = $('<textarea>', {
 			rows: 3,
-			cols: 60,
+			cols: 50,
 			id: this.id,
 			title : this.tip
 		});
@@ -141,14 +136,12 @@ Field = function(name, type, options) {
 		this.input.datepicker( {
 			dateFormat:"yy-mm-dd" 
 		});		
-		//console.log("created datepicker input for field: " + this.name);
 	} else if(type==Field.BOOLEAN) {
 		this.input = $('<input>', {
 			type: "checkbox",
 			id: this.id,
 			title : this.tip
 		});
-		//console.log("created checkbox input for field: " + this.name);
 	}else if(type==Field.CHOICE) {
 		this.input = $('<select>', {
 			id: this.id,
@@ -169,7 +162,6 @@ Field = function(name, type, options) {
 			this.input = this.input.next();
 		}
 		if(val) {
-			console.log("setting value: " + val + " in field " + this.name + " in input " + this.id)
 			this.input.val(val);
 		} else {
 			return this.input.val();
@@ -182,7 +174,6 @@ Field = function(name, type, options) {
 		if(this.type==Field.CHOICE) {
 			this.input = this.input.next();
 		}
-		//console.log("validating field input: " + this.input.attr("id"));
 		if(this.required) {
 			var msg = this.name + ' is required';
 			this.input.require(msg);
@@ -192,7 +183,6 @@ Field = function(name, type, options) {
 			this.input.assert( this.validation, [this.tip] );
 		} else if(this.type==Field.NUMBER || this.type==Field.INTEGER
 				|| this.type==Field.EMAIL || this.type==Field.URL) {
-			//console.log("validating with built-in match");
 			//user match() as implemented by validity.js to validate these
 			this.input.match(this.type);
 		}else if(this.type==Field.DATE) {
@@ -210,7 +200,6 @@ Field = function(name, type, options) {
 			rangeRegex = new RegExp('(^[\\d]+-[\\d]+$)|(^[\\d]+-$)|(^-[\\d]+$)|(^[\\d]+$)');
 			this.input.match(rangeRegex, this.tip);
 			var rangeValid = Field.rangeMinMaxValidation(this.input.val());
-			//console.log("rangeValid: " + rangeValid);
 			this.input.assert(rangeValid, ["The second value should be greater than first"] );
 			//this.input.assert(Field.rangeValidation(this.input.val()), [this.tip ] );
 		}
@@ -254,7 +243,6 @@ Field.uriValidation = function(value) {
 	return components.errors.length==0;
 }
 Field.uriTest = function() {
-	console.log("URI testing")
 	var uris = ["cnn.com", "https://www.sri.com", "https://www.sri.com/", "uri://user:pass@example.com:123/one/two.three?q1=a1&q2=a2#body",
 			"htt://www.s*&^%$ri.com/", "htt://www.sri.com/"];
 	for(key in uris) {

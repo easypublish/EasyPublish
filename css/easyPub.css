@@ -12,6 +12,10 @@ font-family: Verdana,Arial,sans-serif;
 font-size: 0.9em;
 }
 
+#easyPub  {
+  width:800;
+}
+
 #drop_zone {
 	width:200px;
 	height:200px;

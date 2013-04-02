@@ -31,6 +31,7 @@
             });
  
             input.attr("menustatus", "closed");
+            input.attr("size", "44");
  
             // over-ride form submit, so it can't submit
             // if the menu is open

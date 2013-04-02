@@ -1,14 +1,9 @@
 $(function() { 
-	console.log("about to build easyPub");
 	var easyPub = new EasyPublish();
-	//$( "#accordion" ).accordion({
-	//	heightStyle: "content"
-	//});
 });
 
 EasyPublish.prototype.constructor = EasyPublish;
 function EasyPublish() {
-	console.log("in easyPub");
 
 	var editors = {};
 
