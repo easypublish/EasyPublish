@@ -5,6 +5,8 @@ $(function() {
 EasyPublish.prototype.constructor = EasyPublish;
 function EasyPublish() {
 
+	_.first([1,2]);
+
 	var editors = {};
 
 	var fieldManager = new FieldManager();
@@ -97,9 +99,111 @@ function EasyPublish() {
 	    return data;
 	}
 
-	function submitData() {
-		var data = getData();
+	var service = "publish";
+	var oauth_data = {
+		consumer_key:'john.brecht@sri.com',
+		consumer_secret:'ATjaQAYRMhK0e7gppFBK2pZTtPzaBRFD',
+		token:'node_sign_token',
+		token_secret:'7Hy6hsuz702wfuepQpfOgfP3WUCGunGF',
+		node_url:"http://sandbox.learningregistry.org"
 	}
+
+	function makeEnvelope(data) {
+	 	var envelope = {
+            "doc_type": "resource_data",
+            "doc_version": "0.49.0",
+            "resource_data_type": "metadata",
+            "resource_data": data,
+            "active": true,
+            "identity": {
+                "submitter_type": "agent",
+            },
+            "TOS": {
+                "submission_TOS": "http://www.learningregistry.org/tos"
+            },
+            "payload_schema": ["schema.org", "lrmi"],
+            "payoad_placement":"inline",
+            "resource_locator":data.URL
+        }
+        return envelope;
+    }
+
+	function submitData() {
+		var formData = getData();
+		envelope = makeEnvelope(formData)
+        req_info = getOAuthInfo(oauth_data);
+        req_info.message.body = {
+            documents: [envelope]
+        };
+        xhr = oauthRequest(oauth_data.node_url + '/publish', req_info.message, req_info.accessor);
+        return xhr;
+
+		return false;
+	}
+
+	 function getOAuthInfo(oauth_data) {
+
+        var message = {
+            parameters: {
+            }
+        };
+        var accessor = {
+            consumerKey: oauth_data.consumer_key,
+            consumerSecret: oauth_data.consumer_secret,
+            token: oauth_data.token,
+            tokenSecret: oauth_data.token_secret
+        };
+
+        return { 
+            message: message,
+            accessor: accessor
+        };
+    }
+
+    function oauthRequest(path, message, accessor, undefined) {
+        message.action = path;
+        message.method ='POST';
+        OAuth.completeRequest(message, accessor);
+        var parameters = message.parameters;
+        var options = {
+            headers: {
+                    Authorization: OAuth.getAuthorizationHeader('', parameters)
+            },
+            data: JSON.stringify(message.body)
+        }
+
+        // var options = {
+        //     contentType: "application/x-www-form-urlencoded",
+        //     headers: {
+        //         Authorization: OAuth.getAuthorizationHeader('', parameters),
+        //         Accept: "application/json"
+        //     },
+        //     data: OAuth.formEncode(parameters)
+        // }
+
+        return commonAjax('POST', path, options);
+    }
+
+	 function commonAjax(method, url, options) {
+        var settings = {
+            type: method,
+            contentType: "application/json",
+            dataType: "json"
+        }
+        if (options) {
+            settings = _.extend(settings, options);
+        }
+        var request = $.ajax(url, settings);
+        request.done(function(msg){
+            console.log("Done");
+            console.log(msg);
+        });
+        request.fail(function(msg){
+            console.log("Fail");
+            console.log(msg);
+        });
+        return request;
+    }
 
 	function downloadData(type) {
 		var data = getData();
