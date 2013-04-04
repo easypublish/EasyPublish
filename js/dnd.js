@@ -13,7 +13,9 @@ function DragAndDrop(easyPub) {
                       f.size, ' bytes, last modified: ',
                       f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
                       '</li>');*/
-              console.log("loaded file name: " + f.name + ", type: " + f.type);
+            //console.log("loaded file name: " + f.name + ", type: " + f.type);
+            $("#dropStatus1").html("Dropped file name: " + f.name + "<br/><br/>File type: " + f.type);
+            $("#dropStatus2").html("");
             reader.readAsText(f);
             reader.onload = function(e) {
               easyPub.importCSVData(e.target.result);

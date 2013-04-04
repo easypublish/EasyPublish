@@ -11,22 +11,39 @@ font-family: Verdana,Arial,sans-serif;
 font-size: 0.9em;
 }
 
-#easyPub  {
-  width:700;
+#leftCol  {
+  width:400;
+}
+#middleCol  {
+  width:400;
+  float:right;
 }
 
-#drop_zone {
-	width:200px;
-	height:200px;
-	border-radius: 15px;
+.fieldRow {
+	margin:10px;
+}
+
+#testDiv {
+
 	background-color:gainsboro;
+}
+#rightCol {
 	float:right;
+	width:200px;
+}
+#drop_zone {
+	height:150px;
+	padding: 10px;
+	background-color:powderblue;
+	border-radius: 15px;
+	border-style: dashed;
+	border-color: green;
 	display: table;
 }
 
 #drop_zone  p {
-  display: table-cell; 
-  vertical-align: middle; 
+  /*display: table-cell; 
+  vertical-align: middle; */
   text-align: center; 
 }
 
@@ -35,8 +52,8 @@ fieldset {
   font:80%/1 sans-serif;
 }
 label {
-	float:left;
-	width:25%;
+	/*float:left;
+	width:25%;*/
 	margin-right:0.5em;
 	padding-top:0.2em;
 	text-align:right;
@@ -46,7 +63,8 @@ fieldset {
 	border:0px solid green;
 	background-color:gainsboro;
 	border-radius: 15px;
-	margin: 15px;
+	margin-right: 20px;
+	margin-bottom: 15px;
 }
 
 legend {
@@ -54,7 +72,7 @@ legend {
 	border:0px solid gray;
 	border-radius: 15px;
 	background-color:gainsboro;
-	color:forestgreen;
+	color:orangered;
 	font-size:150%;
 	text-align:left;
 	font-weight:bold;

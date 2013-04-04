@@ -16,7 +16,7 @@
 		<style>
 			body{
 				font: 100% "Trebuchet MS", sans-serif;
-				margin: 50px;
+				margin: 20px;
 			}
 		</style>
 	</head>
@@ -25,12 +25,20 @@
 	<body>
 		<h1>Easy Publish</h1>
 		<div style="width:1000">
-			<div id="drop_zone"><p>Drop a CSV data file here</p></div>
-			<div id="easyPub">
+			<div id="rightCol">
 				<form>
-					<fieldset id="mainForm">
-						<legend>Primary Data</legend>
+					<fieldset id="dropForm">
+						<legend>Import Data</legend>
+						<div id="drop_zone">	
+							<p id="dropStatus1">Drop a CSV data file here</p>
+							<p id="dropStatus2"></p>
+						</div>
 					</fieldset>
+				</form>
+			</div>
+			<div id="middleCol">
+				<form>
+					<!-- <div id="testDiv">TEST</div> -->
 					<fieldset id="alignmentForm">
 						<legend>Alignment Data</legend>
 					</fieldset>
@@ -41,12 +49,18 @@
 						<legend>Publisher Data</legend>
 					</fieldset>
 				</form>
-				<p>
-				<button id="Submit">Submit</button>
-				<button id="DownloadJSON">Download JSON</button>
-				<button id="DownloadCSV">Download CSV</button>
-				<button id="TestData">Test Data</button>
 			</div>
+			<div id="leftCol">
+				<form>
+					<fieldset id="mainForm">
+						<legend>Primary Data</legend>
+					</fieldset>
+				</form>
+			</div>
+			<button id="Submit">Submit</button>
+			<button id="DownloadJSON">Download JSON</button>
+			<button id="DownloadCSV">Download CSV</button>
+			<button id="TestData">Test Data</button>
 		</div>
 	</body>
 </html>

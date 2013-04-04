@@ -134,10 +134,11 @@ function EasyPublish() {
 	}
 
 	this.importCSVData = function(dataText) {
-		var arrData = CSVToArray(dataText);		
+		var arrData = CSVToArray(dataText);	
+		var rowCount = arrData.length;
+		$("#dropStatus2").append("Found " + rowCount + " row(s) of data");	
 		for(var i=0; i<arrData[0].length; i++) {
 			var fieldName = trim1(arrData[0][i]);
-			console.log("imprting field: " + fieldName);
 			var field = fieldManager.fieldDictionary[fieldName];
 			if(field) {
 				field.value(trim1(arrData[1][i]));
@@ -268,7 +269,9 @@ function EasyPublish() {
 
 FieldEditorRow = function(field) {
 
-	this.elem = $('<div>');
+	this.elem = $('<div>', {
+		class: 'fieldRow'
+	});
 	var label = $('<label>', {
 		text: field.name,
 		for: field.id
@@ -283,6 +286,7 @@ FieldEditorRow = function(field) {
 		requiredStar.css("color", "red");
 		requiredStar.appendTo(label);
 	}
+	$('<br>').appendTo(this.elem);
 	field.input.appendTo(this.elem);
 	$('<br>').appendTo(this.elem);
 }
