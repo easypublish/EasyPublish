@@ -1,35 +1,32 @@
 function FieldManager() {
-
-	var mediaTypes = ["Audio CD", "Audiotape", "Calculator", "CD-I", "CD-ROM", "Diskette", "Duplication Master", "DVD/ Blu-ray", "E-Mail", "Electronic Slides", "Field Trip", "Filmstrip", "Flash", "Image", "In-Person/Speaker", "Interactive whiteboard", "Manipulative", "MBL (Microcomputer Based)", "Microfiche", "Overhead", "Pamphlet", "PDF", "Person-to-Person", "Phonograph Record", "Photo", "Podcast", "Printed", "Radio", "Robotics", "Satellite", "Slides", "Television", "Transparency", "Video Conference", "Videodisc", "Webpage", "Wiki"];
+	
+	var mediaTypes = ["Audio", "Document", "Image", "Video", "Other"]; 
 	var edRoles = ["Administrator", "Mentor", "Parent", "Peer Tutor", "Specialist", "Student", "Teacher", "Team"];
 	var edUses = ["Activity", "Analogies", "Assessment", "Auditory", "Brainstorming", "Classifying", "Comparing", "Cooperative Learning", "Creative Response", "Demonstration", "Differentiation ", "Discovery Learning", "Discussion/Debate", "Drill & Practice", "Experiential", "Field Trip", "Game", "Generating hypotheses", "Guided questions ", "Hands-on", "Homework", "Identify similarities & differences", "Inquiry", "Interactive", "Interview/Survey", "Interviews", "Introduction", "Journaling ", "Kinesthetic", "Laboratory", "Lecture", "Metaphors", "Model & Simulation", "Musical", "Nonlinguistic ", "Note taking ", "Peer Coaching", "Peer Response", "Play", "Presentation", "Problem Solving", "Problem-based", "Project", "Questioning ", "Reading", "Reciprocal teaching ", "Reflection", "Reinforcement", "Research", "Review", "Role Playing", "Service learning ", "Simulations", "Summarizing ", "Technology ", "Testing hypotheses", "Thematic instruction ", "Visual/Spatial", "Word association", "Writing"];
-	var interactivityTypes = ["Active", "Expositive", "Mixed"];
-	var learningResourceTypes = ["Activity", "Assessment", "Audio", "Broadcast", "Calculator", "Discussion", "E-Mail", "Field Trip", "Hands-on", "In-Person/Speaker", "Kinesthetic", "Lab Material (Printed Activities, Instruments, Samples...)", "Lesson Plan", "Manipulative", "MBL (Microcomputer Based)", "Model", "On-Line", "Podcast", "Presentation", "Printed", "Quiz", "Robotics", "Still Image", "Test", "Video", "Wiki", "Worksheet"];
+	var interactivityTypes = ["interactive", "passive", "social", "programmatic (machine-human interaction)", "one-on-one", "async", "sync", "group"];
+	var learningResourceTypes = ["Activity", "Assessment", "Audio", "Calculator", "Demonstration", "Game", "Interview", "Lecture",
+								 "Lesson Plan", "Simulation", "Presentation", "Other"];
 	var groupTypes = ["Class", "Community", "Grade", "Group- large (6+ members)", "Group- small (3-5 members)", "Individual", "Inter-Generational", "Multiple Class", "Pair", "School", "State/Province", "World"];
+
+	var k12Choices = ["K", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
+	var gradeChoices = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"];
+	var edGovSubjects = ["Arts & Music", "Artists", "Music", "Blues, Gospel, Folk", "Jazz", "Sheet Music", "Other Music", "Theatre & Film", "Visual arts", "Architecture", "Drawing & Prints", "Painting", "Photography", "Sculpture", "Other Visual arts", "Other Arts & Music", "Health & Phys Ed", "Phys ed, exercise", "Substance abuse", "Other Health", "Language Arts", "Literature & Writers", "American Literature", "Poetry", "Other Literature", "Reading", "Other Language Arts", "Math", "Algebra", "Data Analysis", "Geometry", "Measurement", "Number & Operations", "Other Math", "Science", "Applied Sciences", "Computers/Tech", "Engineering", "Earth Sciences", "Climate Change", "Environment", "Geology", "Oceans", "Other Earth Sciences", "Life Sciences", "Animals/Zoology", "Botany", "Cells", "Diseases", "Genes, Evolution", "Human Body", "Interdependence", "Medicine", "Other Life Sciences", "Physical Sciences", "Chemistry", "Energy", "Physics", "Other Physical Sciences", "Space Sciences", "Aeronautics/Flight", "Astronomy", "Other Space Sciences", "Other Science", "World Studies", "Countries & Continents", "Africa", "Arctic, Antarctica", "Other Countries & Continents", "Foreign Languages", "World History", "China", "Europe", "Russia, Soviet Union", "Other World History", "Other World Studies", "U.S. History Topics", "Business & Work", "Business", "Careers", "Economics", "Entrepreneurship", "Labor", "Ethnic Groups", "African Americans", "Asian Americans", "Hispanic Americans", "Native Americans", "Famous People", "Explorers", "Inventors", "Leaders", "Scientists", "Others", "Government", "Congress", "Courts", "Elections", "Military", "Presidents", "U.S. Constitution", "Other", "Movements", "Civil Rights", "Immigration & Migration", "Transportation", "Women's History", "States & Regions", "California", "Massachusetts", "Midwest", "New Mexico", "New York", "Northeast", "Pennsylvania", "South", "Virginia", "West", "Others", "Wars", "American Revolution", "Civil War", "World War I", "World War II", "Other Wars", "Other History & Soc Studies", "Anthropology", "Geography", "Natural Disasters", "Religion & Society", "Slavery", "Other Resources", "U.S. Time Periods", "-1607: Three Worlds Meet", "1607-1763: Colonization", "1763-1815: Revolution", "1801-1861: Expansion", "1850-1877: Civil War & Reconstruction", "1865-1920: Modern America", "1914-1945: World Wars", "1945-Present: Contemporary America", "Other History & Social Studies: U.S. History Time Periods"];
 
 	this.fieldDictionary = {};
 
 	this.mainFields = [
-		new Field("Name", Field.STRING),
-		new Field("About", Field.LONG_STRING),
-		new Field("URL", Field.URL),
-		new Field("Tags", Field.LONG_STRING),
-		new Field("Alignment", Field.STRING, {tip:"Add optional alignment details below"}),
-		new Field("Audience", Field.LONG_STRING),
-		new Field("Date Created", Field.DATE,  {required:false, tip:"Format: YYYY-MM-DD", objectName:"dateCreated"}),
-		new Field("Date Modified", Field.DATE,  {required:false, tip:"Format: YYYY-MM-DD", objectName:"dateModified"}),
-		new Field("Author", Field.STRING, {tip:"Add optional author details below"}),
-		new Field("Publisher", Field.STRING, {tip:"Add optional publisher details below"}),
-		new Field("Language", Field.STRING, {objectName:"inLanguage"}),
-		new Field("LanguageDescription", Field.LONG_STRING, {required:false, objectName:"inLanguageDescription"}),
+		new Field("Resource Title", Field.STRING, {required:true, objectName:"targetName"}),
+		new Field("Resource URL", Field.URL, {required:true, objectName:"targetUrl"}),
+		new Field("Description", Field.LONG_STRING, {objectName:"CreativeWork_description"}),
+		new Field("Subject", Field.CHOICE, {objectName:"CreativeWork_keywords", choices:edGovSubjects}),
+		new Field("US K_12 Grade", Field.CHOICE, {objectName:"educationalAlignment_targetDescription", choices:k12Choices}),
+		new Field("Grade", Field.CHOICE, {objectName:"educationalAlignment_targetName", choices:gradeChoices}),
+		new Field("Date Created", Field.DATE,  {tip:"Date the resource was originally created, Format: YYYY_MM_DD", objectName:"dateCreated"}),
+		new Field("Date Modified", Field.DATE,  {tip:"Date the resource was most recently modified, Format: YYYY_MM_DD", objectName:"dateModified"}),
+		new Field("Language", Field.STRING, {objectName:"language"}),
 		new Field("Media Type", Field.CHOICE, {objectName:"mediaType", choices:mediaTypes}),
-		new Field("Educational Role", Field.CHOICE, {objectName:"educationalRole", choices:edRoles}),
-		new Field("Educational Use", Field.CHOICE, {objectName:"educationalUse", choices:edUses}),
-		new Field("Time Required", Field.DURATION, {tip:"Format: P0Y0M0W0DT0H0M0S", objectName:"timeRequired"}),
-		new Field("Typical Age Range", Field.RANGE, {tip:"E.g. 7, 7-12, 18-, -6", objectName:"typicalAgeRange"}),
-		new Field("Group Type", Field.CHOICE, {objectName:"groupType", choices:groupTypes}),
-		new Field("Interactivity Type", Field.CHOICE, {objectName:"interactivityType", choices:interactivityTypes}),
 		new Field("Learning Resource Type", Field.CHOICE, {objectName:"learningResourceType", choices:learningResourceTypes}),
+		new Field("Interactivity", Field.CHOICE, {objectName:"interactivityType", choices:interactivityTypes}),
 		new Field("Use Rights URL", Field.URL, {objectName:"useRightsUrl"}),
 		new Field("Is based on URL", Field.URL, {objectName:"isBasedOnUrl"}),
 	];
@@ -38,19 +35,32 @@ function FieldManager() {
 		this.fieldDictionary[field.id] = field;
 	}
 
-	var alignmentTypes = ["assesses", "teaches", "requires", "textComplexity", "readingLevel", "educationalSubject", "educationLevel"];
+	var alignmentTypes = ["assesses", "teaches", "requires"];
+	var standardFrameworks = ["Common Core Math", "Common Core Language Arts", "State Standard"];
+
+	var standards = [];
+	for(key in standardsData) {
+		var stateStandards = standardsData[key];
+		var state = stateStandards.state;
+		for(key2 in stateStandards.documents) {
+			var doc = stateStandards.documents[key2];
+			var title = doc.title;
+			standards.push(state + " - " + title);
+		}
+	}
 
 	this.alignmentFields = [
-		new Field("Alignment Type", Field.CHOICE, {required:false, objectName:"alignmentType", choices:alignmentTypes, 
-					tip:"A category of alignment between the learning resource and the framework node"}),
-		new Field("Educational Framework", Field.STRING, {required:false, objectName:"educationalFramework",
-					tip:"The framework to which the resource being described is aligned"}),
-		new Field("Target Name", Field.STRING, {required:false, objectName:"targetName",
+		new Field("This resource...", Field.CHOICE, {objectName:"educationalAlignment_alignmentType", choices:alignmentTypes}),
+		new Field("Standard Framework", Field.CHOICE, {objectName:"educationalAlignment_educationalFramework",
+					tip:"The framework to which the resource being described is aligned", choices:standardFrameworks}),
+		new Field("Standard", Field.CHOICE, {objectName:"educationalAlignment_targetURL", choices:standards}),
+
+		/*new Field("Target Name", Field.STRING, {objectName:"targetName",
 					tip:"The name of a node in an established educational framework"}),
-		new Field("Target URL", Field.URL, {required:false, objectName:"targetUrl", 
+		new Field("Target URL", Field.URL, {objectName:"targetUrl", 
 					tip:"The URL of a node in an established educational framework"}),
-		new Field("Target Description", Field.STRING, {required:false, objectName:"targetDescription",
-					tip:"The description of a node in an established educational framework"}),
+		new Field("Target Description", Field.STRING, {objectName:"targetDescription",
+					tip:"The description of a node in an established educational framework"}),*/
 	];
 	for(key in this.alignmentFields) {
 		var field = this.alignmentFields[key];
@@ -58,10 +68,11 @@ function FieldManager() {
 	}
 
 	this.authorFields = [
-		new Field("URL", Field.URL, {required:false, objectName:"authorURL"}),
-		new Field("Email Address", Field.EMAIL, {required:false, objectName:"authorEmail"}),
-		new Field("Description", Field.LONG_STRING, {required:false, objectName:"authorDescription"}),
-		new Field("Postal Address", Field.LONG_STRING, {required:false, objectName:"authorAddress"})
+		new Field("Name", Field.STRING, {objectName:"author_name"}),
+		new Field("URL", Field.URL, {objectName:"author_contactpoint_url"}),
+		new Field("Email Address", Field.EMAIL, {objectName:"author_contactpoint_email"}),
+		//new Field("Description", Field.LONG_STRING, {objectName:"authorDescription"}),
+		//new Field("Postal Address", Field.LONG_STRING, {objectName:"authorAddress"})
 	];
 	for(key in this.authorFields) {
 		var field = this.authorFields[key];
@@ -70,10 +81,11 @@ function FieldManager() {
 
 
 	this.publisherFields = [
-		new Field("URL", Field.URL, {required:false, objectName:"publisherURL"}),
-		new Field("Email Address", Field.EMAIL, {required:false, objectName:"publisherEmail"}),
-		new Field("Description", Field.LONG_STRING, {required:false, objectName:"publisherDescription"}),
-		new Field("Postal Address", Field.LONG_STRING, {required:false, objectName:"publisherAddress"})
+		new Field("Name", Field.STRING, {objectName:"publisher_name"}),
+		new Field("URL", Field.URL, {objectName:"publisher_contactpoint_url"}),
+		new Field("Email Address", Field.EMAIL, {objectName:"publisher_contactpoint_email"}),
+		//new Field("Description", Field.LONG_STRING, {objectName:"publisherDescription"}),
+		//new Field("Postal Address", Field.LONG_STRING, {objectName:"publisherAddress"})
 	];
 	for(key in this.publisherFields) {
 		var field = this.publisherFields[key];
@@ -92,7 +104,7 @@ Field = function(name, type, options) {
 	this.name = name;
 	this.type = type;
 	this.objectName = name;
-	this.required = true;
+	this.required = false;
 
 	if(options) {
 		this.tip = options.tip;
@@ -167,7 +179,7 @@ Field = function(name, type, options) {
 		if(this.type==Field.CHOICE) {
 			this.input = this.input.next();
 		}
-		if(val) {
+		if(val || val=="") {
 			this.input.val(val);
 		} else {
 			return this.input.val();

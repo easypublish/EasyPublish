@@ -1,0 +1,85 @@
+{
+        "doc_ID": "68d232f382b84dc999b420d8d5e62c41",
+        "resource_data_description": {
+            "doc_type": "resource_data",
+            "resource_locator": "http://www.khanacademy.org/video/writing-and-using-inequalities-2",
+            "resource_data": {
+                "items": [{
+                    "type": ["http://schema.org/CreativeWork"],
+                    "id": "urn:www.khanacademy.org:node_slug:v/writing-and-using-inequalities-2",
+                    "properties": {
+                        "name": ["Writing and using inequalities 2"],
+                        "author": [{
+                            "type": ["http://schema.org/Person"],
+                            "properties": {
+                                "name": ["Sal Khan"]
+                            }
+                        }, {
+                            "type": ["http://schema.org/Person"],
+                            "properties": {
+                                "name": ["Monterey Institute for Technology and Education"]
+                            }
+                        }],
+                        "url": ["http://www.khanacademy.org/video/writing-and-using-inequalities-2"],
+                        "interactionCount": ["28103 UserPlays"],
+                        "datePublished": ["2011-02-20T16:28:11Z"],
+                        "educationalAlignment": [{
+                            "type": ["http://schema.org/AlignmentObject"],
+                            "id": "urn:corestandards.org:guid:666AA11DF39241C68112FFBE28D811C4",
+                            "properties": {
+                                "alignmentType": ["teaches"],
+                                "educationalFramework": ["Common Core State Standards"],
+                                "targetName": ["CCSS.Math.Content.6.EE.B.6"],
+                                "targetDescription": ["Use variables to represent numbers and write expressions when solving a real-world or mathematical problem; understand that a variable can represent an unknown number, or, depending on the purpose at hand, any number in a specified set."],
+                                "targetUrl": ["http://corestandards.org/Math/Content/6/EE/B/6"]
+                            }
+                        }],
+                        "learningResourceType": ["video"],
+                        "video": [{
+                            "id": "urn:www.youtube.com:videoid:cCMpin3Te4s",
+                            "type": ["http://schema.org/VideoObject"],
+                            "playerType": ["youtube"],
+                            "properties": {
+                                "url": ["http://www.youtube.com/watch?v=cCMpin3Te4s&feature=youtube_gdata_player"],
+                                "contentUrl": ["http://s3.amazonaws.com/KA-youtube-converted/cCMpin3Te4s.mp4/cCMpin3Te4s.mp4"],
+                                "thumbnailUrl": ["http://s3.amazonaws.com/KA-youtube-converted/cCMpin3Te4s.mp4/cCMpin3Te4s.png"],
+                                "encodingFormat": ["mpeg4"]
+                            }
+                        }],
+                        "keywords": ["U05_L1_T3_we2, Writing, and, using, inequalities, CC_6_EE_6, CC_6_EE_8, CC_7_EE_4, CC_7_EE_4_b, CC_39336_A-CED_1, CC_39336_A-CED_3, CC_39336_A-REI_3"],
+                        "thumbnailUrl": ["http://s3.amazonaws.com/KA-youtube-converted/cCMpin3Te4s.mp4/cCMpin3Te4s.png"],
+                        "description": ["Writing and using inequalities 2"]
+                    }
+                }]
+            },
+            "digital_signature": {
+                "key_location": ["http://pool.sks-keyservers.net:11371/pks/lookup?op=get&search=0x1AEF8390FDB23BFF"],
+                "key_owner": "Jim Klo DBA Khan Academy <jim.klo+khanacademy@learningregistry.org>",
+                "signing_method": "LR-PGP.1.0",
+                "signature": "-----BEGIN PGP SIGNED MESSAGE-----\nHash: SHA1\n\n8e78990c1f5929447f5c02ecd0ffcbe8b8f04e4d902e72671773da1aecb31d44\n-----BEGIN PGP SIGNATURE-----\nVersion: GnuPG/MacGPG2 v2.0.19 (Darwin)\nComment: GPGTools - http://gpgtools.org\n\niQEcBAEBAgAGBQJRR0+9AAoJEP2YXtUqnXUsquoH/iDQ4J2TTtoimeN4RtYDz5J6\nuilLDTsyQHGoLjz/LGLnwRIfgLdQqjJocO3xTT1fYLHldk0SopIacEv6FERR/4wg\n29JdU7WpmXIX1PuWG/drn4Z7YGGpSdynYmS1UbBBM9P8wzX1VDUrKo8/MmO6+evu\nCzIGDtug/uunuBaAH8LtsvvCHcQAGXDikTiAchXMUJrH+RiWiicMYjrxFH8/LoZO\nFuo6TS8ikPHZ5IuWsPZZutnqtFvkFQ8DiNrG/1fHCh3ohYYAeaD0WGhIKt8h6ZGS\nm64Va0lr7gauwL9CdImUC/Uf7OC26gygStJr/38bzqup2UPX3+RRTAdGM2Nz6pc=\n=qNm8\n-----END PGP SIGNATURE-----\n"
+            },
+            "keys": [],
+            "TOS": {
+                "submission_TOS": "http://www.learningregistry.org/information-assurances/open-information-assurances-1-0"
+            },
+            "_rev": "1-e6ee73d74f0e2f285455ec1ab09c634b",
+            "resource_data_type": "metadata",
+            "payload_schema_locator": "http://www.w3.org/TR/2012/WD-microdata-20121025/#converting-html-to-other-formats",
+            "payload_placement": "inline",
+            "payload_schema": ["schema.org", "LRMI", "application/microdata+json"],
+            "node_timestamp": "2013-03-18T17:33:08.873023Z",
+            "doc_version": "0.23.0",
+            "create_timestamp": "2013-03-18T17:33:08.873023Z",
+            "update_timestamp": "2013-03-18T17:33:08.873023Z",
+            "active": true,
+            "publishing_node": "e20237f51cc14d9fa8b57f905a8d364c",
+            "_id": "68d232f382b84dc999b420d8d5e62c41",
+            "doc_ID": "68d232f382b84dc999b420d8d5e62c41",
+            "identity": {
+                "signer": "Jim Klo DBA Khan Academy",
+                "submitter": "Jim Klo @ SRI",
+                "submitter_type": "agent",
+                "curator": "Khan Academy"
+            }
+        }
+    }

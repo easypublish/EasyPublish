@@ -3,6 +3,7 @@
     $.widget("ui.autocombobox", {
  
         _create: function() {
+
             var select = this.element;
  
             if (select.is(":disabled")

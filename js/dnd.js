@@ -1,10 +1,20 @@
 function DragAndDrop(easyPub) {
-      function handleFileSelect(evt) {
+
+     function handleFileSelect(evt) {
         evt.stopPropagation();
         evt.preventDefault();
+        var files = evt.target.files;
+        readFiles(files);
+      }
 
+      function handleFileDrop(evt) {
+        evt.stopPropagation();
+        evt.preventDefault();
         var files = evt.dataTransfer.files; // FileList object.
+        readFiles(files);
+      }
 
+      function readFiles(files) {
         // files is a FileList of File objects. List some properties.
         var output = [];
         var reader = new FileReader();
@@ -14,11 +24,11 @@ function DragAndDrop(easyPub) {
                       f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
                       '</li>');*/
             //console.log("loaded file name: " + f.name + ", type: " + f.type);
-            $("#dropStatus1").html("Dropped file name: " + f.name + "<br/><br/>File type: " + f.type);
+            $("#dropStatus1").html("<strong>Dropped file name: </strong>" + f.name + "<br/><br/><strong>File type:</strong> " + f.type);
             $("#dropStatus2").html("");
             reader.readAsText(f);
             reader.onload = function(e) {
-              easyPub.importCSVData(e.target.result);
+              easyPub.fileDropped(e.target.result);
             }
             reader.onerror = function(stuff) {
               console.log("error", stuff)
@@ -36,10 +46,15 @@ function DragAndDrop(easyPub) {
 
       // Setup the dnd listeners.
       var dropZone = document.getElementById('drop_zone');
+      console.log("dropZone: " + dropZone);
 
       //var dropZone = $('drop_zone');
       dropZone.addEventListener('dragover', handleDragOver, false);
-      dropZone.addEventListener('drop', handleFileSelect, false);
+      dropZone.addEventListener('drop', handleFileDrop, false);
+
+      var fileButton = document.getElementById('csvFile');
+      console.log("fileButton: " + fileButton);
+      fileButton.addEventListener('change', handleFileSelect, false);
 
       
 }

@@ -5,12 +5,34 @@ $(function() {
 EasyPublish.prototype.constructor = EasyPublish;
 function EasyPublish() {
 
-	_.first([1,2]);
-
 	var editors = {};
 
-	var fieldManager = new FieldManager();
+	var that = this;
+	this.fieldManager = new FieldManager();
 	var dnd = new DragAndDrop(this);
+	var dataManager = new DataManager(this);
+
+	var importIndex = 0;
+	var importedData = {
+		numRows:0
+	};
+
+	var dialogPosition  = {my: "top", at: "top", of: $("#middleCol")};
+
+	var dataSelect = $('#dataSelect');
+	dataSelect.selectmenu({
+		style:'popup',
+		width: 300,
+	    change: function(e, object){
+	        setImportIndex(dataSelect.selectmenu("index"), false);
+	    }
+	});
+	dataSelect.selectmenu('disable');
+
+	$('#csvHelpDialog').dialog({
+		autoOpen:false,
+		position:dialogPosition
+	});
 
 	function buildForm(name, fields) {
 		//var form = $("#"+name+"Form");
@@ -26,50 +48,56 @@ function EasyPublish() {
 			}
 		}
 	}
-	buildForm("main", fieldManager.mainFields);
-	buildForm("alignment", fieldManager.alignmentFields);
-	buildForm("author", fieldManager.authorFields);
-	buildForm("publisher", fieldManager.publisherFields);
+	buildForm("main", this.fieldManager.mainFields);
+	buildForm("alignment", this.fieldManager.alignmentFields);
+	buildForm("author", this.fieldManager.authorFields);
+	buildForm("publisher", this.fieldManager.publisherFields);
 
 	var submitButton = $("#Submit");
 	submitButton.button();
 	submitButton.click(function() {
 		var valid = validateForm();
 		if(valid) {
-			submitData();
+			//dataManager.submitData();
+			that.submissionSuccessful();
 		} else {
 			alert("Please correct the indicated problems");
 		}
 
-	});	
-	var downloadJSONButton = $("#DownloadJSON");
-	downloadJSONButton.button();
-	downloadJSONButton.click(function() {
-		var valid = validateForm();
-		if(valid) {
-			downloadData("json");
-		} else {
-			alert("Please correct the indicated problems");
-		}
 	});
-
 	var downloadCSVButton = $("#DownloadCSV");
 	downloadCSVButton.button();
 	downloadCSVButton.click(function() {
-		var valid = validateForm();
-		if(valid) {
-			downloadData("csv");
-		} else {
-			alert("Please correct the indicated problems");
-		}
+		window.location = "template.csv";
+		return false;
+	});
+
+	var dlCSVButton = $("#DL_CSV");
+	dlCSVButton.button();
+	dlCSVButton.click(function() {
+		dataManager.downloadData("csv");
+		return false;
+	});
+
+
+	var CSVHelpButton = $("#csvHelp");
+	CSVHelpButton.button( {
+      icons: {
+        primary: "ui-icon-help"
+      },
+      text: false
+
+	});
+	CSVHelpButton.click(function() {
+		$("#csvHelpDialog").dialog( "open" );
+		return false;
 	});
 
 	var testDataButton = $("#TestData");
 	testDataButton.button();
 	testDataButton.click(function() {
-		console.log("TestData clicked")
-		for(key in fieldManager.fieldDictionary) {
-			var field = fieldManager.fieldDictionary[key];
+		for(key in that.fieldManager.fieldDictionary) {
+			var field = that.fieldManager.fieldDictionary[key];
 			var data = field.id+"DATA";
 			if(field.type==Field.URL) {
 				data = "http://www."+data+".com";
@@ -86,172 +114,192 @@ function EasyPublish() {
 		}
 	});
 
+	var previousDataButton = $("#prevData");
+	previousDataButton.button({
+		icons: {
+			primary: "ui-icon-arrowthick-1-w",
+		},
+		disabled: true 
+	});
+	previousDataButton.click(function() {
+		if(importIndex>0) {
+			console.log("previous");
+			setImportIndex(--importIndex, true);
+		}
+		return false;
+	});
+
+	var nextDataButton = $("#nextData");
+	nextDataButton.button({
+		icons: {
+			secondary: "ui-icon-arrowthick-1-e",
+		},
+		disabled: true 
+	});
+	nextDataButton.click(function() {
+		if(importIndex<importedData.numRows-1) {
+			console.log("next");
+			setImportIndex(++importIndex, true);
+
+		}
+		return false;
+	});
+
+	function setImportIndex(newIndex, updateDataSelect) {
+		importIndex = newIndex;
+		setCurrentImportData(importIndex);
+    	previousDataButton.button("option", "disabled", importIndex==0);
+    	nextDataButton.button("option", "disabled", importIndex==importedData.numRows-1);
+    	if(updateDataSelect) {
+    		dataSelect.selectmenu("index", importIndex);
+    	}
+	}
+
+
 	$( document ).tooltip({ position: { my: "left top", at: "right+15 top", collision: "flipfit" } });
 
-	function getData() {
+	this.submissionSuccessful = function() {
+		if(importedData.numRows>0) {
+	    	for(key in importedData) {
+	    		if(key!="numRows") {
+	            	importedData[key].splice(importIndex, 1);
+	            }
+	    	}
+		}
+		importedData.numRows--;
+		if(importedData.numRows>0) {
+			while(importIndex>importedData.numRows-1) {
+				importIndex--;
+			}
+        	setCurrentImportData(importIndex);
+        } else {
+        	clearFields();
+        }
+        buildDataSelections();
+	}
+
+	this.fileDropped = function(fileData) {
+        var arrData = dataManager.CSVToArray(fileData);
+        var objData = dataManager.twoDArrayToObjectArray(arrData);
+        var valid = validateImportData(arrData);
+        if(valid) {
+			var rowCount = arrData.length;
+	        $("#dropStatus2").append("Found " + rowCount + " row(s) of data");
+        	importedData = objData;
+        	importIndex = 0;
+        	previousDataButton.button("option", "disabled", true);
+        	if(rowCount>1) {
+        		nextDataButton.button("option", "disabled", false);
+        	}
+        	buildDataSelections();
+        	setCurrentImportData(importIndex);
+	    }
+    }
+
+    function buildDataSelections() {
+    	dataSelect.selectmenu("destroy")
+    	dataSelect.empty();
+    	if(importedData.numRows>0) {
+	    	var sel = true;
+	    	for(var i=0; i<importedData.numRows; i++) {
+	    		var name = importedData.Name[i];
+				if(sel) {
+					var option = "<option value='"+name+" selected='selected'>"+name+"</option>";
+					sel = false;
+				} else {
+	    			var option = "<option value='"+name+"'>"+name+"</option>";
+	    		}
+	    		dataSelect.append(option);
+
+	    	}
+	    	dataSelect.selectmenu({
+				style:'popup',
+				width: 300,
+			    change: function(e, object){
+			        setImportIndex(dataSelect.selectmenu("index"), false);
+			    }
+			});
+			dataSelect.selectmenu('enable');
+    		dataSelect.selectmenu("index", importIndex);
+		}else{
+			dataSelect.append("<option value='No Data'>No Data</option>");
+			dataSelect.selectmenu({
+				style:'popup',
+				width: 300,
+			    change: function(e, object){
+			        setImportIndex(dataSelect.selectmenu("index"), false);
+			    }
+			});
+			dataSelect.selectmenu('disable');
+		}
+    }
+
+    function setCurrentImportData(index) {
+    	for(key in importedData) {
+            var field = that.fieldManager.fieldDictionary[key];
+            if (field) {
+                field.value(importedData[key][index]);
+            }
+    	}
+    }
+
+    function clearFields() {
+    	for(key in importedData) {
+            var field = that.fieldManager.fieldDictionary[key];
+            if (field) {
+                field.value("");
+            }
+    	}
+    }
+
+    var importFailDialogTemplate = null;
+    var importWarningDialogTemplate = null;
+    function validateImportData(arrData) {
+    	var header = arrData[0];
+    	var fields = _.keys(that.fieldManager.fieldDictionary);
+    	var intersection = _.intersection(header, fields);
+    	var extraHeaders = _.difference(header, intersection);
+    	var missingFields = _.difference(fields, intersection);
+    	if(missingFields.length>0) {
+    		if(!importFailDialogTemplate) {
+    			var importFailDialogSrc = document.getElementById("importFailDialogTemplate").innerHTML;
+    			importFailDialogTemplate = Handlebars.compile(importFailDialogSrc);
+    		}
+    		var timestamp = new Date().getTime();
+            var tempData = {
+                guid:timestamp,
+                missingFieldsList:missingFields.join()
+            };
+			importFailDialogHtml = importFailDialogTemplate(tempData);
+            $("body").append(importFailDialogHtml);
+            $("#"+timestamp).dialog({position:dialogPosition});
+            return false;
+    	} else if(extraHeaders.length>0) {
+    		if(!importWarningDialogTemplate) {
+    			var importWarningDialogSrc = document.getElementById("importWarningDialogTemplate").innerHTML;
+    			importWarningDialogTemplate = Handlebars.compile(importWarningDialogSrc);
+    		}
+    		var timestamp = new Date().getTime();
+            var tempData = {
+                guid:timestamp,
+                extraHeadersList:extraHeaders.join()
+            };
+			importWarningDialogHtml = importWarningDialogTemplate(tempData);
+            $("body").append(importWarningDialogHtml);
+            $("#"+timestamp).dialog({position:dialogPosition});
+    	}
+    	return true;
+    }
+
+	this.getData = function() {
 		var data = {};
-		for(key in fieldManager.fieldDictionary) {
-			var field = fieldManager.fieldDictionary[key];
+		for(key in this.fieldManager.fieldDictionary) {
+			var field = this.fieldManager.fieldDictionary[key];
 			data[field.objectName] = field.value();
 		}
-	    //console.log("data:");
-	    //console.log(JSON.stringify(data));
 	    return data;
 	}
 
-	var service = "publish";
-	var oauth_data = {
-		consumer_key:'john.brecht@sri.com',
-		consumer_secret:'ATjaQAYRMhK0e7gppFBK2pZTtPzaBRFD',
-		token:'node_sign_token',
-		token_secret:'7Hy6hsuz702wfuepQpfOgfP3WUCGunGF',
-		node_url:"http://sandbox.learningregistry.org"
-	}
-
-	function makeEnvelope(data) {
-	 	var envelope = {
-            "doc_type": "resource_data",
-            "doc_version": "0.49.0",
-            "resource_data_type": "metadata",
-            "resource_data": data,
-            "active": true,
-            "identity": {
-                "submitter_type": "agent",
-            },
-            "TOS": {
-                "submission_TOS": "http://www.learningregistry.org/tos"
-            },
-            "payload_schema": ["schema.org", "lrmi"],
-            "payoad_placement":"inline",
-            "resource_locator":data.URL
-        }
-        return envelope;
-    }
-
-	function submitData() {
-		var formData = getData();
-		envelope = makeEnvelope(formData)
-        req_info = getOAuthInfo(oauth_data);
-        req_info.message.body = {
-            documents: [envelope]
-        };
-        xhr = oauthRequest(oauth_data.node_url + '/publish', req_info.message, req_info.accessor);
-        return xhr;
-
-		return false;
-	}
-
-	 function getOAuthInfo(oauth_data) {
-
-        var message = {
-            parameters: {
-            }
-        };
-        var accessor = {
-            consumerKey: oauth_data.consumer_key,
-            consumerSecret: oauth_data.consumer_secret,
-            token: oauth_data.token,
-            tokenSecret: oauth_data.token_secret
-        };
-
-        return { 
-            message: message,
-            accessor: accessor
-        };
-    }
-
-    function oauthRequest(path, message, accessor, undefined) {
-        message.action = path;
-        message.method ='POST';
-        OAuth.completeRequest(message, accessor);
-        var parameters = message.parameters;
-        var options = {
-            headers: {
-                    Authorization: OAuth.getAuthorizationHeader('', parameters)
-            },
-            data: JSON.stringify(message.body)
-        }
-
-        // var options = {
-        //     contentType: "application/x-www-form-urlencoded",
-        //     headers: {
-        //         Authorization: OAuth.getAuthorizationHeader('', parameters),
-        //         Accept: "application/json"
-        //     },
-        //     data: OAuth.formEncode(parameters)
-        // }
-
-        return commonAjax('POST', path, options);
-    }
-
-	 function commonAjax(method, url, options) {
-        var settings = {
-            type: method,
-            contentType: "application/json",
-            dataType: "json"
-        }
-        if (options) {
-            settings = _.extend(settings, options);
-        }
-        var request = $.ajax(url, settings);
-        request.done(function(msg){
-            console.log("Done");
-            console.log(msg);
-        });
-        request.fail(function(msg){
-            console.log("Fail");
-            console.log(msg);
-        });
-        return request;
-    }
-
-	function downloadData(type) {
-		var data = getData();
-		var output;
-		var filetype;
-		if(type=="json") {
-			output = JSON.stringify(data);
-			filetype = 'text/json';
-		} else if(type=="csv") {
-			output = toCSV(data);
-			filetype = 'text/csv';
-		}
-		//document.location = 'data:Application/octet-stream,' +
-		//                         encodeURIComponent(output);
-
-		window.URL = window.webkitURL || window.URL;
-		blob = new Blob([output], {type: filetype});
-		url = window.URL.createObjectURL(blob);
-		document.location = url;
-	}
-
-
-	function toCSV(data) {
-		var csv = "";
-		var row2 = ""
-		for(key in data) {
-			csv += key +", ";
-			row2 += data[key] + ", ";
-		}
-		csv += "\n"+row2;
-		return csv;
-	}
-
-	this.importCSVData = function(dataText) {
-		var arrData = CSVToArray(dataText);	
-		var rowCount = arrData.length;
-		$("#dropStatus2").append("Found " + rowCount + " row(s) of data");	
-		for(var i=0; i<arrData[0].length; i++) {
-			var fieldName = trim1(arrData[0][i]);
-			var field = fieldManager.fieldDictionary[fieldName];
-			if(field) {
-				field.value(trim1(arrData[1][i]));
-			}
-		}
-	}
-	function trim1 (str) {
-	    return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
-	}
 
 	// This is the validation function:
 	function validateForm() {
@@ -263,15 +311,14 @@ function EasyPublish() {
 	    function validateFields(fields) {
 			for(key in fields) {
 				var nextField = fields[key];
-				//console.log("validating: " + nextField.name);
 				nextField.validateField();
 				//nextField.input.require();
 		    }
 		}
-		validateFields(fieldManager.mainFields);
-		validateFields(fieldManager.alignmentFields);
-		validateFields(fieldManager.authorFields);
-		validateFields(fieldManager.publisherFields);
+		validateFields(that.fieldManager.mainFields);
+		validateFields(that.fieldManager.alignmentFields);
+		validateFields(that.fieldManager.authorFields);
+		validateFields(that.fieldManager.publisherFields);
 	    
 	    // All of the validator methods have been called:
 	    // End the validation session:
@@ -284,88 +331,6 @@ function EasyPublish() {
 	}
 
 
-    // This will parse a delimited string into an array of
-    // arrays. The default delimiter is the comma, but this
-    // can be overriden in the second argument.
-    function CSVToArray( strData, strDelimiter ){
-    	// Check to see if the delimiter is defined. If not,
-    	// then default to comma.
-    	strDelimiter = (strDelimiter || ",");
-
-    	// Create a regular expression to parse the CSV values.
-    	var objPattern = new RegExp(
-    		(
-    			// Delimiters.
-    			"(\\" + strDelimiter + "|\\r?\\n|\\r|^)" +
-
-    			// Quoted fields.
-    			"(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
-
-    			// Standard fields.
-    			"([^\"\\" + strDelimiter + "\\r\\n]*))"
-    		),
-    		"gi"
-    		);
-
-
-    	// Create an array to hold our data. Give the array
-    	// a default empty first row.
-    	var arrData = [[]];
-
-    	// Create an array to hold our individual pattern
-    	// matching groups.
-    	var arrMatches = null;
-
-
-    	// Keep looping over the regular expression matches
-    	// until we can no longer find a match.
-    	while (arrMatches = objPattern.exec( strData )){
-
-    		// Get the delimiter that was found.
-    		var strMatchedDelimiter = arrMatches[ 1 ];
-
-    		// Check to see if the given delimiter has a length
-    		// (is not the start of string) and if it matches
-    		// field delimiter. If id does not, then we know
-    		// that this delimiter is a row delimiter.
-    		if (
-    			strMatchedDelimiter.length &&
-    			(strMatchedDelimiter != strDelimiter)
-    			){
-
-    			// Since we have reached a new row of data,
-    			// add an empty row to our data array.
-    			arrData.push( [] );
-
-    		}
-
-
-    		// Now that we have our delimiter out of the way,
-    		// let's check to see which kind of value we
-    		// captured (quoted or unquoted).
-    		if (arrMatches[ 2 ]){
-
-    			// We found a quoted value. When we capture
-    			// this value, unescape any double quotes.
-    			var strMatchedValue = arrMatches[ 2 ].replace(
-    				new RegExp( "\"\"", "g" ),
-    				"\""
-    				);
-
-    		} else {
-    			// We found a non-quoted value.
-    			var strMatchedValue = arrMatches[ 3 ];
-    		}
-
-
-    		// Now that we have our value string, let's add
-    		// it to the data array.
-    		arrData[ arrData.length - 1 ].push( strMatchedValue );
-    	}
-
-    	// Return the parsed data.
-    	return( arrData );
-    }
 
 
 }

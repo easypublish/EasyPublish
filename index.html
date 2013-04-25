@@ -3,19 +3,53 @@
 		<title>Learning Registry Easy Publish</title>
 		<link href="css/smoothness/jquery-ui-1.10.2.custom.css" rel="stylesheet">
 		<link href="css/jquery.validity.css" rel="stylesheet">
+		<link type="text/css" href="css/jquery.ui.selectmenu.css" rel="stylesheet" />
+		<link rel="stylesheet" href="css/jquery.fileupload-ui.css">
 		<link href="css/easyPub.css" rel="stylesheet">
-		<script type="text/javascript" src="http://underscorejs.org/underscore-min.js"></script>
+		<script type="text/javascript" src="js/lib/underscore.min.js"></script>
 		<script type="text/javascript" src="js/jquery/jquery-1.9.1.min.js"></script>
 		<script type="text/javascript" src="js/jquery/validity.js"></script>
 		<script type="text/javascript" src="js/jquery/jquery-ui-1.10.2.custom.min.js"></script>
-		<script type="text/javascript" src="js/uri.min.js"></script>
-		<script type="text/javascript" src="js/oauth.js"></script>
-		<script type="text/javascript" src="js/sha1.js"></script>
+		<script type="text/javascript" src="js/jquery/autoCombobox.js"></script>
+		<script type="text/javascript" src="js/jquery/jquery.fileupload.js"></script>
+		<script type="text/javascript" src="js/jquery/ui/jquery.ui.selectmenu.js"></script>
+		<script type="text/javascript" src="js/jquery/ui/jquery.fileupload-ui.js"></script>
 
+		<script type="text/javascript" src="js/lib/handlebars.js"></script>
+		<script type="text/javascript" src="js/lib/uri.min.js"></script>
+		<script type="text/javascript" src="js/lib/oauth.js"></script>
+		<script type="text/javascript" src="js/lib/sha1.js"></script>
+
+		<script type="text/javascript" src="js/standards.js"></script>
 		<script type="text/javascript" src="js/easyPub.js"></script>
-		<script type="text/javascript" src="js/autoCombobox.js"></script>
 		<script type="text/javascript" src="js/fields.js"></script>
 		<script type="text/javascript" src="js/dnd.js"></script>
+		<script type="text/javascript" src="js/datamanager.js"></script>
+
+		<script id="successDialogTemplate" type="text/x-handlebars-template">
+			<div id="{{guid}}" title="Successful Post">
+				<p>Your submission "{{name}}" has been successfully posted to the learning registry.
+					You may find it <a href="{{serverURL}}/harvest/getrecord?request_id={{docID}}">here</a>.
+				</p>
+			</div>
+		</script>
+		<script id="failDialogTemplate" type="text/x-handlebars-template">
+			<div id="{{guid}}" title="Post Attempt Failed">
+				<p>Your submission "{{name}}" failed with the following error: {{error}}.</p>
+			</div>
+		</script>
+		<script id="importFailDialogTemplate" type="text/x-handlebars-template">
+			<div id="{{guid}}" title="Import Attempt Failed">
+				<p>Cannot import CSV file, it is missing the following fields:</p>
+				<p>{{missingFieldsList}}</p>
+			</div>
+		</script>
+		<script id="importWarningDialogTemplate" type="text/x-handlebars-template">
+			<div id="{{guid}}" title="Import Warning">
+				<p>Import will proceed but the following columns are extraneous and will be ignored:</p>
+				<p>{{extraHeadersList}}</p>
+			</div>
+		</script>
 
 		<style>
 			body{
@@ -28,7 +62,7 @@
 
 	<body>
 		<h1>Easy Publish</h1>
-		<div style="width:1000">
+		<div style="width:1150">
 			<div id="rightCol">
 				<form>
 					<fieldset id="dropForm">
@@ -37,34 +71,64 @@
 							<p id="dropStatus1">Drop a CSV data file here</p>
 							<p id="dropStatus2"></p>
 						</div>
+						<br>
+						<!--<input type="file" id="files" name="file" />-->
+		                <span class="btn btn-success fileinput-button">
+		                    <span>Select File...</span>
+		                    <input type="file" name="files[]" id="csvFile">
+		                </span>
+		                <button class="round-btn" id="csvHelp"></button>
+						<button id="DownloadCSV">Download CSV Template</button>
+					</fieldset>
+					<fieldset id="navigate">
+						<legend>Navigate</legend>
+						<div>
+							<button id="prevData">Previous</button><button id="nextData">Next</button>
+						</div>
+
+						<p>
+							<label for="dataSelect">Select a Dataset:</label>
+							<br><br>
+							<select name="dataSelect" id="dataSelect">
+								<option value='No Data'>No Data</option>
+							</select>
+						</p>
 					</fieldset>
 				</form>
+				<button id="Submit">Submit Data To Learning Registry</button>
+
 			</div>
 			<div id="middleCol">
 				<form>
 					<!-- <div id="testDiv">TEST</div> -->
 					<fieldset id="alignmentForm">
-						<legend>Alignment Data</legend>
+						<legend>Standards Alignment</legend>
 					</fieldset>
 					<fieldset id="authorForm">
-						<legend>Author Data</legend>
+						<legend>Author</legend>
 					</fieldset>
 					<fieldset id="publisherForm">
-						<legend>Publisher Data</legend>
+						<legend>Publisher</legend>
 					</fieldset>
 				</form>
 			</div>
 			<div id="leftCol">
 				<form>
 					<fieldset id="mainForm">
-						<legend>Primary Data</legend>
+						<legend>Resource Information</legend>
 					</fieldset>
 				</form>
 			</div>
-			<button id="Submit">Submit</button>
-			<button id="DownloadJSON">Download JSON</button>
-			<button id="DownloadCSV">Download CSV</button>
+		</div>
+		<hr>
+		<div>
+			<h3>Debug buttons</h3>
+			<!--<button id="DownloadJSON">Download JSON</button>-->
 			<button id="TestData">Test Data</button>
+			<button id="DL_CSV">DL CSV</button>
+		</div>
+		<div id="csvHelpDialog" title="CSV Import Help">
+			<p>If you wish to enter data more rapidly, you can submit a CSV file. First click "Download CSV Template" to get a template file. Then add rows of data to that file. Next, import the file by clicking "Select file..." or by dragging the file into the blue area above.</p>
 		</div>
 	</body>
 </html>
