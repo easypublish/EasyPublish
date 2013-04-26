@@ -15,12 +15,82 @@ function DataManager(easyPub) {
         node_url: nodeURL
     }
 
-    function makeEnvelope(data) {
+    //This needs big cleanup. It's a little hacky right now and kind of defeats the original purpose of the
+    //field dictionary
+    function makePayload() {
+        var payload = {
+            items: [{
+                type: ["http://schema.org/CreativeWork"],
+                id: easyPub.getID(),
+                properties: {
+                    name: [easyPub.getValue("title")],
+                    url: [easyPub.getValue("url")],
+                    description: [easyPub.getValue("description")],
+                    keywords: [easyPub.getValue("keywords")],
+            		educationalAlignment: [{
+                        type: ["http://schema.org/AlignmentObject"],
+                        id: "xxx",
+                        properties: {
+                            alignmentType: ["educationLevel"],
+                            educationalFramework: ["US K-12 Grade Levels"],
+                            targetName: [easyPub.getValue("grade")],
+                            targetDescription: [easyPub.getValue("k12Grade")],
+                            //targetUrl: []
+                        },
+                        type: ["http://schema.org/AlignmentObject"],
+                        id: "xxx",
+                        properties: {
+                            alignmentType: [easyPub.getValue("educationalAlignment_alignmentType")],
+                            educationalFramework: [easyPub.getValue("educationalAlignment_educationalFramework")],
+                            targetName: ["Standards Alignment"],
+                            //targetDescription: [],
+                            targetUrl: [easyPub.getValue("educationalAlignment_targetURL")]
+                        }
+            		}],
+                    dateCreated: [easyPub.getValue("dateCreated")],
+                    dateModified: [easyPub.getValue("dateModified")],
+                    language: [easyPub.getValue("language")],
+                    mediaType: [easyPub.getValue("mediaType")], //this is not an actual field in the CreativeWork schema
+            		learningResourceType: [easyPub.getValue("learningResourceType")],
+                    interactivityType: [easyPub.getValue("interactivityType")],
+                    useRightsUrl: [easyPub.getValue("useRightsUrl")],
+                    isBasedOnUrl: [easyPub.getValue("isBasedOnUrl")],
+                    author: [
+                        {
+                            type: ["http://schema.org/Person"],
+                            properties: {
+                                name: [easyPub.getValue("author_name")],
+                                url:  [easyPub.getValue("author_url")],
+                                email:  [easyPub.getValue("author_email")]
+
+                            }
+                        }
+                    ],
+                    publisher: [
+                        {
+                            type: ["http://schema.org/Organization"],
+                            properties: {
+                                name: [easyPub.getValue("publisher_name")],
+                                url:  [easyPub.getValue("publisher_url")],
+                                email:  [easyPub.getValue("publisher_email")]
+
+                            }
+                        }
+                    ],
+                }
+            }]
+        };
+
+        return payload;
+    }
+
+    function makeEnvelope() {
+        var payload = makePayload();
         var envelope = {
             "doc_type": "resource_data",
             "doc_version": "0.49.0",
             "resource_data_type": "metadata",
-            "resource_data": data,
+            "resource_data": payload,
             "active": true,
             "identity": {
                 "submitter_type": "agent",
@@ -30,15 +100,19 @@ function DataManager(easyPub) {
             },
             "payload_schema": ["schema.org", "lrmi"],
             "payload_placement": "inline",
-            "resource_locator": data.URL
+            "resource_locator": easyPub.getValue("url")
         }
         return envelope;
     }
 
+    this.testEnvelope = function() {
+        var envelope = makeEnvelope();
+        console.log(envelope);
+    }
+
     //TODO - handle arrays of form data
     this.submitData = function () {
-        var formData = easyPub.getData();
-        envelope = makeEnvelope(formData)
+        envelope = makeEnvelope()
         req_info = getOAuthInfo(oauth_data);
         req_info.message.body = {
             documents: [envelope]
@@ -58,7 +132,7 @@ function DataManager(easyPub) {
                     console.log("success, doc_ID: " + nextResult.doc_ID);
                     var tempData = {
                         guid:nextResult.doc_ID,
-                        name:formData.Name,
+                        name:easyPub.getValue("title"),
                         serverURL: nodeURL,
                         docID:nextResult.doc_ID
                     };
@@ -69,7 +143,7 @@ function DataManager(easyPub) {
                 } else {
                     console.log("error: " + nextResult.error);
                     var tempData = {
-                        guid:formData.Name,
+                        guid:easyPub.getValue("title"),
                         error:nextResult.error,
                         name:formData.Name
                     };
@@ -143,13 +217,14 @@ function DataManager(easyPub) {
     }
 
     this.downloadData = function(type) {
-        var data = easyPub.getData();
         var output;
         var filetype;
         if (type == "json") {
+            var data = makeEnvelope();
             output = JSON.stringify(data);
             filetype = 'text/json';
         } else if (type == "csv") {
+            var data = easyPub.getData();
             output = toCSV(data);
             filetype = 'text/csv';
         }

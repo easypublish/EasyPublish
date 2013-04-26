@@ -29,7 +29,7 @@
 		<script id="successDialogTemplate" type="text/x-handlebars-template">
 			<div id="{{guid}}" title="Successful Post">
 				<p>Your submission "{{name}}" has been successfully posted to the learning registry.
-					You may find it <a href="{{serverURL}}/harvest/getrecord?request_id={{docID}}">here</a>.
+					You may find it <a href="{{serverURL}}/obtain?by_doc_ID={{docID}}">here</a>.
 				</p>
 			</div>
 		</script>
@@ -105,7 +105,9 @@
 						<legend>Standards Alignment</legend>
 					</fieldset>
 					<fieldset id="authorForm">
-						<legend>Author</legend>
+						<legend>Author(s)</legend>
+						<div class="sublegend">Author 1</div>
+						<!--<button id="addAuthor">Add Author</button>-->
 					</fieldset>
 					<fieldset id="publisherForm">
 						<legend>Publisher</legend>
@@ -126,6 +128,7 @@
 			<!--<button id="DownloadJSON">Download JSON</button>-->
 			<button id="TestData">Test Data</button>
 			<button id="DL_CSV">DL CSV</button>
+			<button id="DL_JSON">DL JSON</button>
 		</div>
 		<div id="csvHelpDialog" title="CSV Import Help">
 			<p>If you wish to enter data more rapidly, you can submit a CSV file. First click "Download CSV Template" to get a template file. Then add rows of data to that file. Next, import the file by clicking "Select file..." or by dragging the file into the blue area above.</p>

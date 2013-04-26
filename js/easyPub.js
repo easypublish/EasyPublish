@@ -17,6 +17,8 @@ function EasyPublish() {
 		numRows:0
 	};
 
+	var authorCount = 1;
+
 	var dialogPosition  = {my: "top", at: "top", of: $("#middleCol")};
 
 	var dataSelect = $('#dataSelect');
@@ -41,7 +43,11 @@ function EasyPublish() {
 		for(key in fields) {
 			var nextField = fields[key];
 			var nextRow = new FieldEditorRow(nextField);
-			nextRow.elem.appendTo(formSection);	
+			//if(name=="author") {
+			//	$("#addAuthor").before(nextRow.elem);
+			//} else {	
+				nextRow.elem.appendTo(formSection);	
+			//}
 			//have to construct combo boxes after they've been added to DOM
 			if(nextField.type==Field.CHOICE) {
 				$("#"+nextField.id).autocombobox();
@@ -58,8 +64,8 @@ function EasyPublish() {
 	submitButton.click(function() {
 		var valid = validateForm();
 		if(valid) {
-			//dataManager.submitData();
-			that.submissionSuccessful();
+			dataManager.submitData();
+			//that.submissionSuccessful();
 		} else {
 			alert("Please correct the indicated problems");
 		}
@@ -76,6 +82,13 @@ function EasyPublish() {
 	dlCSVButton.button();
 	dlCSVButton.click(function() {
 		dataManager.downloadData("csv");
+		return false;
+	});	
+
+	var dlJSONButton = $("#DL_JSON");
+	dlJSONButton.button();
+	dlJSONButton.click(function() {
+		dataManager.downloadData("json");
 		return false;
 	});
 
@@ -145,6 +158,38 @@ function EasyPublish() {
 		return false;
 	});
 
+
+	/*var addAuthorButton = $("#addAuthor");
+	addAuthorButton.button({
+		icons: {
+			secondary: "ui-icon-plus",
+		}
+	});
+	addAuthorButton.click(function() {
+		addAuthor();
+		return false;
+	});*/
+
+	function addAuthor() {
+		authorCount++;
+		$("#addAuthor").before('<div class="sublegend">Author '+authorCount+'</div>');
+		for(key in that.fieldManager.authorFields) {
+			var nextField = that.fieldManager.authorFields[key];
+			var clone = nextField.clone();
+			var input = clone.input;
+			var id = input.attr("id");
+			id += authorCount;
+			input.attr("id", id);
+			input.attr("name", id);
+			var nextRow = new FieldEditorRow(clone, authorCount);
+			$("#addAuthor").before(nextRow.elem);
+			//have to construct combo boxes after they've been added to DOM
+			if(nextField.type==Field.CHOICE) {
+				$("#"+nextField.id).autocombobox();
+			}
+		}
+	}
+
 	function setImportIndex(newIndex, updateDataSelect) {
 		importIndex = newIndex;
 		setCurrentImportData(importIndex);
@@ -159,6 +204,7 @@ function EasyPublish() {
 	$( document ).tooltip({ position: { my: "left top", at: "right+15 top", collision: "flipfit" } });
 
 	this.submissionSuccessful = function() {
+		console.log("submissionSuccessful");
 		if(importedData.numRows>0) {
 	    	for(key in importedData) {
 	    		if(key!="numRows") {
@@ -244,7 +290,7 @@ function EasyPublish() {
     }
 
     function clearFields() {
-    	for(key in importedData) {
+    	for(key in that.fieldManager.fieldDictionary) {
             var field = that.fieldManager.fieldDictionary[key];
             if (field) {
                 field.value("");
@@ -298,6 +344,20 @@ function EasyPublish() {
 			data[field.objectName] = field.value();
 		}
 	    return data;
+	}
+
+	this.getID = function() {
+		return this.getValue("url");
+	}
+
+	this.getValue = function(id) {
+		var field = this.fieldManager.fieldDictionary[id];
+		if(field) {
+			return field.value();
+		}else {
+			console.log("field not found: " + id);
+			return "";
+		}
 	}
 
 

@@ -15,12 +15,12 @@ function FieldManager() {
 	this.fieldDictionary = {};
 
 	this.mainFields = [
-		new Field("Resource Title", Field.STRING, {required:true, objectName:"targetName"}),
-		new Field("Resource URL", Field.URL, {required:true, objectName:"targetUrl"}),
-		new Field("Description", Field.LONG_STRING, {objectName:"CreativeWork_description"}),
-		new Field("Subject", Field.CHOICE, {objectName:"CreativeWork_keywords", choices:edGovSubjects}),
-		new Field("US K_12 Grade", Field.CHOICE, {objectName:"educationalAlignment_targetDescription", choices:k12Choices}),
-		new Field("Grade", Field.CHOICE, {objectName:"educationalAlignment_targetName", choices:gradeChoices}),
+		new Field("Resource Title", Field.STRING, {required:true, objectName:"title"}),
+		new Field("Resource URL", Field.URL, {required:true, objectName:"url"}),
+		new Field("Description", Field.LONG_STRING, {objectName:"description"}),
+		new Field("Subject", Field.CHOICE, {objectName:"keywords", choices:edGovSubjects}),
+		new Field("US K_12 Grade", Field.CHOICE, {objectName:"k12Grade", choices:k12Choices}),
+		new Field("Grade", Field.CHOICE, {objectName:"grade", choices:gradeChoices}),
 		new Field("Date Created", Field.DATE,  {tip:"Date the resource was originally created, Format: YYYY_MM_DD", objectName:"dateCreated"}),
 		new Field("Date Modified", Field.DATE,  {tip:"Date the resource was most recently modified, Format: YYYY_MM_DD", objectName:"dateModified"}),
 		new Field("Language", Field.STRING, {objectName:"language"}),
@@ -50,8 +50,8 @@ function FieldManager() {
 	}
 
 	this.alignmentFields = [
-		new Field("This resource...", Field.CHOICE, {objectName:"educationalAlignment_alignmentType", choices:alignmentTypes}),
-		new Field("Standard Framework", Field.CHOICE, {objectName:"educationalAlignment_educationalFramework",
+		new Field("This resource...", Field.CHOICE, {objectName:"alignmentType", choices:alignmentTypes}),
+		new Field("Standard Framework", Field.CHOICE, {objectName:"educationalFramework",
 					tip:"The framework to which the resource being described is aligned", choices:standardFrameworks}),
 		new Field("Standard", Field.CHOICE, {objectName:"educationalAlignment_targetURL", choices:standards}),
 
@@ -69,8 +69,8 @@ function FieldManager() {
 
 	this.authorFields = [
 		new Field("Name", Field.STRING, {objectName:"author_name"}),
-		new Field("URL", Field.URL, {objectName:"author_contactpoint_url"}),
-		new Field("Email Address", Field.EMAIL, {objectName:"author_contactpoint_email"}),
+		new Field("URL", Field.URL, {objectName:"author_url"}),
+		new Field("Email Address", Field.EMAIL, {objectName:"author_email"}),
 		//new Field("Description", Field.LONG_STRING, {objectName:"authorDescription"}),
 		//new Field("Postal Address", Field.LONG_STRING, {objectName:"authorAddress"})
 	];
@@ -82,8 +82,8 @@ function FieldManager() {
 
 	this.publisherFields = [
 		new Field("Name", Field.STRING, {objectName:"publisher_name"}),
-		new Field("URL", Field.URL, {objectName:"publisher_contactpoint_url"}),
-		new Field("Email Address", Field.EMAIL, {objectName:"publisher_contactpoint_email"}),
+		new Field("URL", Field.URL, {objectName:"publisher_url"}),
+		new Field("Email Address", Field.EMAIL, {objectName:"publisher_email"}),
 		//new Field("Description", Field.LONG_STRING, {objectName:"publisherDescription"}),
 		//new Field("Postal Address", Field.LONG_STRING, {objectName:"publisherAddress"})
 	];
@@ -105,6 +105,10 @@ Field = function(name, type, options) {
 	this.type = type;
 	this.objectName = name;
 	this.required = false;
+
+	this.clone = function() {
+		return new Field(name, type, options);
+	}
 
 	if(options) {
 		this.tip = options.tip;

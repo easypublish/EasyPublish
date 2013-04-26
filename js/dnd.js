@@ -46,14 +46,14 @@ function DragAndDrop(easyPub) {
 
       // Setup the dnd listeners.
       var dropZone = document.getElementById('drop_zone');
-      console.log("dropZone: " + dropZone);
+      //console.log("dropZone: " + dropZone);
 
       //var dropZone = $('drop_zone');
       dropZone.addEventListener('dragover', handleDragOver, false);
       dropZone.addEventListener('drop', handleFileDrop, false);
 
       var fileButton = document.getElementById('csvFile');
-      console.log("fileButton: " + fileButton);
+      //console.log("fileButton: " + fileButton);
       fileButton.addEventListener('change', handleFileSelect, false);
 
       

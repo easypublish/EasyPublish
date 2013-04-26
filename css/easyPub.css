@@ -11,6 +11,12 @@ font-family: Verdana,Arial,sans-serif;
 font-size: 0.9em;
 }
 
+.sublegend {
+	font-size: 1.1em;
+	font-weight: bold;
+	padding-bottom:5px;
+}
+
 #leftCol  {
   width:400;
 }
