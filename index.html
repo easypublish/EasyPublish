@@ -21,6 +21,8 @@
 		<script type="text/javascript" src="js/lib/sha1.js"></script>
 
 		<script type="text/javascript" src="js/standards.js"></script>
+		<script type="text/javascript" src="js/subjects.js"></script>
+		<script type="text/javascript" src="js/treeMenu.js"></script>
 		<script type="text/javascript" src="js/easyPub.js"></script>
 		<script type="text/javascript" src="js/fields.js"></script>
 		<script type="text/javascript" src="js/dnd.js"></script>
@@ -29,7 +31,7 @@
 		<script id="successDialogTemplate" type="text/x-handlebars-template">
 			<div id="{{guid}}" title="Successful Post">
 				<p>Your submission "{{name}}" has been successfully posted to the learning registry.
-					You may find it <a href="{{serverURL}}/obtain?by_doc_ID={{docID}}">here</a>.
+					You may find it <a href="{{serverURL}}/obtain?by_doc_ID=true&request_ID={{docID}}">here</a>.
 				</p>
 			</div>
 		</script>
@@ -65,6 +67,32 @@
 		<div style="width:1150">
 			<div id="rightCol">
 				<form>
+					<fieldset id="credentials">
+						<legend>Credentials</legend>
+						<div class='fieldRow'>
+							<label for="consumer_key">Consumer Key</label><br>
+							<input type="text" id="consumer_key" name="consumer_key" size="50" title="Your OAuth consumer_key" class="text ui-widget-content ui-corner-all oauth"/>
+						</div>
+						<div class='fieldRow'>
+							<label for="consumer_secret">Consumer Secret</label><br>
+							<input type="text" id="consumer_secret" name="consumer_secret" size="50"  title="Your OAuth consumer_secret" class="text ui-widget-content ui-corner-all oauth"/>
+						</div>
+						<div class='fieldRow'>
+							<label for="token_secret">Token Secret</label><br>
+							<input type="text" id="token_secret" name="token_secret" size="50"  title="Your OAuth token_secret" class="text ui-widget-content ui-corner-all oauth"/>
+						</div>
+						<div class='fieldRow'>
+							<label for="node_url">Node URL</label><br>
+							<input type="text" id="node_url" name="node_url"  size="50" title="URL of the node you would like to submit to" class="text ui-widget-content ui-corner-all oauth"/>
+						</div>
+						<div class='fieldRow' id="store_cred_row">
+							<label for="store_cred">Store these credentials in this browser?</label>
+							<input type="checkbox" id="store_cred" name="store_cred"  size="50" title="Store these values in your browser's local storage."/>
+							<span id="store_state">(Not stored)</span>
+		                	<button class="round-btn" id="storeHelp"></button>
+						</div>
+					</fieldset>
+					<p><button id="Submit">Submit Data To Learning Registry</button></p>
 					<fieldset id="dropForm">
 						<legend>Import Data</legend>
 						<div id="drop_zone">	
@@ -79,13 +107,6 @@
 		                </span>
 		                <button class="round-btn" id="csvHelp"></button>
 						<button id="DownloadCSV">Download CSV Template</button>
-					</fieldset>
-					<fieldset id="navigate">
-						<legend>Navigate</legend>
-						<div>
-							<button id="prevData">Previous</button><button id="nextData">Next</button>
-						</div>
-
 						<p>
 							<label for="dataSelect">Select a Dataset:</label>
 							<br><br>
@@ -93,9 +114,11 @@
 								<option value='No Data'>No Data</option>
 							</select>
 						</p>
+						<div>
+							<button id="prevData">Previous</button><button id="nextData">Next</button>
+						</div>
 					</fieldset>
 				</form>
-				<button id="Submit">Submit Data To Learning Registry</button>
 
 			</div>
 			<div id="middleCol">
@@ -103,11 +126,13 @@
 					<!-- <div id="testDiv">TEST</div> -->
 					<fieldset id="alignmentForm">
 						<legend>Standards Alignment</legend>
+						<div class="sublegend">Alignment 1</div>
+						<button id="addAlignment">Add Alignment</button>
 					</fieldset>
 					<fieldset id="authorForm">
-						<legend>Author(s)</legend>
+						<legend>Authors</legend>
 						<div class="sublegend">Author 1</div>
-						<!--<button id="addAuthor">Add Author</button>-->
+						<button id="addAuthor">Add Author</button>
 					</fieldset>
 					<fieldset id="publisherForm">
 						<legend>Publisher</legend>
@@ -122,7 +147,7 @@
 				</form>
 			</div>
 		</div>
-		<hr>
+		<!--<div style="visibility:hidden;">-->
 		<div>
 			<h3>Debug buttons</h3>
 			<!--<button id="DownloadJSON">Download JSON</button>-->
@@ -132,6 +157,12 @@
 		</div>
 		<div id="csvHelpDialog" title="CSV Import Help">
 			<p>If you wish to enter data more rapidly, you can submit a CSV file. First click "Download CSV Template" to get a template file. Then add rows of data to that file. Next, import the file by clicking "Select file..." or by dragging the file into the blue area above.</p>
+		</div>
+		<div id="storeHelpDialog" title="Local Storage Help">
+			<p>If you choose this option, your credentials will be stored in your browser using <a href="http://diveintohtml5.info/storage.html">HTML5 Local Storage</a>.</p>
+		</div>
+		<div id="oauthErrorDialog" title="Missing OAuth credentials">
+			<p>Please supply values for all OAuth fields as well as a node URL.</p>
 		</div>
 	</body>
 </html>

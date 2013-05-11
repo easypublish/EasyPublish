@@ -17,7 +17,11 @@ function EasyPublish() {
 		numRows:0
 	};
 
+
+	var alignmentCount = 1;
 	var authorCount = 1;
+	var store_credentials = false;
+	var local_storeage = false;
 
 	var dialogPosition  = {my: "top", at: "top", of: $("#middleCol")};
 
@@ -35,6 +39,90 @@ function EasyPublish() {
 		autoOpen:false,
 		position:dialogPosition
 	});
+	$('#oauthErrorDialog').dialog({
+		autoOpen:false,
+		position:dialogPosition
+	});
+	$('#storeHelpDialog').dialog({
+		autoOpen:false,
+		position:dialogPosition
+	});
+
+	function supports_html5_storage() {
+	  try {
+	    return 'localStorage' in window && window['localStorage'] !== null;
+	  } catch (e) {
+	    return false;
+	  }
+	}
+	if(supports_html5_storage()) {
+		local_storage = true;
+		var storedCreds = localStorage.getItem("store_credentials");
+		if(storedCreds=="true") {
+			store_credentials = true;
+			$("#store_cred").attr('checked', true);
+			$("#store_state").html("(stored)");
+			restoreCredentials();
+		} else {
+			$("#store_cred").attr('checked', false);
+		}
+	} else {
+		$("#store_cred_row").hide();
+		local_storeage = false;
+	}
+
+	$("#store_cred").change(function() {
+		//var checked = $("#store_cred").val();
+		if(this.checked) {
+			console.log("clicked stored");
+			store_credentials = true;
+			localStorage.setItem("store_credentials", true);
+			storeAllCredentials();
+			$("#store_state").html("(stored)");
+		} else {
+			console.log("clicked unstored");
+			store_credentials = false;
+			localStorage.setItem("store_credentials", false);
+			clearAllCredentials();
+			$("#store_state").html("(not stored)");
+		}
+	});
+
+	$(".oauth").change(function() {
+		if(store_credentials) {
+			storeCredential(this);
+		}
+	});
+
+	function clearAllCredentials() { 
+		$(".oauth").each(function( index ){
+			var id = $(this).attr("id");
+			localStorage.removeItem(id);
+		});
+	}
+
+	function restoreCredentials() { 
+		$(".oauth").each(function( index ){
+			var id = $(this).attr("id");
+			var value = localStorage.getItem(id);
+			$(this).val(value);
+		});
+	}
+
+	function storeAllCredentials() { 
+		$(".oauth").each(function( index ){
+			storeCredential($(this));
+		});
+	}
+
+	function storeCredential(credField) {
+		if(local_storage) {
+			var id = $(credField).attr("id");
+			var value = $(credField).val();
+			console.log("storing credential: " + id + ", val: " + value);
+			localStorage.setItem(id, value);
+		}
+	}
 
 	function buildForm(name, fields) {
 		//var form = $("#"+name+"Form");
@@ -43,14 +131,18 @@ function EasyPublish() {
 		for(key in fields) {
 			var nextField = fields[key];
 			var nextRow = new FieldEditorRow(nextField);
-			//if(name=="author") {
-			//	$("#addAuthor").before(nextRow.elem);
-			//} else {	
+			if(name=="author") {
+				$("#addAuthor").before(nextRow.elem);
+			} else if(name=="alignment") {
+				$("#addAlignment").before(nextRow.elem);
+			}  else {	
 				nextRow.elem.appendTo(formSection);	
-			//}
+			}
 			//have to construct combo boxes after they've been added to DOM
 			if(nextField.type==Field.CHOICE) {
 				$("#"+nextField.id).autocombobox();
+			}else if (nextField.type==Field.TREE_CHOICE) {
+				nextField.treeMenu.initGUI();
 			}
 		}
 	}
@@ -69,7 +161,7 @@ function EasyPublish() {
 		} else {
 			alert("Please correct the indicated problems");
 		}
-
+		return false;
 	});
 	var downloadCSVButton = $("#DownloadCSV");
 	downloadCSVButton.button();
@@ -92,6 +184,19 @@ function EasyPublish() {
 		return false;
 	});
 
+
+	var storeHelpButton = $("#storeHelp");
+	storeHelpButton.button( {
+      icons: {
+        primary: "ui-icon-help"
+      },
+      text: false
+
+	});
+	storeHelpButton.click(function() {
+		$("#storeHelpDialog").dialog( "open" );
+		return false;
+	});
 
 	var CSVHelpButton = $("#csvHelp");
 	CSVHelpButton.button( {
@@ -159,7 +264,7 @@ function EasyPublish() {
 	});
 
 
-	/*var addAuthorButton = $("#addAuthor");
+	var addAuthorButton = $("#addAuthor");
 	addAuthorButton.button({
 		icons: {
 			secondary: "ui-icon-plus",
@@ -168,24 +273,50 @@ function EasyPublish() {
 	addAuthorButton.click(function() {
 		addAuthor();
 		return false;
-	});*/
+	});
 
 	function addAuthor() {
 		authorCount++;
 		$("#addAuthor").before('<div class="sublegend">Author '+authorCount+'</div>');
-		for(key in that.fieldManager.authorFields) {
-			var nextField = that.fieldManager.authorFields[key];
-			var clone = nextField.clone();
-			var input = clone.input;
-			var id = input.attr("id");
-			id += authorCount;
-			input.attr("id", id);
-			input.attr("name", id);
+		for(var i=0; i<3; i++) {
+			var nextField = that.fieldManager.authorFields[i];
+			var clone = nextField.clone(authorCount);
+			that.fieldManager.fieldDictionary[clone.id] = clone;
+			that.fieldManager.authorFields.push(clone);
 			var nextRow = new FieldEditorRow(clone, authorCount);
 			$("#addAuthor").before(nextRow.elem);
 			//have to construct combo boxes after they've been added to DOM
-			if(nextField.type==Field.CHOICE) {
-				$("#"+nextField.id).autocombobox();
+			if(clone.type==Field.CHOICE) {
+				$("#"+clone.id).autocombobox();
+			}
+		}
+	}
+
+
+	var addAlignmentButton = $("#addAlignment");
+	addAlignmentButton.button({
+		icons: {
+			secondary: "ui-icon-plus",
+		}
+	});
+	addAlignmentButton.click(function() {
+		addAlignment();
+		return false;
+	});
+	//TODO - very redundant with addAuthor, can refactor and make one parent function for both
+	function addAlignment() {
+		alignmentCount++;
+		$("#addAlignment").before('<div class="sublegend">Alignment '+alignmentCount+'</div>');
+		for(var i=0; i<3; i++) {
+			var nextField = that.fieldManager.alignmentFields[i];
+			var clone = nextField.clone(alignmentCount);
+			that.fieldManager.fieldDictionary[clone.id] = clone;
+			that.fieldManager.alignmentFields.push(clone);
+			var nextRow = new FieldEditorRow(clone, alignmentCount);
+			$("#addAlignment").before(nextRow.elem);
+			//have to construct combo boxes after they've been added to DOM
+			if(clone.type==Field.CHOICE) {
+				$("#"+clone.id).autocombobox();
 			}
 		}
 	}
@@ -232,6 +363,8 @@ function EasyPublish() {
 			var rowCount = arrData.length;
 	        $("#dropStatus2").append("Found " + rowCount + " row(s) of data");
         	importedData = objData;
+        	console.log("importedData: ");
+        	console.log(importedData);
         	importIndex = 0;
         	previousDataButton.button("option", "disabled", true);
         	if(rowCount>1) {
@@ -248,7 +381,7 @@ function EasyPublish() {
     	if(importedData.numRows>0) {
 	    	var sel = true;
 	    	for(var i=0; i<importedData.numRows; i++) {
-	    		var name = importedData.Name[i];
+	    		var name = importedData.title[i];
 				if(sel) {
 					var option = "<option value='"+name+" selected='selected'>"+name+"</option>";
 					sel = false;
@@ -337,6 +470,73 @@ function EasyPublish() {
     	return true;
     }
 
+    this.getOAuthData = function() {
+    	var cons_key = $("#consumer_key").val();
+    	var cons_sec = $("#consumer_secret").val();
+    	var tok_sec = $("#token_secret").val();
+    	var n_url = $("#node_url").val();
+
+    	if(cons_key && cons_sec && tok_sec && n_url) {
+	    	var oauth_data = {
+		        consumer_key: cons_key,
+		        consumer_secret: cons_sec,
+		        token: 'node_sign_token',
+		        token_secret: tok_sec,
+		        node_url: n_url
+	    	}
+	    	return oauth_data;
+	    } else {
+	    	$('#oauthErrorDialog').dialog("open");
+	    	return null;
+	    }
+	}
+
+	this.getAuthors = function() {
+		var authors = [];
+		var author0 = {
+		    name: [this.getValue("author_name")],
+            url:  [this.getValue("author_url")],
+            email:  [this.getValue("author_email")]
+		}
+		authors[0] = author0;
+		if(authorCount>1) {
+			for(var i=2; i<=authorCount; i++) {
+				var author = {
+				    name: [$("#author_name"+i).val()],
+		            url:  [$("#author_url"+i).val()],
+		            email:  [$("#author_email"+i).val()]
+				}
+				authors[i-1] = author;
+			}
+		}
+		return authors;
+	}
+
+	this.getAlignments = function() {
+		var alignments = [];
+		var alignment0 = {
+		    alignmentType: [this.getValue("alignmentType")],
+            educationalFramework:  [this.getValue("educationalFramework")],
+            //targetUrl:  [this.getValue("educationalAlignment_targetURL")],
+            targetUrl:  [$("#educationalAlignment_targetURL").autocombobox("selectvalue")]
+		}
+		alignments[0] = alignment0;
+		if(alignmentCount>1) {
+			for(var i=2; i<=alignmentCount; i++) {
+				var alignment = {
+				    alignmentType: [this.getValue("alignmentType"+i)],
+		            educationalFramework:  [this.getValue("educationalFramework"+i)],
+		            targetUrl:  [$("#educationalAlignment_targetURL"+i).autocombobox("selectvalue")]
+				    /*alignmentType: [$("#alignmentType"+i).val()],
+		            educationalFramework:  [$("#educationalFramework"+i).val()],
+		            targetUrl:  [$("#targetUrl"+i).val()]*/
+				}
+				alignments[i-1] = alignment;
+			}
+		}
+		return alignments;
+	}
+
 	this.getData = function() {
 		var data = {};
 		for(key in this.fieldManager.fieldDictionary) {
@@ -347,7 +547,7 @@ function EasyPublish() {
 	}
 
 	this.getID = function() {
-		return this.getValue("url");
+		return this.getValue("consumer_key") + this.getValue("url");
 	}
 
 	this.getValue = function(id) {
@@ -355,7 +555,6 @@ function EasyPublish() {
 		if(field) {
 			return field.value();
 		}else {
-			console.log("field not found: " + id);
 			return "";
 		}
 	}
@@ -416,7 +615,11 @@ FieldEditorRow = function(field) {
 		requiredStar.appendTo(label);
 	}
 	$('<br>').appendTo(this.elem);
-	field.input.appendTo(this.elem);
+	if(field.type==Field.TREE_CHOICE) {
+		field.treeMenu.getContainer().appendTo(this.elem);
+	}else {
+		field.input.appendTo(this.elem);
+	}
 	$('<br>').appendTo(this.elem);
 }
 

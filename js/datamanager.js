@@ -7,17 +7,21 @@ function DataManager(easyPub) {
     var nodeURL = "http://sandbox.learningregistry.org";
 
     var service = "publish";
-    var oauth_data = {
+
+    /*var default_oauth_data = {
         consumer_key: 'john.brecht@sri.com',
         consumer_secret: 'ATjaQAYRMhK0e7gppFBK2pZTtPzaBRFD',
         token: 'node_sign_token',
         token_secret: '7Hy6hsuz702wfuepQpfOgfP3WUCGunGF',
         node_url: nodeURL
-    }
+    }*/
 
     //This needs big cleanup. It's a little hacky right now and kind of defeats the original purpose of the
     //field dictionary
     function makePayload() {
+
+        var fullAuthorsArray = buildFullAuthorsArray();
+        var fullAlignmentsArray = buildFullAlignmentsArray();
         var payload = {
             items: [{
                 type: ["http://schema.org/CreativeWork"],
@@ -27,26 +31,7 @@ function DataManager(easyPub) {
                     url: [easyPub.getValue("url")],
                     description: [easyPub.getValue("description")],
                     keywords: [easyPub.getValue("keywords")],
-            		educationalAlignment: [{
-                        type: ["http://schema.org/AlignmentObject"],
-                        id: "xxx",
-                        properties: {
-                            alignmentType: ["educationLevel"],
-                            educationalFramework: ["US K-12 Grade Levels"],
-                            targetName: [easyPub.getValue("grade")],
-                            targetDescription: [easyPub.getValue("k12Grade")],
-                            //targetUrl: []
-                        },
-                        type: ["http://schema.org/AlignmentObject"],
-                        id: "xxx",
-                        properties: {
-                            alignmentType: [easyPub.getValue("educationalAlignment_alignmentType")],
-                            educationalFramework: [easyPub.getValue("educationalAlignment_educationalFramework")],
-                            targetName: ["Standards Alignment"],
-                            //targetDescription: [],
-                            targetUrl: [easyPub.getValue("educationalAlignment_targetURL")]
-                        }
-            		}],
+            		educationalAlignment:fullAlignmentsArray,
                     dateCreated: [easyPub.getValue("dateCreated")],
                     dateModified: [easyPub.getValue("dateModified")],
                     language: [easyPub.getValue("language")],
@@ -55,17 +40,7 @@ function DataManager(easyPub) {
                     interactivityType: [easyPub.getValue("interactivityType")],
                     useRightsUrl: [easyPub.getValue("useRightsUrl")],
                     isBasedOnUrl: [easyPub.getValue("isBasedOnUrl")],
-                    author: [
-                        {
-                            type: ["http://schema.org/Person"],
-                            properties: {
-                                name: [easyPub.getValue("author_name")],
-                                url:  [easyPub.getValue("author_url")],
-                                email:  [easyPub.getValue("author_email")]
-
-                            }
-                        }
-                    ],
+                    author: fullAuthorsArray,
                     publisher: [
                         {
                             type: ["http://schema.org/Organization"],
@@ -82,6 +57,60 @@ function DataManager(easyPub) {
         };
 
         return payload;
+    }
+
+
+    function buildFullAlignmentsArray() {
+
+        var alignmentsArray = easyPub.getAlignments();
+        var fullAlignmentsArray = [];
+
+        var educationLevelAlignment = 
+            {
+                type: ["http://schema.org/AlignmentObject"],
+                id: "xxx",
+                properties: {
+                    alignmentType: ["educationLevel"],
+                    educationalFramework: ["US K-12 Grade Levels"],
+                    targetName: [easyPub.getValue("grade")],
+                    targetDescription: [easyPub.getValue("k12Grade")],
+                }
+            };
+        fullAlignmentsArray.push(educationLevelAlignment);
+
+        for(var i=0; i<alignmentsArray.length; i++) {
+            console.log("parsing Alignment " + i)
+            var nextFullAlignment = {
+                type: ["http://schema.org/AlignmentObject"],
+                        id: "xxx",
+                properties: {
+                    alignmentType: [alignmentsArray[i].alignmentType],
+                    educationalFramework:  [alignmentsArray[i].educationalFramework],
+                    targetName: ["Standards Alignment"],
+                    targetUrl:  [alignmentsArray[i].targetUrl]
+                }
+            }
+            fullAlignmentsArray.push(nextFullAlignment);
+        }
+        return fullAlignmentsArray;
+    }
+
+    function buildFullAuthorsArray() {
+        var authorsArray = easyPub.getAuthors();
+        var fullAuthorsArray = [];
+        for(var i=0; i<authorsArray.length; i++) {
+            console.log("parsing author " + i)
+            var nextFullAuthor = {
+                type: ["http://schema.org/Person"],
+                properties: {
+                    name: [authorsArray[i].name],
+                    url:  [authorsArray[i].url],
+                    email:  [authorsArray[i].email]
+                }
+            }
+            fullAuthorsArray[i] = nextFullAuthor;
+        }
+        return fullAuthorsArray;
     }
 
     function makeEnvelope() {
@@ -113,50 +142,56 @@ function DataManager(easyPub) {
     //TODO - handle arrays of form data
     this.submitData = function () {
         envelope = makeEnvelope()
-        req_info = getOAuthInfo(oauth_data);
-        req_info.message.body = {
-            documents: [envelope]
-        };
-        request = oauthRequest(oauth_data.node_url + '/publish', req_info.message, req_info.accessor);
-        
-        request.done(function(msg) {
-            console.log("Done");
-            console.log(msg);
-            var results = msg.document_results;
-            for(key in results) {
-                var nextResult = results[key];
-                console.log("nextResult: ");
-                console.log(nextResult);
-                var OK = nextResult.OK;
-                if(OK) {
-                    console.log("success, doc_ID: " + nextResult.doc_ID);
-                    var tempData = {
-                        guid:nextResult.doc_ID,
-                        name:easyPub.getValue("title"),
-                        serverURL: nodeURL,
-                        docID:nextResult.doc_ID
-                    };
-                    successDialogHtml = successDialogTemplate(tempData);
-                    $("body").append(successDialogHtml);
-                    $("#"+nextResult.doc_ID).dialog({position:{my: "top", at: "top", of: $("#middleCol")}});
-                    easyPub.submissionSuccessful();
-                } else {
-                    console.log("error: " + nextResult.error);
-                    var tempData = {
-                        guid:easyPub.getValue("title"),
-                        error:nextResult.error,
-                        name:formData.Name
-                    };
-                    failDialogHtml = failDialogTemplate(tempData);
-                    $("body").append(failDialogHtml);
-                    $("#"+formData.Name).dialog({position:{my: "top", at: "top", of: $("#middleCol")}});
+        var oauth_data = easyPub.getOAuthData();
+        if(oauth_data==null) {
+            console.log("null oauth_data, aborting submit")
+            return;
+        } else {
+            req_info = getOAuthInfo(oauth_data);
+            req_info.message.body = {
+                documents: [envelope]
+            };
+            request = oauthRequest(oauth_data.node_url + '/publish', req_info.message, req_info.accessor);
+            
+            request.done(function(msg) {
+                console.log("Done");
+                console.log(msg);
+                var results = msg.document_results;
+                for(key in results) {
+                    var nextResult = results[key];
+                    console.log("nextResult: ");
+                    console.log(nextResult);
+                    var OK = nextResult.OK;
+                    if(OK) {
+                        console.log("success, doc_ID: " + nextResult.doc_ID);
+                        var tempData = {
+                            guid:nextResult.doc_ID,
+                            name:easyPub.getValue("title"),
+                            serverURL: nodeURL,
+                            docID:nextResult.doc_ID
+                        };
+                        successDialogHtml = successDialogTemplate(tempData);
+                        $("body").append(successDialogHtml);
+                        $("#"+nextResult.doc_ID).dialog({position:{my: "top", at: "top", of: $("#middleCol")}});
+                        easyPub.submissionSuccessful();
+                    } else {
+                        console.log("error: " + nextResult.error);
+                        var tempData = {
+                            guid:easyPub.getValue("title"),
+                            error:nextResult.error,
+                            name:formData.Name
+                        };
+                        failDialogHtml = failDialogTemplate(tempData);
+                        $("body").append(failDialogHtml);
+                        $("#"+formData.Name).dialog({position:{my: "top", at: "top", of: $("#middleCol")}});
+                    }
                 }
-            }
-        });
-        request.fail(function(msg) {
-            console.log("Fail");
-            console.log(msg);
-        });
+            });
+            request.fail(function(msg) {
+                console.log("Fail");
+                console.log(msg);
+            });
+        }
 
     }
 

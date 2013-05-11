@@ -76,6 +76,10 @@
             input.css("padding", "0 0.4em 0 0.4em");
             //input.css("width", select.outerWidth() - btn.outerWidth(true) - 10);// match the width
         },
+
+        selectvalue : function() {
+            return this.element.val();
+        },
  
         _init : function() {
             var select = this.element;

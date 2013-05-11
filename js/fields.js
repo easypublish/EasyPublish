@@ -8,8 +8,8 @@ function FieldManager() {
 								 "Lesson Plan", "Simulation", "Presentation", "Other"];
 	var groupTypes = ["Class", "Community", "Grade", "Group- large (6+ members)", "Group- small (3-5 members)", "Individual", "Inter-Generational", "Multiple Class", "Pair", "School", "State/Province", "World"];
 
-	var k12Choices = ["K", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
-	var gradeChoices = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"];
+	//var k12Choices = ["K", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
+	var gradeChoices = ["No school completed", "Preschool", "Kindergarten", "First grade", "Second grade", "Third grade", "Fourth grade", "Fifth grade", "Sixth grade", "Seventh grade", "Eighth grade", "Ninth grade", "Tenth grade", "Eleventh Grade", "12th grade, no diploma", "High school diploma", "High school completers (e.g., certificate of attendance)", "High school equivalency (e.g., GED)", "Career and Technical Education certificate", "Grade 13", "Some college but no degree", "Formal award, certificate or diploma (less than one year)", "Formal award, certificate or diploma (more than or equal to one year)", "Associate's degree (two years or more)", "Adult education certification, endorsement, or degree", "Bachelor's (Baccalaureate) degree", "Master's degree (e.g., M.A., M.S., M. Eng., M.Ed., M.S.W., M.B.A., M.L.S.)", "Specialist's degree (e.g., Ed.S.)", "Post-master's certificate", "Graduate certificate", "Doctoral (Doctor's) degree", "First-professional degree", "Post-professional degree", "Doctor's degree-research/scholarship", "Doctor's degree-professional practice", "Doctor's degree-other", "Doctor's degree-research/scholarship", "Other"];
 	var edGovSubjects = ["Arts & Music", "Artists", "Music", "Blues, Gospel, Folk", "Jazz", "Sheet Music", "Other Music", "Theatre & Film", "Visual arts", "Architecture", "Drawing & Prints", "Painting", "Photography", "Sculpture", "Other Visual arts", "Other Arts & Music", "Health & Phys Ed", "Phys ed, exercise", "Substance abuse", "Other Health", "Language Arts", "Literature & Writers", "American Literature", "Poetry", "Other Literature", "Reading", "Other Language Arts", "Math", "Algebra", "Data Analysis", "Geometry", "Measurement", "Number & Operations", "Other Math", "Science", "Applied Sciences", "Computers/Tech", "Engineering", "Earth Sciences", "Climate Change", "Environment", "Geology", "Oceans", "Other Earth Sciences", "Life Sciences", "Animals/Zoology", "Botany", "Cells", "Diseases", "Genes, Evolution", "Human Body", "Interdependence", "Medicine", "Other Life Sciences", "Physical Sciences", "Chemistry", "Energy", "Physics", "Other Physical Sciences", "Space Sciences", "Aeronautics/Flight", "Astronomy", "Other Space Sciences", "Other Science", "World Studies", "Countries & Continents", "Africa", "Arctic, Antarctica", "Other Countries & Continents", "Foreign Languages", "World History", "China", "Europe", "Russia, Soviet Union", "Other World History", "Other World Studies", "U.S. History Topics", "Business & Work", "Business", "Careers", "Economics", "Entrepreneurship", "Labor", "Ethnic Groups", "African Americans", "Asian Americans", "Hispanic Americans", "Native Americans", "Famous People", "Explorers", "Inventors", "Leaders", "Scientists", "Others", "Government", "Congress", "Courts", "Elections", "Military", "Presidents", "U.S. Constitution", "Other", "Movements", "Civil Rights", "Immigration & Migration", "Transportation", "Women's History", "States & Regions", "California", "Massachusetts", "Midwest", "New Mexico", "New York", "Northeast", "Pennsylvania", "South", "Virginia", "West", "Others", "Wars", "American Revolution", "Civil War", "World War I", "World War II", "Other Wars", "Other History & Soc Studies", "Anthropology", "Geography", "Natural Disasters", "Religion & Society", "Slavery", "Other Resources", "U.S. Time Periods", "-1607: Three Worlds Meet", "1607-1763: Colonization", "1763-1815: Revolution", "1801-1861: Expansion", "1850-1877: Civil War & Reconstruction", "1865-1920: Modern America", "1914-1945: World Wars", "1945-Present: Contemporary America", "Other History & Social Studies: U.S. History Time Periods"];
 
 	this.fieldDictionary = {};
@@ -18,8 +18,9 @@ function FieldManager() {
 		new Field("Resource Title", Field.STRING, {required:true, objectName:"title"}),
 		new Field("Resource URL", Field.URL, {required:true, objectName:"url"}),
 		new Field("Description", Field.LONG_STRING, {objectName:"description"}),
-		new Field("Subject", Field.CHOICE, {objectName:"keywords", choices:edGovSubjects}),
-		new Field("US K_12 Grade", Field.CHOICE, {objectName:"k12Grade", choices:k12Choices}),
+		//new Field("Subject", Field.CHOICE, {objectName:"keywords", choices:edGovSubjects}),
+		new Field("Subject", Field.TREE_CHOICE, {objectName:"keywords", choices:subjectsData}),
+		//new Field("US K_12 Grade", Field.CHOICE, {objectName:"k12Grade", choices:k12Choices}),
 		new Field("Grade", Field.CHOICE, {objectName:"grade", choices:gradeChoices}),
 		new Field("Date Created", Field.DATE,  {tip:"Date the resource was originally created, Format: YYYY_MM_DD", objectName:"dateCreated"}),
 		new Field("Date Modified", Field.DATE,  {tip:"Date the resource was most recently modified, Format: YYYY_MM_DD", objectName:"dateModified"}),
@@ -39,6 +40,7 @@ function FieldManager() {
 	var standardFrameworks = ["Common Core Math", "Common Core Language Arts", "State Standard"];
 
 	var standards = [];
+	var standardsURLs = [];
 	for(key in standardsData) {
 		var stateStandards = standardsData[key];
 		var state = stateStandards.state;
@@ -46,6 +48,7 @@ function FieldManager() {
 			var doc = stateStandards.documents[key2];
 			var title = doc.title;
 			standards.push(state + " - " + title);
+			standardsURLs.push(doc.uri);
 		}
 	}
 
@@ -53,7 +56,7 @@ function FieldManager() {
 		new Field("This resource...", Field.CHOICE, {objectName:"alignmentType", choices:alignmentTypes}),
 		new Field("Standard Framework", Field.CHOICE, {objectName:"educationalFramework",
 					tip:"The framework to which the resource being described is aligned", choices:standardFrameworks}),
-		new Field("Standard", Field.CHOICE, {objectName:"educationalAlignment_targetURL", choices:standards}),
+		new Field("Standard", Field.CHOICE, {objectName:"educationalAlignment_targetURL", choices:standards, values:standardsURLs}),
 
 		/*new Field("Target Name", Field.STRING, {objectName:"targetName",
 					tip:"The name of a node in an established educational framework"}),
@@ -100,20 +103,22 @@ function FieldManager() {
 
 }
 
-Field = function(name, type, options) {
+Field = function(name, type, options, index) {
 	this.name = name;
 	this.type = type;
 	this.objectName = name;
 	this.required = false;
 
-	this.clone = function() {
-		return new Field(name, type, options);
+	this.clone = function(index) {
+		var cloned = new Field(name, type, options, index);
+		return cloned;
 	}
 
 	if(options) {
 		this.tip = options.tip;
 		this.validation = options.validation;
 		this.choices = options.choices;
+		this.values = options.values;
 
 		if(options.required!=null) {
 			this.required = options.required;
@@ -124,6 +129,9 @@ Field = function(name, type, options) {
 		}
 	}
 	this.id = this.objectName.replace(/ /g, "-");
+	if(index) {
+		this.id += index;
+	}
 
 
 	if(type==Field.STRING || type==Field.NUMBER || type==Field.INTEGER || type==Field.URI  ||
@@ -172,8 +180,17 @@ Field = function(name, type, options) {
 		this.input.append("<option></option>");
 		for(key in this.choices) {
 	        var choice = this.choices[key];
-	        this.input.append("<option>"+choice+"</option>");
+	        if(this.values) {
+	        	var value = this.values[key];
+	        	this.input.append("<option value='"+value+"'>"+choice+"</option>");
+	        } else {
+	        	this.input.append("<option>"+choice+"</option>");
+	        }
 	    }
+	} else if(type==Field.TREE_CHOICE) {
+		this.treeMenu = new TreeMenu(this.id);
+		this.treeMenu.setChoices(this.choices);
+		this.input = this.treeMenu.input;
 	}  else {
 		alert("invalid type for field: " + name);
 	}
@@ -182,6 +199,9 @@ Field = function(name, type, options) {
 		this.input = $("#"+this.id);
 		if(this.type==Field.CHOICE) {
 			this.input = this.input.next();
+		}
+		if(this.type==Field.TREE_CHOICE) {
+			this.input = this.treeMenu.input;
 		}
 		if(val || val=="") {
 			this.input.val(val);
@@ -232,6 +252,7 @@ Field = function(name, type, options) {
 Field.STRING = "string";
 Field.LONG_STRING = "long_string";
 Field.CHOICE = "choice";
+Field.TREE_CHOICE = "tree_choice";
 Field.NUMBER = "number";
 Field.INTEGER = "integer";
 Field.DATE = "date";

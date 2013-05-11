@@ -36,7 +36,7 @@ font-size: 0.9em;
 	width:350px;
 }
 #drop_zone {
-	height:150px;
+	height:50px;
 	width:250px;
 	padding: 10px;
 	background-color:powderblue;
@@ -47,9 +47,12 @@ font-size: 0.9em;
 }
 
 #drop_zone  p {
-  /*display: table-cell; 
-  vertical-align: middle; */
+  display: table-cell; 
+  vertical-align: middle;
   text-align: center; 
+	font-size: 1.1em;
+	font-weight: bold;
+	color: black;
 }
 
 fieldset {
@@ -72,6 +75,10 @@ fieldset {
 	margin-bottom: 15px;
 }
 
+#credentials {
+	border:1px solid blue;
+}
+
 legend {
 	padding: 0.2em 0.5em;
 	border:0px solid gray;
@@ -86,7 +93,6 @@ legend {
     width: 20px !important;
     height: 20px !important;
     border-radius: 50% !important;
-    http://www.lawyersgunsmoneyblog.com/wp-content/uploads/2012/08/american-flag-2a.jpg
 }
 
 .round-btn span span {
