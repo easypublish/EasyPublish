@@ -86,7 +86,7 @@ function DataManager(easyPub) {
                 properties: {
                     alignmentType: [alignmentsArray[i].alignmentType],
                     educationalFramework:  [alignmentsArray[i].educationalFramework],
-                    targetName: ["Standards Alignment"],
+                    targetName: [alignmentsArray[i].targetName],
                     targetUrl:  [alignmentsArray[i].targetUrl]
                 }
             }
