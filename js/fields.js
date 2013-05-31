@@ -7,8 +7,6 @@ function FieldManager() {
 	var learningResourceTypes = ["Activity", "Assessment", "Audio", "Calculator", "Demonstration", "Game", "Interview", "Lecture",
 								 "Lesson Plan", "Simulation", "Presentation", "Other"];
 	var groupTypes = ["Class", "Community", "Grade", "Group- large (6+ members)", "Group- small (3-5 members)", "Individual", "Inter-Generational", "Multiple Class", "Pair", "School", "State/Province", "World"];
-
-	//var k12Choices = ["K", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
 	var gradeChoices = ["No school completed", "Preschool", "Kindergarten", "First grade", "Second grade", "Third grade", "Fourth grade", "Fifth grade", "Sixth grade", "Seventh grade", "Eighth grade", "Ninth grade", "Tenth grade", "Eleventh Grade", "12th grade, no diploma", "High school diploma", "High school completers (e.g., certificate of attendance)", "High school equivalency (e.g., GED)", "Career and Technical Education certificate", "Grade 13", "Some college but no degree", "Formal award, certificate or diploma (less than one year)", "Formal award, certificate or diploma (more than or equal to one year)", "Associate's degree (two years or more)", "Adult education certification, endorsement, or degree", "Bachelor's (Baccalaureate) degree", "Master's degree (e.g., M.A., M.S., M. Eng., M.Ed., M.S.W., M.B.A., M.L.S.)", "Specialist's degree (e.g., Ed.S.)", "Post-master's certificate", "Graduate certificate", "Doctoral (Doctor's) degree", "First-professional degree", "Post-professional degree", "Doctor's degree-research/scholarship", "Doctor's degree-professional practice", "Doctor's degree-other", "Doctor's degree-research/scholarship", "Other"];
 	var edGovSubjects = ["Arts & Music", "Artists", "Music", "Blues, Gospel, Folk", "Jazz", "Sheet Music", "Other Music", "Theatre & Film", "Visual arts", "Architecture", "Drawing & Prints", "Painting", "Photography", "Sculpture", "Other Visual arts", "Other Arts & Music", "Health & Phys Ed", "Phys ed, exercise", "Substance abuse", "Other Health", "Language Arts", "Literature & Writers", "American Literature", "Poetry", "Other Literature", "Reading", "Other Language Arts", "Math", "Algebra", "Data Analysis", "Geometry", "Measurement", "Number & Operations", "Other Math", "Science", "Applied Sciences", "Computers/Tech", "Engineering", "Earth Sciences", "Climate Change", "Environment", "Geology", "Oceans", "Other Earth Sciences", "Life Sciences", "Animals/Zoology", "Botany", "Cells", "Diseases", "Genes, Evolution", "Human Body", "Interdependence", "Medicine", "Other Life Sciences", "Physical Sciences", "Chemistry", "Energy", "Physics", "Other Physical Sciences", "Space Sciences", "Aeronautics/Flight", "Astronomy", "Other Space Sciences", "Other Science", "World Studies", "Countries & Continents", "Africa", "Arctic, Antarctica", "Other Countries & Continents", "Foreign Languages", "World History", "China", "Europe", "Russia, Soviet Union", "Other World History", "Other World Studies", "U.S. History Topics", "Business & Work", "Business", "Careers", "Economics", "Entrepreneurship", "Labor", "Ethnic Groups", "African Americans", "Asian Americans", "Hispanic Americans", "Native Americans", "Famous People", "Explorers", "Inventors", "Leaders", "Scientists", "Others", "Government", "Congress", "Courts", "Elections", "Military", "Presidents", "U.S. Constitution", "Other", "Movements", "Civil Rights", "Immigration & Migration", "Transportation", "Women's History", "States & Regions", "California", "Massachusetts", "Midwest", "New Mexico", "New York", "Northeast", "Pennsylvania", "South", "Virginia", "West", "Others", "Wars", "American Revolution", "Civil War", "World War I", "World War II", "Other Wars", "Other History & Soc Studies", "Anthropology", "Geography", "Natural Disasters", "Religion & Society", "Slavery", "Other Resources", "U.S. Time Periods", "-1607: Three Worlds Meet", "1607-1763: Colonization", "1763-1815: Revolution", "1801-1861: Expansion", "1850-1877: Civil War & Reconstruction", "1865-1920: Modern America", "1914-1945: World Wars", "1945-Present: Contemporary America", "Other History & Social Studies: U.S. History Time Periods"];
 
@@ -18,9 +16,7 @@ function FieldManager() {
 		new Field("Resource Title", Field.STRING, {required:true, objectName:"title"}),
 		new Field("Resource URL", Field.URL, {required:true, objectName:"url"}),
 		new Field("Description", Field.LONG_STRING, {objectName:"description"}),
-		//new Field("Subject", Field.CHOICE, {objectName:"keywords", choices:edGovSubjects}),
 		new Field("Subject", Field.TREE_CHOICE, {objectName:"keywords", choices:subjectsData}),
-		//new Field("US K_12 Grade", Field.CHOICE, {objectName:"k12Grade", choices:k12Choices}),
 		new Field("Grade", Field.CHOICE, {objectName:"grade", choices:gradeChoices}),
 		new Field("Date Created", Field.DATE,  {tip:"Date the resource was originally created, Format: YYYY_MM_DD", objectName:"dateCreated"}),
 		new Field("Date Modified", Field.DATE,  {tip:"Date the resource was most recently modified, Format: YYYY_MM_DD", objectName:"dateModified"}),
@@ -37,58 +33,38 @@ function FieldManager() {
 	}
 
 	var alignmentTypes = ["assesses", "teaches", "requires"];
-	var standardFrameworks = ["Common Core Math", "Common Core Language Arts", "State Standard"];
-
-	var standards = [];
-	var standardsURLs = [];
-	for(key in standardsData) {
-		var stateStandards = standardsData[key];
-		var state = stateStandards.state;
-		for(key2 in stateStandards.documents) {
-			var doc = stateStandards.documents[key2];
-			var title = doc.title;
-			standards.push(state + " - " + title);
-			standardsURLs.push(doc.uri);
-		}
-	}
+	var standardFrameworks = ["Common Core Math", "Common Core Language Arts"];//, "State Standard"];
 
 	this.alignmentFields = [
 		new Field("This resource...", Field.CHOICE, {objectName:"alignmentType", choices:alignmentTypes}),
 		new Field("Standard Framework", Field.CHOICE, {objectName:"educationalFramework",
 					tip:"The framework to which the resource being described is aligned", choices:standardFrameworks}),
-		new Field("Standard", Field.CHOICE, {objectName:"educationalAlignment_targetURL", choices:standards, values:standardsURLs}),
 
-		/*new Field("Target Name", Field.STRING, {objectName:"targetName",
-					tip:"The name of a node in an established educational framework"}),
-		new Field("Target URL", Field.URL, {objectName:"targetUrl", 
-					tip:"The URL of a node in an established educational framework"}),
-		new Field("Target Description", Field.STRING, {objectName:"targetDescription",
-					tip:"The description of a node in an established educational framework"}),*/
+		//Giving up altogether on trying to make the standards menu a general type, it need to be handled as its own special case.
+		new Field("ELA Standard", Field.STANDARDS_TREE_CHOICE, {choices:standardsTree.CCSS["ELA-Literacy"]}),
+		new Field("Math Standard", Field.STANDARDS_TREE_CHOICE, {choices:standardsTree.CCSS.Math}),
+
 	];
 	for(key in this.alignmentFields) {
 		var field = this.alignmentFields[key];
 		this.fieldDictionary[field.id] = field;
+		console.log("alignmentFields dictionary key: " + field.id)
 	}
 
 	this.authorFields = [
 		new Field("Name", Field.STRING, {objectName:"author_name"}),
 		new Field("URL", Field.URL, {objectName:"author_url"}),
-		new Field("Email Address", Field.EMAIL, {objectName:"author_email"}),
-		//new Field("Description", Field.LONG_STRING, {objectName:"authorDescription"}),
-		//new Field("Postal Address", Field.LONG_STRING, {objectName:"authorAddress"})
+		new Field("Email Address", Field.EMAIL, {objectName:"author_email"})
 	];
 	for(key in this.authorFields) {
 		var field = this.authorFields[key];
 		this.fieldDictionary[field.id] = field;
 	}
 
-
 	this.publisherFields = [
 		new Field("Name", Field.STRING, {objectName:"publisher_name"}),
 		new Field("URL", Field.URL, {objectName:"publisher_url"}),
-		new Field("Email Address", Field.EMAIL, {objectName:"publisher_email"}),
-		//new Field("Description", Field.LONG_STRING, {objectName:"publisherDescription"}),
-		//new Field("Postal Address", Field.LONG_STRING, {objectName:"publisherAddress"})
+		new Field("Email Address", Field.EMAIL, {objectName:"publisher_email"})
 	];
 	for(key in this.publisherFields) {
 		var field = this.publisherFields[key];
@@ -100,7 +76,6 @@ function FieldManager() {
 		Field.durationTest();
 		Field.uriTest();
 	}
-
 }
 
 Field = function(name, type, options, index) {
@@ -130,7 +105,11 @@ Field = function(name, type, options, index) {
 	}
 	this.id = this.objectName.replace(/ /g, "-");
 	if(index) {
-		this.id += index;
+		this.id += "_" + index;
+	}
+
+	if(type==Field.URI && !this.validation ) {
+		this.validation = Field.uriValidation;
 	}
 
 
@@ -191,16 +170,20 @@ Field = function(name, type, options, index) {
 		this.treeMenu = new TreeMenu(this.id);
 		this.treeMenu.setChoices(this.choices);
 		this.input = this.treeMenu.input;
+	}  else if(type==Field.STANDARDS_TREE_CHOICE) {
+		this.treeMenu = new TreeMenu(this.id);
+		this.treeMenu.setCCSSChoices(this.choices);
+		this.input = this.treeMenu.input;
 	}  else {
 		alert("invalid type for field: " + name);
 	}
 
 	this.value = function(val) {
 		this.input = $("#"+this.id);
-		if(this.type==Field.CHOICE) {
+		if(this.type==Field.CHOICE && this.id.lastIndexOf("educationalFramework")==-1) {
 			this.input = this.input.next();
 		}
-		if(this.type==Field.TREE_CHOICE) {
+		if(this.type==Field.TREE_CHOICE || this.type==Field.STANDARDS_TREE_CHOICE) {
 			this.input = this.treeMenu.input;
 		}
 		if(val || val=="") {
@@ -211,11 +194,7 @@ Field = function(name, type, options, index) {
 	}
 
 
-	this.validateField = function() {
-		this.input = $("#"+this.id);
-		if(this.type==Field.CHOICE) {
-			this.input = this.input.next();
-		}
+		/* ORIGINAL VALIDATION USING VALIDITY.JS, NO LONGER USING THIS, USING VALIDATOR.JS
 		if(this.required) {
 			var msg = this.name + ' is required';
 			this.input.require(msg);
@@ -244,15 +223,14 @@ Field = function(name, type, options, index) {
 			var rangeValid = Field.rangeMinMaxValidation(this.input.val());
 			this.input.assert(rangeValid, ["The second value should be greater than first"] );
 			//this.input.assert(Field.rangeValidation(this.input.val()), [this.tip ] );
-		}
-
-	}
+		}*/
 }
 //Field Types
 Field.STRING = "string";
 Field.LONG_STRING = "long_string";
 Field.CHOICE = "choice";
 Field.TREE_CHOICE = "tree_choice";
+Field.STANDARDS_TREE_CHOICE = "standards_tree_choice";
 Field.NUMBER = "number";
 Field.INTEGER = "integer";
 Field.DATE = "date";
