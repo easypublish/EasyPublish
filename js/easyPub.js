@@ -11,6 +11,7 @@ function EasyPublish() {
 	this.fieldManager = new FieldManager();
 	var dnd = new DragAndDrop(this);
 	var dataManager = new DataManager(this);
+	var validator = new Validator();
 
 	var importIndex = 0;
 	var importedData = {
@@ -123,9 +124,29 @@ function EasyPublish() {
 			localStorage.setItem(id, value);
 		}
 	}
+	function edFrameworkSelected(event) {
+		var id = $(event.currentTarget).attr("id")
+		var selection = $("#"+id).val();
+		var indexLoc = id.lastIndexOf("_");
+		var index = "";
+		if(indexLoc>=0) {
+			index = id.slice(indexLoc);
+		};
+		var mathRow = "#Math-Standard" + index + "Row";
+		var elaRow = "#ELA-Standard" + index + "Row";
+		if(selection.indexOf("Math")>=0) {
+			$(mathRow).show();
+			$(elaRow).hide();
+		} else if(selection.indexOf("Language")>=0) {
+			$(mathRow).hide();
+			$(elaRow).show();
+		}else {
+			$(mathRow).hide();
+			$(elaRow).hide();
+		}
+	}
 
 	function buildForm(name, fields) {
-		//var form = $("#"+name+"Form");
 		var formSection = $("#"+name+"Form");
 
 		for(key in fields) {
@@ -140,11 +161,20 @@ function EasyPublish() {
 			}
 			//have to construct combo boxes after they've been added to DOM
 			if(nextField.type==Field.CHOICE) {
-				$("#"+nextField.id).autocombobox();
-			}else if (nextField.type==Field.TREE_CHOICE) {
+				if(nextField.id=="educationalFramework") {
+					//for educationalFramework specifically, we don't make it an autocombobox,
+					//just leave it as a <select>. on the other hand, and a change listener so
+					//we can show/hide the Math vs. ELA subject menus accordingly
+					$("#"+nextField.id).change(edFrameworkSelected);
+				} else {
+					$("#"+nextField.id).autocombobox();
+				}
+			}else if (nextField.type==Field.TREE_CHOICE || nextField.type==Field.STANDARDS_TREE_CHOICE) {
 				nextField.treeMenu.initGUI();
 			}
 		}
+		$("#ELA-StandardRow").hide();
+		$("#Math-StandardRow").hide();
 	}
 	buildForm("main", this.fieldManager.mainFields);
 	buildForm("alignment", this.fieldManager.alignmentFields);
@@ -154,7 +184,7 @@ function EasyPublish() {
 	var submitButton = $("#Submit");
 	submitButton.button();
 	submitButton.click(function() {
-		var valid = validateForm();
+		var valid = validateAll();
 		if(valid) {
 			dataManager.submitData();
 			//that.submissionSuccessful();
@@ -274,7 +304,6 @@ function EasyPublish() {
 		addAuthor();
 		return false;
 	});
-
 	function addAuthor() {
 		authorCount++;
 		$("#addAuthor").before('<div class="sublegend">Author '+authorCount+'</div>');
@@ -292,7 +321,6 @@ function EasyPublish() {
 		}
 	}
 
-
 	var addAlignmentButton = $("#addAlignment");
 	addAlignmentButton.button({
 		icons: {
@@ -303,25 +331,37 @@ function EasyPublish() {
 		addAlignment();
 		return false;
 	});
-	//TODO - very redundant with addAuthor, can refactor and make one parent function for both
 	function addAlignment() {
 		alignmentCount++;
 		$("#addAlignment").before('<div class="sublegend">Alignment '+alignmentCount+'</div>');
-		for(var i=0; i<3; i++) {
+		for(var i=0; i<4; i++) {
 			var nextField = that.fieldManager.alignmentFields[i];
 			var clone = nextField.clone(alignmentCount);
 			that.fieldManager.fieldDictionary[clone.id] = clone;
 			that.fieldManager.alignmentFields.push(clone);
 			var nextRow = new FieldEditorRow(clone, alignmentCount);
 			$("#addAlignment").before(nextRow.elem);
+
 			//have to construct combo boxes after they've been added to DOM
 			if(clone.type==Field.CHOICE) {
-				$("#"+clone.id).autocombobox();
+				if(clone.id=="educationalFramework_"+alignmentCount) {
+					//for educationalFramework specifically, we don't make it an autocombobox,
+					//just leave it as a <select>. on the other hand, and a change listener so
+					//we can show/hide the Math vs. ELA subject menus accordingly
+					$("#"+clone.id).change(edFrameworkSelected);
+				} else {
+					$("#"+clone.id).autocombobox();
+				}
+			}else if (clone.type==Field.TREE_CHOICE || clone.type==Field.STANDARDS_TREE_CHOICE) {
+				clone.treeMenu.initGUI();
 			}
 		}
+		$("#Math-Standard_" + alignmentCount+ "Row").hide();
+		$("#ELA-Standard_"+ alignmentCount + "Row").hide();
 	}
 
 	function setImportIndex(newIndex, updateDataSelect) {
+		//storeCurrentImportData();
 		importIndex = newIndex;
 		setCurrentImportData(importIndex);
     	previousDataButton.button("option", "disabled", importIndex==0);
@@ -412,6 +452,16 @@ function EasyPublish() {
 			dataSelect.selectmenu('disable');
 		}
     }
+
+    function storeCurrentImportData() {
+    	for(key in importedData) {
+            var field = that.fieldManager.fieldDictionary[key];
+            if (field) {
+                importedData[key][importIndex] = field.value();
+            }
+    	}
+    }
+
 
     function setCurrentImportData(index) {
     	for(key in importedData) {
@@ -513,24 +563,62 @@ function EasyPublish() {
 	}
 
 	this.getAlignments = function() {
+
+		console.log("get alignments, fieldDict keys: ");
+		var keys = _.keys(this.fieldManager.fieldDictionary);
+		console.log(keys);
+
 		var alignments = [];
+
+		var edFramework = this.getValue("educationalFramework");
+		console.log("edFramework is:  " + edFramework);
 		var alignment0 = {
 		    alignmentType: [this.getValue("alignmentType")],
-            educationalFramework:  [this.getValue("educationalFramework")],
-            //targetUrl:  [this.getValue("educationalAlignment_targetURL")],
-            targetUrl:  [$("#educationalAlignment_targetURL").autocombobox("selectvalue")]
+            educationalFramework:  [edFramework]
+		}
+		if(edFramework && edFramework.trim().length>0) {
+			var standardField;
+			if(edFramework.lastIndexOf("Math")>=0) {
+				standardField = this.fieldManager.fieldDictionary["Math-Standard"];
+			} else if(edFramework.lastIndexOf("ELA")>=0) {
+				standardField = this.fieldManager.fieldDictionary["ELA-Standard"];
+			}
+			if(standardField) {
+				alignment0.targetUrl = [standardField.treeMenu.getCurrentSelectionData()];
+				alignment0.targetName = [standardField.treeMenu.getCurrentSelectionText()];
+				console.log("targetUrl is:  " + alignment0.targetUrl);
+				console.log("targetName is:  " + alignment0.targetName);
+			}
 		}
 		alignments[0] = alignment0;
+
 		if(alignmentCount>1) {
 			for(var i=2; i<=alignmentCount; i++) {
+				var edFramework = this.getValue("educationalFramework_"+i);
+				console.log("edFramework " + i + " is:  " + edFramework);
+
 				var alignment = {
-				    alignmentType: [this.getValue("alignmentType"+i)],
-		            educationalFramework:  [this.getValue("educationalFramework"+i)],
-		            targetUrl:  [$("#educationalAlignment_targetURL"+i).autocombobox("selectvalue")]
-				    /*alignmentType: [$("#alignmentType"+i).val()],
-		            educationalFramework:  [$("#educationalFramework"+i).val()],
-		            targetUrl:  [$("#targetUrl"+i).val()]*/
+				    alignmentType: [this.getValue("alignmentType_"+i)],
+		            educationalFramework:  [edFramework]
 				}
+				if(edFramework && edFramework.trim().length>0) {
+					var standardField;
+					if(edFramework.lastIndexOf("Math")>=0) {
+						standardField = this.fieldManager.fieldDictionary["Math-Standard_"+i];
+					} else if(edFramework.lastIndexOf("ELA")>=0) {
+						standardField = this.fieldManager.fieldDictionary["ELA-Standard_"+i];
+					}
+					if(standardField) {
+						alignment.targetUrl = [standardField.treeMenu.getCurrentSelectionData()];
+						alignment.targetName = [standardField.treeMenu.getCurrentSelectionText()];
+						console.log("targetUrl " + i + " is:  " + alignment.targetUrl);
+						console.log("targetName " + i + " is:  " + alignment.targetName);
+
+					}
+				}
+				console.log("alignment " + i + " is:  ");
+				console.log(alignment);
+
 				alignments[i-1] = alignment;
 			}
 		}
@@ -552,6 +640,7 @@ function EasyPublish() {
 
 	this.getValue = function(id) {
 		var field = this.fieldManager.fieldDictionary[id];
+		console.log("getValue for: " + id + ", found field: " + field);
 		if(field) {
 			return field.value();
 		}else {
@@ -559,34 +648,39 @@ function EasyPublish() {
 		}
 	}
 
+	function validateAll() {
+		var valid = true;
+		if(importedData.numRows>0) {
+			var index = 0;
+			while(valid) {
+				setImportIndex(index, true);
+				valid = validateForm();
+			}
+			return valid;
+		} else {
+			return validateForm();
+		}
 
-	// This is the validation function:
+	}
 	function validateForm() {
-
-	    // Start validation:
-	    $.validity.start();
-	    
-	    // Validator methods go here:
+	    var valid = true;
 	    function validateFields(fields) {
 			for(key in fields) {
 				var nextField = fields[key];
-				nextField.validateField();
-				//nextField.input.require();
+				var message = validator.validateField(nextField);
+				if(message!="") {
+					valid = false;
+					$("#"+nextField.id+"Error").html("("+message+")");
+				} else {
+					$("#"+nextField.id+"Error").html("");
+				}
 		    }
 		}
 		validateFields(that.fieldManager.mainFields);
 		validateFields(that.fieldManager.alignmentFields);
 		validateFields(that.fieldManager.authorFields);
 		validateFields(that.fieldManager.publisherFields);
-	    
-	    // All of the validator methods have been called:
-	    // End the validation session:
-	    var result = $.validity.end();
-	    
-	    console.log("validity result: ");
-	    console.log(result);
-	    // Return whether it's okay to proceed with the Ajax:
-	    return result.valid;
+	    return valid;
 	}
 
 
@@ -598,13 +692,20 @@ function EasyPublish() {
 FieldEditorRow = function(field) {
 
 	this.elem = $('<div>', {
-		class: 'fieldRow'
+		class: 'fieldRow',
+		id: field.id+"Row"
 	});
 	var label = $('<label>', {
 		text: field.name,
 		for: field.id
 	});
+	var errorLabel = $('<span>', {
+		text: "",
+		id: field.id+"Error",
+		class: "error"
+	});
 	label.appendTo(this.elem);
+	errorLabel.appendTo(this.elem);
 	if(field.required) {
 		//console.log("required: " + field.required);
 		var requiredStar = $('<span>', {
@@ -615,7 +716,7 @@ FieldEditorRow = function(field) {
 		requiredStar.appendTo(label);
 	}
 	$('<br>').appendTo(this.elem);
-	if(field.type==Field.TREE_CHOICE) {
+	if(field.type==Field.TREE_CHOICE || field.type==Field.STANDARDS_TREE_CHOICE) {
 		field.treeMenu.getContainer().appendTo(this.elem);
 	}else {
 		field.input.appendTo(this.elem);
@@ -623,28 +724,3 @@ FieldEditorRow = function(field) {
 	$('<br>').appendTo(this.elem);
 }
 
-
-/*
-FieldEditorRow = function(field) {
-
-	this.elem = $('<tr>');
-	var labelTD = $('<td>');
-	var label = $('<span>', {
-		text: field.name
-	});
-	label.appendTo(labelTD);
-	if(field.required) {
-		//console.log("required: " + field.required);
-		var requiredStar = $('<span>', {
-			text: '*',
-			title: 'Required field'
-		});
-		requiredStar.css("color", "red");
-		requiredStar.appendTo(labelTD);
-	}
-	labelTD.appendTo(this.elem);
-	var inputTD = $('<td>');
-	field.input.appendTo(inputTD);
-	inputTD.appendTo(this.elem); 
-
-}*/
