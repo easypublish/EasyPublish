@@ -1,6 +1,10 @@
-function TreeMenu(id) {
+function TreeMenu(id, type) {
 	this.id = id;
-	that = this;
+	this.type = type;
+	var that = this;
+
+	var currentSelectionData = "";
+	var currentSelectionText = "";
 
 	this.container = $('<div>', {
 		id: this.id,
@@ -10,8 +14,10 @@ function TreeMenu(id) {
 
 	this.input = $('<input>', {
 		id : "selection" + this.id,
-		type: "text"
+		type: "text",
+		class: "text ui-widget-content ui-corner-all"
 	});
+	this.input.attr("size", "44");
 	this.input.appendTo(this.container);
 
 	this.button = $('<button>', {
@@ -24,18 +30,41 @@ function TreeMenu(id) {
 	});
 	this.menu.appendTo(this.container);
 
+	this.getCurrentSelectionData = function() {
+		return currentSelectionData;
+	}
+	this.getCurrentSelectionText = function() {
+		return currentSelectionText;
+	}
+
 	var selected = function( event, ui ) {
-		var selectedText = ui.item.text();
-		var selectedTextArray=selectedText.split("\n");
-		for(key in selectedTextArray) {
-			var next = selectedTextArray[key];
-			next = next.trim();
-			if(next.trim().length>0) {
-				selectedText = next;
-				break;
+		var selectedText;
+		var value = ui.item.children(":first").attr("data");
+		console.log("value: " + value);
+		if(value) {
+			currentSelectionData = value;
+			selectedText = ui.item.text();
+			if(this.type="CCSS") {
+				var index = selectedText.lastIndexOf("CCSS");
+				selectedText = selectedText.slice(index);
+
+			} else {
+				var selectedTextArray=selectedText.split("\n");
+				for(key in selectedTextArray) {
+					var next = selectedTextArray[key];
+					console.log("next in selected: " + next);
+					next = next.trim();
+					if(next.trim().length>0) {
+						selectedText = next;
+						break;
+					}
+				}
 			}
+		} else {
+			selectedText = "";
+			currentSelectionData = null;
 		}
-		//console.log( "Selected: [" + selectedText +"]");
+		currentSelectionText = selectedText;
 		$("#selection" + that.id).val(selectedText);
 		$("#selectMenu" + that.id).hide();
 	}
@@ -48,17 +77,21 @@ function TreeMenu(id) {
 		return this.input;
 	}
 
-	var extendMenu = function(list, children) {
+	this.extendMenu = function(list, children) {
 		for(key in children) {
 			var child = children[key];
 			var item = $('<li>');
-			var link = $('<a>', {
+			var linkObj = {
 				text : child.name
-			});
+			};
+			var link = $('<a>', linkObj);
+			if(child.value) {
+				link.attr("data", child.value);
+			}
 			link.appendTo(item);
 			if(child.children && child.children.length>0) {
 				var sublist = $('<ul>');
-				extendMenu(sublist, child.children);
+				this.extendMenu(sublist, child.children);
 				sublist.appendTo(item);
 			}
 			item.appendTo(list);
@@ -68,10 +101,17 @@ function TreeMenu(id) {
 
 	this.setChoices = function(choiceTree) {
 		var children = choiceTree.children;
-		extendMenu(this.menu, children);
+		this.extendMenu(this.menu, children);
+	}
+
+	this.setCCSSChoices = function(choices) {
+		console.log("setCCSSChoices");
+		var ccss = new CCSS();
+		ccss.buildStandardsListElement(this.menu, choices);
 	}
 
 	this.initGUI = function() {
+		console.log("initGUI in treeMenu: " + this.id);
 		$("#selectMenu" + this.id).menu( {select: selected, trigger: $("#selectButton" + that.id)} );
 		$("#selectMenu" + this.id).hide();
 		$("#selectButton" + this.id).button({
