@@ -17,6 +17,12 @@ font-size: 0.9em;
 	padding-bottom:5px;
 }
 
+.error {
+	font-size: 1.0em;
+	font-weight: bold;
+	color: red;
+}
+
 #leftCol  {
   width:400;
 }
