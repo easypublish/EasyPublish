@@ -11,6 +11,7 @@ function FieldManager() {
 	var edGovSubjects = ["Arts & Music", "Artists", "Music", "Blues, Gospel, Folk", "Jazz", "Sheet Music", "Other Music", "Theatre & Film", "Visual arts", "Architecture", "Drawing & Prints", "Painting", "Photography", "Sculpture", "Other Visual arts", "Other Arts & Music", "Health & Phys Ed", "Phys ed, exercise", "Substance abuse", "Other Health", "Language Arts", "Literature & Writers", "American Literature", "Poetry", "Other Literature", "Reading", "Other Language Arts", "Math", "Algebra", "Data Analysis", "Geometry", "Measurement", "Number & Operations", "Other Math", "Science", "Applied Sciences", "Computers/Tech", "Engineering", "Earth Sciences", "Climate Change", "Environment", "Geology", "Oceans", "Other Earth Sciences", "Life Sciences", "Animals/Zoology", "Botany", "Cells", "Diseases", "Genes, Evolution", "Human Body", "Interdependence", "Medicine", "Other Life Sciences", "Physical Sciences", "Chemistry", "Energy", "Physics", "Other Physical Sciences", "Space Sciences", "Aeronautics/Flight", "Astronomy", "Other Space Sciences", "Other Science", "World Studies", "Countries & Continents", "Africa", "Arctic, Antarctica", "Other Countries & Continents", "Foreign Languages", "World History", "China", "Europe", "Russia, Soviet Union", "Other World History", "Other World Studies", "U.S. History Topics", "Business & Work", "Business", "Careers", "Economics", "Entrepreneurship", "Labor", "Ethnic Groups", "African Americans", "Asian Americans", "Hispanic Americans", "Native Americans", "Famous People", "Explorers", "Inventors", "Leaders", "Scientists", "Others", "Government", "Congress", "Courts", "Elections", "Military", "Presidents", "U.S. Constitution", "Other", "Movements", "Civil Rights", "Immigration & Migration", "Transportation", "Women's History", "States & Regions", "California", "Massachusetts", "Midwest", "New Mexico", "New York", "Northeast", "Pennsylvania", "South", "Virginia", "West", "Others", "Wars", "American Revolution", "Civil War", "World War I", "World War II", "Other Wars", "Other History & Soc Studies", "Anthropology", "Geography", "Natural Disasters", "Religion & Society", "Slavery", "Other Resources", "U.S. Time Periods", "-1607: Three Worlds Meet", "1607-1763: Colonization", "1763-1815: Revolution", "1801-1861: Expansion", "1850-1877: Civil War & Reconstruction", "1865-1920: Modern America", "1914-1945: World Wars", "1945-Present: Contemporary America", "Other History & Social Studies: U.S. History Time Periods"];
 
 	this.fieldDictionary = {};
+	this.englishNameDictionary = {};
 
 	this.mainFields = [
 		new Field("Resource Title", Field.STRING, {required:true, objectName:"title"}),
@@ -30,6 +31,7 @@ function FieldManager() {
 	for(key in this.mainFields) {
 		var field = this.mainFields[key];
 		this.fieldDictionary[field.id] = field;
+		this.englishNameDictionary[field.name] = field.id;
 	}
 
 	var alignmentTypes = ["assesses", "teaches", "requires"];
@@ -48,27 +50,29 @@ function FieldManager() {
 	for(key in this.alignmentFields) {
 		var field = this.alignmentFields[key];
 		this.fieldDictionary[field.id] = field;
-		console.log("alignmentFields dictionary key: " + field.id)
+		this.englishNameDictionary[field.name] = field.id;
 	}
 
 	this.authorFields = [
-		new Field("Name", Field.STRING, {objectName:"author_name"}),
-		new Field("URL", Field.URL, {objectName:"author_url"}),
-		new Field("Email Address", Field.EMAIL, {objectName:"author_email"})
+		new Field("Author Name", Field.STRING, {objectName:"author_name"}),
+		new Field("Author URL", Field.URL, {objectName:"author_url"}),
+		new Field("Author Email Address", Field.EMAIL, {objectName:"author_email"})
 	];
 	for(key in this.authorFields) {
 		var field = this.authorFields[key];
 		this.fieldDictionary[field.id] = field;
+		this.englishNameDictionary[field.name] = field.id;
 	}
 
 	this.publisherFields = [
-		new Field("Name", Field.STRING, {objectName:"publisher_name"}),
-		new Field("URL", Field.URL, {objectName:"publisher_url"}),
-		new Field("Email Address", Field.EMAIL, {objectName:"publisher_email"})
+		new Field("Publisher Name", Field.STRING, {objectName:"publisher_name"}),
+		new Field("Publisher URL", Field.URL, {objectName:"publisher_url"}),
+		new Field("Publisher Email Address", Field.EMAIL, {objectName:"publisher_email"})
 	];
 	for(key in this.publisherFields) {
 		var field = this.publisherFields[key];
 		this.fieldDictionary[field.id] = field;
+		this.englishNameDictionary[field.name] = field.id;
 	}
 
 	this.runTests = function() {
@@ -80,6 +84,9 @@ function FieldManager() {
 
 Field = function(name, type, options, index) {
 	this.name = name;
+	if(index) {
+		this.name += " " + index;
+	}
 	this.type = type;
 	this.objectName = name;
 	this.required = false;
@@ -123,6 +130,8 @@ Field = function(name, type, options, index) {
 			class: "text ui-widget-content ui-corner-all"
 		});
 		this.input.attr("size", "50");
+		this.input.attr("autocomplete", "off");
+
 	} else if(type==Field.LONG_STRING) {
 		this.input = $('<textarea>', {
 			rows: 3,
