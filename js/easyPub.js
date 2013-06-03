@@ -704,8 +704,6 @@ function EasyPublish() {
 	}
 
 
-
-
 }
 
 
