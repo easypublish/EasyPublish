@@ -75,13 +75,11 @@ function EasyPublish() {
 	$("#store_cred").change(function() {
 		//var checked = $("#store_cred").val();
 		if(this.checked) {
-			console.log("clicked stored");
 			store_credentials = true;
 			localStorage.setItem("store_credentials", true);
 			storeAllCredentials();
 			$("#store_state").html("(stored)");
 		} else {
-			console.log("clicked unstored");
 			store_credentials = false;
 			localStorage.setItem("store_credentials", false);
 			clearAllCredentials();
@@ -120,12 +118,11 @@ function EasyPublish() {
 		if(local_storage) {
 			var id = $(credField).attr("id");
 			var value = $(credField).val();
-			console.log("storing credential: " + id + ", val: " + value);
 			localStorage.setItem(id, value);
 		}
 	}
-	function edFrameworkSelected(event) {
-		var id = $(event.currentTarget).attr("id")
+
+	function updateEdFramework(id) {
 		var selection = $("#"+id).val();
 		var indexLoc = id.lastIndexOf("_");
 		var index = "";
@@ -144,6 +141,11 @@ function EasyPublish() {
 			$(mathRow).hide();
 			$(elaRow).hide();
 		}
+	}
+
+	function edFrameworkSelected(event) {
+		var id = $(event.currentTarget).attr("id");
+		updateEdFramework(id);
 	}
 
 	function buildForm(name, fields) {
@@ -271,7 +273,6 @@ function EasyPublish() {
 	});
 	previousDataButton.click(function() {
 		if(importIndex>0) {
-			console.log("previous");
 			setImportIndex(--importIndex, true);
 		}
 		return false;
@@ -286,7 +287,6 @@ function EasyPublish() {
 	});
 	nextDataButton.click(function() {
 		if(importIndex<importedData.numRows-1) {
-			console.log("next");
 			setImportIndex(++importIndex, true);
 
 		}
@@ -375,7 +375,6 @@ function EasyPublish() {
 	$( document ).tooltip({ position: { my: "left top", at: "right+15 top", collision: "flipfit" } });
 
 	this.submissionSuccessful = function() {
-		console.log("submissionSuccessful");
 		if(importedData.numRows>0) {
 	    	for(key in importedData) {
 	    		if(key!="numRows") {
@@ -395,16 +394,15 @@ function EasyPublish() {
         buildDataSelections();
 	}
 
+
 	this.fileDropped = function(fileData) {
         var arrData = dataManager.CSVToArray(fileData);
-        var objData = dataManager.twoDArrayToObjectArray(arrData);
-        var valid = validateImportData(arrData);
+        var objData = dataManager.twoDArrayToObjectArray(arrData, this.fieldManager.englishNameDictionary);
+        var valid = true; //validateImportData(arrData);
         if(valid) {
 			var rowCount = arrData.length;
 	        $("#dropStatus2").append("Found " + rowCount + " row(s) of data");
         	importedData = objData;
-        	console.log("importedData: ");
-        	console.log(importedData);
         	importIndex = 0;
         	previousDataButton.button("option", "disabled", true);
         	if(rowCount>1) {
@@ -464,11 +462,40 @@ function EasyPublish() {
 
 
     function setCurrentImportData(index) {
-    	for(key in importedData) {
+        var mathTest = /[\w]*Math[\w]*/;
+        var elaTest = /[\w]*Language[\w]*/;
+    	var indexTest = /([\w]*)_(\d+)$/;
+    	var authorTest = /[\w]*author[\w]*/;
+    	var alignmentTest = /[\w]*(alignmentType|educationalFramework|Standard)[\w]*/;
+
+
+    	for(var key in importedData) {
+            var val = importedData[key][index];
+        	if(key.match(indexTest)) {
+        		match = indexTest.exec(key);
+        		var base = match[1];
+        		var key_index = match[2];
+        		//console.log("base is: " + base);
+        		//console.log("index is: " + key_index);
+        		if(key.match(authorTest)) {
+        			if(key_index>authorCount) {
+        				addAuthor();
+        			}
+        		} else if (key.match(alignmentTest)) {
+        			if(key_index>alignmentCount) {
+        				addAlignment();
+        			}
+        		}
+        	}
             var field = that.fieldManager.fieldDictionary[key];
             if (field) {
-                field.value(importedData[key][index]);
+                field.value(val);
+            } else {
+            	console.log("no field found for key: " + key + ", val: " +  val);
             }
+        	if(key.lastIndexOf("educationalFramework")>=0) {
+        		updateEdFramework(key);
+        	}
     	}
     }
 
@@ -564,14 +591,11 @@ function EasyPublish() {
 
 	this.getAlignments = function() {
 
-		console.log("get alignments, fieldDict keys: ");
 		var keys = _.keys(this.fieldManager.fieldDictionary);
-		console.log(keys);
 
 		var alignments = [];
 
 		var edFramework = this.getValue("educationalFramework");
-		console.log("edFramework is:  " + edFramework);
 		var alignment0 = {
 		    alignmentType: [this.getValue("alignmentType")],
             educationalFramework:  [edFramework]
@@ -586,8 +610,6 @@ function EasyPublish() {
 			if(standardField) {
 				alignment0.targetUrl = [standardField.treeMenu.getCurrentSelectionData()];
 				alignment0.targetName = [standardField.treeMenu.getCurrentSelectionText()];
-				console.log("targetUrl is:  " + alignment0.targetUrl);
-				console.log("targetName is:  " + alignment0.targetName);
 			}
 		}
 		alignments[0] = alignment0;
@@ -595,7 +617,6 @@ function EasyPublish() {
 		if(alignmentCount>1) {
 			for(var i=2; i<=alignmentCount; i++) {
 				var edFramework = this.getValue("educationalFramework_"+i);
-				console.log("edFramework " + i + " is:  " + edFramework);
 
 				var alignment = {
 				    alignmentType: [this.getValue("alignmentType_"+i)],
@@ -611,13 +632,9 @@ function EasyPublish() {
 					if(standardField) {
 						alignment.targetUrl = [standardField.treeMenu.getCurrentSelectionData()];
 						alignment.targetName = [standardField.treeMenu.getCurrentSelectionText()];
-						console.log("targetUrl " + i + " is:  " + alignment.targetUrl);
-						console.log("targetName " + i + " is:  " + alignment.targetName);
 
 					}
 				}
-				console.log("alignment " + i + " is:  ");
-				console.log(alignment);
 
 				alignments[i-1] = alignment;
 			}
@@ -625,11 +642,15 @@ function EasyPublish() {
 		return alignments;
 	}
 
-	this.getData = function() {
+	this.getData = function(byEnglishName) {
 		var data = {};
 		for(key in this.fieldManager.fieldDictionary) {
 			var field = this.fieldManager.fieldDictionary[key];
-			data[field.objectName] = field.value();
+			if(byEnglishName) {
+				data[field.name] = field.value();
+			} else {
+				data[key] = field.value();
+			}
 		}
 	    return data;
 	}
@@ -640,7 +661,6 @@ function EasyPublish() {
 
 	this.getValue = function(id) {
 		var field = this.fieldManager.fieldDictionary[id];
-		console.log("getValue for: " + id + ", found field: " + field);
 		if(field) {
 			return field.value();
 		}else {
