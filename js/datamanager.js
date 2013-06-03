@@ -16,6 +16,15 @@ function DataManager(easyPub) {
         node_url: nodeURL
     }*/
 
+    function stripEmptyProperties(properties) {
+        for(var key in properties) {
+            var next = properties[key];
+            if(next==null || next=="" || next=="null") {
+                delete properties[key];
+            }
+        }
+    }
+
     //This needs big cleanup. It's a little hacky right now and kind of defeats the original purpose of the
     //field dictionary
     function makePayload() {
@@ -55,6 +64,11 @@ function DataManager(easyPub) {
                 }
             }]
         };
+        stripEmptyProperties(payload.items[0].properties);
+        stripEmptyProperties(payload.items[0].properties.publisher[0].properties);
+        if(_.size(payload.items[0].properties.publisher[0].properties)==0) {
+            delete payload.items[0].properties.publisher;
+        }
 
         return payload;
     }
@@ -76,7 +90,9 @@ function DataManager(easyPub) {
                     targetDescription: [easyPub.getValue("k12Grade")],
                 }
             };
-        fullAlignmentsArray.push(educationLevelAlignment);
+        if(easyPub.getValue("grade")!="" || easyPub.getValue("k12Grade")!="") {
+            fullAlignmentsArray.push(educationLevelAlignment);
+        }
 
         for(var i=0; i<alignmentsArray.length; i++) {
             console.log("parsing Alignment " + i)
@@ -90,7 +106,10 @@ function DataManager(easyPub) {
                     targetUrl:  [alignmentsArray[i].targetUrl]
                 }
             }
-            fullAlignmentsArray.push(nextFullAlignment);
+            stripEmptyProperties(nextFullAlignment.properties);
+            if(_.size(nextFullAlignment.properties)>0) {
+                fullAlignmentsArray.push(nextFullAlignment);
+            }
         }
         return fullAlignmentsArray;
     }
@@ -108,7 +127,10 @@ function DataManager(easyPub) {
                     email:  [authorsArray[i].email]
                 }
             }
-            fullAuthorsArray[i] = nextFullAuthor;
+            stripEmptyProperties(nextFullAuthor.properties);
+            if(_.size(nextFullAuthor.properties)>0) {
+                fullAuthorsArray[i] = nextFullAuthor;
+            }
         }
         return fullAuthorsArray;
     }
@@ -259,7 +281,7 @@ function DataManager(easyPub) {
             output = JSON.stringify(data);
             filetype = 'text/json';
         } else if (type == "csv") {
-            var data = easyPub.getData();
+            var data = easyPub.getData(true);
             output = toCSV(data);
             filetype = 'text/csv';
         }
@@ -276,26 +298,50 @@ function DataManager(easyPub) {
 
 
     function toCSV(data) {
+        console.log("toCSV");
+        console.log(data);
         var csv = "";
         var row2 = ""
         for (key in data) {
             csv += key + ", ";
             row2 += data[key] + ", ";
+            console.log(key, data[key])
         }
         csv += "\n" + row2;
         return csv;
     }
 
-    this.twoDArrayToObjectArray = function(arrData) {
+    this.twoDArrayToObjectArray = function(arrData, remapDictionary) {
+        console.log("remapDictionary:");
+        console.log(remapDictionary);
         var objArray = {};
+        var indexTest = /(.*...+) (\d+)$/;
         objArray.numRows = arrData.length-1;
         for(var colIndex=0; colIndex<arrData[0].length; colIndex++) {
             var fieldName = arrData[0][colIndex];
+            var fieldKey = remapDictionary[fieldName];
+            //if we haven't found a field key, it might be an indexed name
+            if(!fieldKey) {
+                var match = indexTest.exec(fieldName);
+                if(match) {
+                    var base = match[1];
+                    var index = match[2];
+                    if(base && index && remapDictionary[base]) {
+                        fieldKey = remapDictionary[base] + "_" + index;
+                    } else {
+                        console.log("can't remap, got base: " + base + ", index: " + index);
+                        continue;
+                    }
+                } else {
+                    console.log("field not found: " + fieldName);
+                }
+            }
+            console.log("remapping: " + fieldName + " to: " + fieldKey);
             var colData = [];
             for(var rowIndex=1; rowIndex<arrData.length; rowIndex++) {
                 colData[rowIndex-1] = arrData[rowIndex][colIndex];
             }
-            objArray[fieldName] = colData;
+            objArray[fieldKey] = colData;
         }
         return objArray;
     }
