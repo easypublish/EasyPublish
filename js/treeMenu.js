@@ -39,20 +39,19 @@ function TreeMenu(id, type) {
 
 	var selected = function( event, ui ) {
 		var selectedText;
-		var value = ui.item.children(":first").attr("data");
-		console.log("value: " + value);
+		var value = ui.item.children(":first").attr("value");
 		if(value) {
 			currentSelectionData = value;
-			selectedText = ui.item.text();
 			if(this.type="CCSS") {
-				var index = selectedText.lastIndexOf("CCSS");
-				selectedText = selectedText.slice(index);
+				selectedText = ui.item.children(":first").attr("dotNotation");
+				//var index = selectedText.lastIndexOf("CCSS");
+				//selectedText = selectedText.slice(index);
 
 			} else {
+				selectedText = ui.item.text();
 				var selectedTextArray=selectedText.split("\n");
 				for(key in selectedTextArray) {
 					var next = selectedTextArray[key];
-					console.log("next in selected: " + next);
 					next = next.trim();
 					if(next.trim().length>0) {
 						selectedText = next;
@@ -86,7 +85,7 @@ function TreeMenu(id, type) {
 			};
 			var link = $('<a>', linkObj);
 			if(child.value) {
-				link.attr("data", child.value);
+				link.attr("value", child.value);
 			}
 			link.appendTo(item);
 			if(child.children && child.children.length>0) {
@@ -105,13 +104,11 @@ function TreeMenu(id, type) {
 	}
 
 	this.setCCSSChoices = function(choices) {
-		console.log("setCCSSChoices");
 		var ccss = new CCSS();
 		ccss.buildStandardsListElement(this.menu, choices);
 	}
 
 	this.initGUI = function() {
-		console.log("initGUI in treeMenu: " + this.id);
 		$("#selectMenu" + this.id).menu( {select: selected, trigger: $("#selectButton" + that.id)} );
 		$("#selectMenu" + this.id).hide();
 		$("#selectButton" + this.id).button({
