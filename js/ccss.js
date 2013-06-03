@@ -12,14 +12,16 @@ function CCSS() {
 		return listElem;
 	}*/
 
-	buildStandardElement = function(standard) {
+	buildStandardElement = function(standard, key) {
 		var listElem = $('<li>');
 		var link = $('<a>', {
 			style: "font-weight:bold;",
-			text: standard.DotNotation
+			text: key + " "
 		});
-		link.attr("data", standard.URI);
+		link.attr("value", standard.URI);
+		link.attr("dotNotation", standard.DotNotation);
 		link.appendTo(listElem);
+		listElem.addClass("ui-menu-multilevel");
 		return listElem;
 	}
 	buildStandardsList = function(tree, dots, rootList) {
@@ -43,7 +45,7 @@ function CCSS() {
 			var branch = tree[key];
 			var item;
 			if(branch.standard) {
-				item = buildStandardElement(branch.standard);
+				item = buildStandardElement(branch.standard, key);
 				item.appendTo(list);
 			} else {
 				item = $('<li>');
