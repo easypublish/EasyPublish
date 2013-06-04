@@ -2,7 +2,6 @@
 	<head>
 		<title>Learning Registry Easy Publish</title>
 		<link href="css/smoothness/jquery-ui-1.10.2.custom.css" rel="stylesheet">
-		<link href="css/jquery.validity.css" rel="stylesheet">
 		<link type="text/css" href="css/jquery.ui.selectmenu.css" rel="stylesheet" />
 		<link rel="stylesheet" href="css/jquery.fileupload-ui.css">
 		<link href="css/easyPub.css" rel="stylesheet">
@@ -31,7 +30,10 @@
 
 		<script id="successDialogTemplate" type="text/x-handlebars-template">
 			<div id="{{guid}}" title="Successful Post">
-				<p>Your submission "{{name}}" has been successfully posted to the learning registry.
+				<p>Your submission "{{name}}" has been successfully posted to the Learning Registry.
+					You may find it <a href="{{serverURL}}/obtain?by_doc_ID=true&request_ID={{docID}}">here</a>.
+				</p>
+				<p>Your submission "{{name}}" has been successfully posted to the Learning Registry.
 					You may find it <a href="{{serverURL}}/obtain?by_doc_ID=true&request_ID={{docID}}">here</a>.
 				</p>
 			</div>
@@ -41,6 +43,7 @@
 				<p>Your submission "{{name}}" failed with the following error: {{error}}.</p>
 			</div>
 		</script>
+
 		<script id="importFailDialogTemplate" type="text/x-handlebars-template">
 			<div id="{{guid}}" title="Import Attempt Failed">
 				<p>Cannot import CSV file, it is missing the following fields:</p>
@@ -148,8 +151,7 @@
 				</form>
 			</div>
 		</div>
-		<!--<div style="visibility:hidden;">-->
-		<div>
+		<div style="visibility:hidden;">
 			<h3>Debug buttons</h3>
 			<!--<button id="DownloadJSON">Download JSON</button>-->
 			<button id="TestData">Test Data</button>
