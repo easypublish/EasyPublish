@@ -1,12 +1,13 @@
 function DataManager(easyPub) {
 
+    var nodeURL = "http://sandbox.learningregistry.org";
+
+    var service = "publish";
+
     var succTempSrc = document.getElementById("successDialogTemplate").innerHTML;
     successDialogTemplate = Handlebars.compile(succTempSrc);
     var failTempSrc = document.getElementById("failDialogTemplate").innerHTML;
     failDialogTemplate = Handlebars.compile(failTempSrc);
-    var nodeURL = "http://sandbox.learningregistry.org";
-
-    var service = "publish";
 
     /*var default_oauth_data = {
         consumer_key: 'john.brecht@sri.com',
@@ -95,7 +96,6 @@ function DataManager(easyPub) {
         }
 
         for(var i=0; i<alignmentsArray.length; i++) {
-            console.log("parsing Alignment " + i)
             var nextFullAlignment = {
                 type: ["http://schema.org/AlignmentObject"],
                         id: "xxx",
@@ -118,7 +118,6 @@ function DataManager(easyPub) {
         var authorsArray = easyPub.getAuthors();
         var fullAuthorsArray = [];
         for(var i=0; i<authorsArray.length; i++) {
-            console.log("parsing author " + i)
             var nextFullAuthor = {
                 type: ["http://schema.org/Person"],
                 properties: {
@@ -156,6 +155,21 @@ function DataManager(easyPub) {
         return envelope;
     }
 
+    function makeAllEnvelopes() {
+        var envelopes = [];
+        var numRows = easyPub.getNumImportRows();
+        if(numRows==0) {
+            envelopes.push(makeEnvelope());
+        } else { 
+            for(var i=0; i<numRows; i++) {
+                easyPub.setCurrentImportData(i);
+                var envelope = makeEnvelope();
+                envelopes.push(envelope);
+            }
+        }
+        return envelopes;
+    }
+
     this.testEnvelope = function() {
         var envelope = makeEnvelope();
         console.log(envelope);
@@ -163,7 +177,8 @@ function DataManager(easyPub) {
 
     //TODO - handle arrays of form data
     this.submitData = function () {
-        envelope = makeEnvelope()
+        envelopes = makeAllEnvelopes();
+
         var oauth_data = easyPub.getOAuthData();
         if(oauth_data==null) {
             console.log("null oauth_data, aborting submit")
@@ -171,13 +186,26 @@ function DataManager(easyPub) {
         } else {
             req_info = getOAuthInfo(oauth_data);
             req_info.message.body = {
-                documents: [envelope]
+                documents: envelopes
             };
+            console.log("req_info:");
+            console.log(req_info);
             request = oauthRequest(oauth_data.node_url + '/publish', req_info.message, req_info.accessor);
             
             request.done(function(msg) {
                 console.log("Done");
                 console.log(msg);
+                if(msg.OK) {
+                    alert("Submission succeeded, press OK to view the node reply.");
+                    //easyPub.submissionComplete(true);
+                    displayResults(msg.document_results);
+                } else {
+                    alert("Submission failed, press OK to view the node reply.");
+                    displayResults(msg.document_results);
+                    //easyPub.submissionComplete(false);
+                }
+                
+                /*
                 var results = msg.document_results;
                 for(key in results) {
                     var nextResult = results[key];
@@ -195,7 +223,7 @@ function DataManager(easyPub) {
                         successDialogHtml = successDialogTemplate(tempData);
                         $("body").append(successDialogHtml);
                         $("#"+nextResult.doc_ID).dialog({position:{my: "top", at: "top", of: $("#middleCol")}});
-                        easyPub.submissionSuccessful();
+                        easyPub.submissionComplete(true);
                     } else {
                         console.log("error: " + nextResult.error);
                         var tempData = {
@@ -206,12 +234,15 @@ function DataManager(easyPub) {
                         failDialogHtml = failDialogTemplate(tempData);
                         $("body").append(failDialogHtml);
                         $("#"+formData.Name).dialog({position:{my: "top", at: "top", of: $("#middleCol")}});
+                        easyPub.submissionComplete(false);
                     }
-                }
+                }*/
             });
             request.fail(function(msg) {
                 console.log("Fail");
                 console.log(msg);
+                alert("Submission failed.");
+                easyPub.submissionComplete(false);
             });
         }
 
@@ -273,6 +304,17 @@ function DataManager(easyPub) {
         return request;
     }
 
+    function displayResults(results) {
+        var output = JSON.stringify(results);
+        var filetype = 'text/json';
+        window.URL = window.webkitURL || window.URL;
+        blob = new Blob([output], {
+            type: filetype
+        });
+        url = window.URL.createObjectURL(blob);
+        document.location = url;
+    }
+
     this.downloadData = function(type) {
         var output;
         var filetype;
@@ -312,8 +354,8 @@ function DataManager(easyPub) {
     }
 
     this.twoDArrayToObjectArray = function(arrData, remapDictionary) {
-        console.log("remapDictionary:");
-        console.log(remapDictionary);
+        //console.log("remapDictionary:");
+        //console.log(remapDictionary);
         var objArray = {};
         var indexTest = /(.*...+) (\d+)$/;
         objArray.numRows = arrData.length-1;
@@ -336,7 +378,7 @@ function DataManager(easyPub) {
                     console.log("field not found: " + fieldName);
                 }
             }
-            console.log("remapping: " + fieldName + " to: " + fieldKey);
+           // console.log("remapping: " + fieldName + " to: " + fieldKey);
             var colData = [];
             for(var rowIndex=1; rowIndex<arrData.length; rowIndex++) {
                 colData[rowIndex-1] = arrData[rowIndex][colIndex];
