@@ -18,7 +18,6 @@ function EasyPublish() {
 		numRows:0
 	};
 
-
 	var alignmentCount = 1;
 	var authorCount = 1;
 	var store_credentials = false;
@@ -31,7 +30,7 @@ function EasyPublish() {
 		style:'popup',
 		width: 300,
 	    change: function(e, object){
-	        setImportIndex(dataSelect.selectmenu("index"), false);
+	        setImportIndex(dataSelect.selectmenu("index"), false, true);
 	    }
 	});
 	dataSelect.selectmenu('disable');
@@ -186,10 +185,10 @@ function EasyPublish() {
 	var submitButton = $("#Submit");
 	submitButton.button();
 	submitButton.click(function() {
+		submittedDocs = [];
 		var valid = validateAll();
 		if(valid) {
 			dataManager.submitData();
-			//that.submissionSuccessful();
 		} else {
 			alert("Please correct the indicated problems");
 		}
@@ -262,6 +261,7 @@ function EasyPublish() {
 			}
 			field.value(data);
 		}
+		return false;
 	});
 
 	var previousDataButton = $("#prevData");
@@ -273,7 +273,7 @@ function EasyPublish() {
 	});
 	previousDataButton.click(function() {
 		if(importIndex>0) {
-			setImportIndex(--importIndex, true);
+			setImportIndex(importIndex-1, true, true);
 		}
 		return false;
 	});
@@ -287,8 +287,7 @@ function EasyPublish() {
 	});
 	nextDataButton.click(function() {
 		if(importIndex<importedData.numRows-1) {
-			setImportIndex(++importIndex, true);
-
+			setImportIndex(importIndex+1, true, true);
 		}
 		return false;
 	});
@@ -360,10 +359,12 @@ function EasyPublish() {
 		$("#ELA-Standard_"+ alignmentCount + "Row").hide();
 	}
 
-	function setImportIndex(newIndex, updateDataSelect) {
-		//storeCurrentImportData();
+	function setImportIndex(newIndex, updateDataSelect, storeCurrent) {
+		if(storeCurrent) {
+			storeCurrentImportData();
+		}
 		importIndex = newIndex;
-		setCurrentImportData(importIndex);
+		that.setCurrentImportData(importIndex);
     	previousDataButton.button("option", "disabled", importIndex==0);
     	nextDataButton.button("option", "disabled", importIndex==importedData.numRows-1);
     	if(updateDataSelect) {
@@ -374,24 +375,16 @@ function EasyPublish() {
 
 	$( document ).tooltip({ position: { my: "left top", at: "right+15 top", collision: "flipfit" } });
 
-	this.submissionSuccessful = function() {
-		if(importedData.numRows>0) {
-	    	for(key in importedData) {
-	    		if(key!="numRows") {
-	            	importedData[key].splice(importIndex, 1);
-	            }
-	    	}
-		}
-		importedData.numRows--;
-		if(importedData.numRows>0) {
-			while(importIndex>importedData.numRows-1) {
-				importIndex--;
-			}
-        	setCurrentImportData(importIndex);
-        } else {
+	this.submissionComplete = function(success) {
+		if(success) {
+			importedData = {
+				numRows:0
+			};
         	clearFields();
-        }
-        buildDataSelections();
+        	buildDataSelections();
+	    } else {
+
+	    }
 	}
 
 
@@ -409,7 +402,7 @@ function EasyPublish() {
         		nextDataButton.button("option", "disabled", false);
         	}
         	buildDataSelections();
-        	setCurrentImportData(importIndex);
+        	that.setCurrentImportData(importIndex);
 	    }
     }
 
@@ -433,7 +426,7 @@ function EasyPublish() {
 				style:'popup',
 				width: 300,
 			    change: function(e, object){
-			        setImportIndex(dataSelect.selectmenu("index"), false);
+			        setImportIndex(dataSelect.selectmenu("index"), false, true);
 			    }
 			});
 			dataSelect.selectmenu('enable');
@@ -444,7 +437,7 @@ function EasyPublish() {
 				style:'popup',
 				width: 300,
 			    change: function(e, object){
-			        setImportIndex(dataSelect.selectmenu("index"), false);
+			        setImportIndex(dataSelect.selectmenu("index"), false, true);
 			    }
 			});
 			dataSelect.selectmenu('disable');
@@ -452,6 +445,7 @@ function EasyPublish() {
     }
 
     function storeCurrentImportData() {
+    	//console.trace();
     	for(key in importedData) {
             var field = that.fieldManager.fieldDictionary[key];
             if (field) {
@@ -460,23 +454,27 @@ function EasyPublish() {
     	}
     }
 
+    this.getNumImportRows = function() {
+    	return importedData.numRows;
+    }
 
-    function setCurrentImportData(index) {
+    this.setCurrentImportData = function(index) {
+    	//console.trace();
         var mathTest = /[\w]*Math[\w]*/;
         var elaTest = /[\w]*Language[\w]*/;
     	var indexTest = /([\w]*)_(\d+)$/;
     	var authorTest = /[\w]*author[\w]*/;
     	var alignmentTest = /[\w]*(alignmentType|educationalFramework|Standard)[\w]*/;
 
-
     	for(var key in importedData) {
+    		if(key=="numRows") {
+    			continue;
+    		}
             var val = importedData[key][index];
         	if(key.match(indexTest)) {
         		match = indexTest.exec(key);
         		var base = match[1];
         		var key_index = match[2];
-        		//console.log("base is: " + base);
-        		//console.log("index is: " + key_index);
         		if(key.match(authorTest)) {
         			if(key_index>authorCount) {
         				addAuthor();
@@ -670,11 +668,13 @@ function EasyPublish() {
 
 	function validateAll() {
 		var valid = true;
+		storeCurrentImportData();
 		if(importedData.numRows>0) {
 			var index = 0;
-			while(valid) {
+			while(valid && index<importedData.numRows) {
 				setImportIndex(index, true);
 				valid = validateForm();
+				index++;
 			}
 			return valid;
 		} else {
@@ -725,7 +725,6 @@ FieldEditorRow = function(field) {
 	label.appendTo(this.elem);
 	errorLabel.appendTo(this.elem);
 	if(field.required) {
-		//console.log("required: " + field.required);
 		var requiredStar = $('<span>', {
 			text: '*',
 			title: 'Required field'
