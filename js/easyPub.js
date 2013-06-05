@@ -194,12 +194,12 @@ function EasyPublish() {
 		}
 		return false;
 	});
-	var downloadCSVButton = $("#DownloadCSV");
+	/*var downloadCSVButton = $("#DownloadCSV");
 	downloadCSVButton.button();
 	downloadCSVButton.click(function() {
 		window.location = "template.csv";
 		return false;
-	});
+	});*/
 
 	var dlCSVButton = $("#DL_CSV");
 	dlCSVButton.button();
