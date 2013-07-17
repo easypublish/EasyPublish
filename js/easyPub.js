@@ -92,6 +92,13 @@ function EasyPublish() {
 		}
 	});
 
+    function getParameterByName(name) {
+        name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+            results = regex.exec(location.search);
+        return results == null ? undefined : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+
 	function clearAllCredentials() { 
 		$(".oauth").each(function( index ){
 			var id = $(this).attr("id");
@@ -214,6 +221,18 @@ function EasyPublish() {
 		dataManager.downloadData("json");
 		return false;
 	});
+
+
+    var enableDebug = getParameterByName("debug");
+    if (enableDebug !== undefined) {
+        $("#debugConsole").show();
+    }
+
+    var resultDialog = $("#resultsDialog").dialog({
+        autoOpen: false,
+        modal: true,
+        width: 634
+    });
 
 
 	var storeHelpButton = $("#storeHelp");

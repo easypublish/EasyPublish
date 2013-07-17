@@ -42,8 +42,9 @@ function TreeMenu(id, type) {
 		var value = ui.item.children(":first").attr("value");
 		if(value) {
 			currentSelectionData = value;
-			if(this.type="CCSS") {
-				selectedText = ui.item.children(":first").attr("dotNotation");
+			var dotNotation = ui.item.children(":first").attr("dotNotation");
+			if(dotNotation !== undefined) {
+				selectedText = dotNotation;
 				//var index = selectedText.lastIndexOf("CCSS");
 				//selectedText = selectedText.slice(index);
 
@@ -86,6 +87,8 @@ function TreeMenu(id, type) {
 			var link = $('<a>', linkObj);
 			if(child.value) {
 				link.attr("value", child.value);
+			} else {
+				link.attr("value", child.name);
 			}
 			link.appendTo(item);
 			if(child.children && child.children.length>0) {

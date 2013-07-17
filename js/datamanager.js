@@ -26,6 +26,46 @@ function DataManager(easyPub) {
         }
     }
 
+    function stripEmptyValues(properties) {
+        // If properties is an array check each element to see if it should be deleted and remove,
+        // if at the end the array is empty signal calling method to delete empty array.
+        if (Object.prototype.toString.call( properties ) === '[object Array]' ) {
+            var deletions = [];
+            for (var i=0; i<properties.length; i++) {
+                var removeValue = stripEmptyValues(properties[i])
+                if (removeValue)
+                    deletions.unshift(i);
+            }
+
+            for (var j=0; j<deletions.length; j++)
+                properties.splice(j,1);
+
+            if (properties.length == 0)
+                return true;
+
+        } 
+        // If properties is an object, remove any empty keys, if object then has no keys, singnal
+        // calling method to delete empty object.
+        else if (Object.prototype.toString.call(properties) === '[object Object]') {
+            for(var key in properties) {
+                if (stripEmptyValues(properties[key]))
+                    delete properties[key];
+            }
+            if (Object.keys(properties).length == 0) {
+                return true;
+            }
+
+        } 
+        // If properties is null or empty (or some special variant), signal calling method to delete.
+        else if(properties===null || properties===undefined || properties==="" || properties==="null") {
+                return true;
+            
+        }
+
+        return false;
+
+    }
+
     //This needs big cleanup. It's a little hacky right now and kind of defeats the original purpose of the
     //field dictionary
     function makePayload() {
@@ -70,7 +110,6 @@ function DataManager(easyPub) {
         if(_.size(payload.items[0].properties.publisher[0].properties)==0) {
             delete payload.items[0].properties.publisher;
         }
-
         return payload;
     }
 
@@ -83,7 +122,7 @@ function DataManager(easyPub) {
         var educationLevelAlignment = 
             {
                 type: ["http://schema.org/AlignmentObject"],
-                id: "xxx",
+                // id: "xxx",
                 properties: {
                     alignmentType: ["educationLevel"],
                     educationalFramework: ["US K-12 Grade Levels"],
@@ -91,14 +130,14 @@ function DataManager(easyPub) {
                     targetDescription: [easyPub.getValue("k12Grade")],
                 }
             };
-        if(easyPub.getValue("grade")!="" || easyPub.getValue("k12Grade")!="") {
+        if(easyPub.getValue("grade")!=="" || easyPub.getValue("k12Grade")!=="") {
             fullAlignmentsArray.push(educationLevelAlignment);
         }
 
         for(var i=0; i<alignmentsArray.length; i++) {
             var nextFullAlignment = {
                 type: ["http://schema.org/AlignmentObject"],
-                        id: "xxx",
+                        // id: "xxx",
                 properties: {
                     alignmentType: [alignmentsArray[i].alignmentType],
                     educationalFramework:  [alignmentsArray[i].educationalFramework],
@@ -152,6 +191,7 @@ function DataManager(easyPub) {
             "payload_placement": "inline",
             "resource_locator": easyPub.getValue("url")
         }
+        stripEmptyValues(envelope);
         return envelope;
     }
 
@@ -312,7 +352,14 @@ function DataManager(easyPub) {
             type: filetype
         });
         url = window.URL.createObjectURL(blob);
-        document.location = url;
+        // document.location = url;
+        displayDialog(url);
+    }
+
+
+    function displayDialog(url) {
+        $('#resultsDialog > iframe').attr("src", url);
+        $('#resultsDialog').dialog("open");
     }
 
     this.downloadData = function(type) {
@@ -335,7 +382,8 @@ function DataManager(easyPub) {
             type: filetype
         });
         url = window.URL.createObjectURL(blob);
-        document.location = url;
+        // document.location = url;
+        window.open(url, "blobwin")
     }
 
 
