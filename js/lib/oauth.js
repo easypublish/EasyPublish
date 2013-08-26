@@ -59,6 +59,9 @@
    The browser encodes each value before transmitting it. For example,
    see consumer.setInputs in example/consumer.js.
  */
+
+require("sha1");
+
 var OAuth; if (OAuth == null) OAuth = {};
 
 OAuth.setProperties = function setProperties(into, from) {

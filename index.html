@@ -5,18 +5,28 @@
 		<link type="text/css" href="css/jquery.ui.selectmenu.css" rel="stylesheet" />
 		<link rel="stylesheet" href="css/jquery.fileupload-ui.css">
 		<link href="css/easyPub.css" rel="stylesheet">
-		<script type="text/javascript" src="js/lib/underscore.min.js"></script>
-		<script type="text/javascript" src="js/jquery/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="modules.js"></script>
+		<script type="text/javascript">
+			var $ = require("jquery"),
+				jQuery = $;
+				_ = require("underscore"),
+				url = require("url"),
+				Handlebars = require("handlebars");
+
+		</script>
+
+		<!-- script type="text/javascript" src="js/lib/underscore.min.js"></script -->
+		<!-- script type="text/javascript" src="js/jquery/jquery-1.9.1.min.js"></script -->
 		<script type="text/javascript" src="js/jquery/jquery-ui-1.10.2.custom.min.js"></script>
 		<script type="text/javascript" src="js/jquery/autoCombobox.js"></script>
 		<script type="text/javascript" src="js/jquery/jquery.fileupload.js"></script>
 		<script type="text/javascript" src="js/jquery/ui/jquery.ui.selectmenu.js"></script>
 		<script type="text/javascript" src="js/jquery/ui/jquery.fileupload-ui.js"></script>
 
-		<script type="text/javascript" src="js/lib/handlebars.js"></script>
-		<script type="text/javascript" src="js/lib/uri.min.js"></script>
+		<!-- script type="text/javascript" src="js/lib/handlebars.js"></script -->
+		<!-- script type="text/javascript" src="js/lib/uri.min.js"></script -->
 		<script type="text/javascript" src="js/lib/oauth.js"></script>
-		<script type="text/javascript" src="js/lib/sha1.js"></script>
+		<!-- script type="text/javascript" src="js/lib/sha1.js"></script-->
 
 		<script type="text/javascript" src="js/data/standardsTree.js"></script>
 		<script type="text/javascript" src="js/data/subjects.js"></script>
@@ -27,6 +37,7 @@
 		<script type="text/javascript" src="js/fields.js"></script>
 		<script type="text/javascript" src="js/dnd.js"></script>
 		<script type="text/javascript" src="js/datamanager.js"></script>
+
 
 		<script id="successDialogTemplate" type="text/x-handlebars-template">
 			<div id="{{guid}}" title="Successful Post">
@@ -118,6 +129,7 @@
 							<select name="dataSelect" id="dataSelect">
 								<option value='No Data'>No Data</option>
 							</select>
+							<button id="removeRow" class="btn">Remove Row</button>
 						</p>
 						<div>
 							<button id="prevData">Previous</button><button id="nextData">Next</button>

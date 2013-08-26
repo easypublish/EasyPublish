@@ -35,6 +35,15 @@ function EasyPublish() {
 	});
 	dataSelect.selectmenu('disable');
 
+    var removeRowButton = $('#removeRow');
+    removeRowButton.button({
+        disabled: true
+    });
+    removeRowButton.click(function(){
+        
+    });
+    
+
 	$('#csvHelpDialog').dialog({
 		autoOpen:false,
 		position:dialogPosition
@@ -386,6 +395,7 @@ function EasyPublish() {
 		that.setCurrentImportData(importIndex);
     	previousDataButton.button("option", "disabled", importIndex==0);
     	nextDataButton.button("option", "disabled", importIndex==importedData.numRows-1);
+        removeRowButton.button("option", "disabled", importedData.numRows==0);
     	if(updateDataSelect) {
     		dataSelect.selectmenu("index", importIndex);
     	}
@@ -419,6 +429,7 @@ function EasyPublish() {
         	previousDataButton.button("option", "disabled", true);
         	if(rowCount>1) {
         		nextDataButton.button("option", "disabled", false);
+                removeRowButton.button("option", "disabled", false);
         	}
         	buildDataSelections();
         	that.setCurrentImportData(importIndex);
@@ -432,11 +443,15 @@ function EasyPublish() {
 	    	var sel = true;
 	    	for(var i=0; i<importedData.numRows; i++) {
 	    		var name = importedData.title[i];
+                var title = "-- UNDEFINED TITLE --";
+                if (name.trim().length > 0) {
+                    title = name;
+                }
 				if(sel) {
-					var option = "<option value='"+name+" selected='selected'>"+name+"</option>";
+					var option = "<option value='"+name+" selected='selected'>"+title+"</option>";
 					sel = false;
 				} else {
-	    			var option = "<option value='"+name+"'>"+name+"</option>";
+	    			var option = "<option value='"+name+"'>"+title+"</option>";
 	    		}
 	    		dataSelect.append(option);
 
