@@ -60,7 +60,7 @@
    see consumer.setInputs in example/consumer.js.
  */
 
-require("sha1");
+var sha1 = require("sha1");
 
 var OAuth; if (OAuth == null) OAuth = {};
 
@@ -510,7 +510,7 @@ OAuth.SignatureMethod.registerMethodClass(["HMAC-SHA1", "HMAC-SHA1-Accessor"],
     OAuth.SignatureMethod.makeSubclass(
         function getSignature(baseString) {
             b64pad = '=';
-            var signature = b64_hmac_sha1(this.key, baseString);
+            var signature = sha1.base64_hmac(this.key, baseString);
             return signature;
         }
     ));

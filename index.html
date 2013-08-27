@@ -5,6 +5,8 @@
 		<link type="text/css" href="css/jquery.ui.selectmenu.css" rel="stylesheet" />
 		<link rel="stylesheet" href="css/jquery.fileupload-ui.css">
 		<link href="css/easyPub.css" rel="stylesheet">
+		<link rel="stylesheet" type="text/css" href="/_browserid/style.css">
+
 		<script type="text/javascript" src="modules.js"></script>
 		<script type="text/javascript">
 			var $ = require("jquery"),
@@ -38,6 +40,11 @@
 		<script type="text/javascript" src="js/dnd.js"></script>
 		<script type="text/javascript" src="js/datamanager.js"></script>
 
+		<script type="text/javascript" src="/_browserid/include.js"></script>
+		<script type="text/javascript" src="/_browserid/main.js"></script>
+		<script type="text/javascript">
+			require("lib/credentials");
+		</script>
 
 		<script id="successDialogTemplate" type="text/x-handlebars-template">
 			<div id="{{guid}}" title="Successful Post">
@@ -81,6 +88,12 @@
 		<h1>Easy Publish</h1>
 		<div style="width:1150">
 			<div id="rightCol">
+				<div id="browserid">
+					<div class="login">
+						<img src="/_browserid/sign_in_blue.png">
+					</div>
+					<div class="picture"></div>
+			    </div>
 				<form>
 					<fieldset id="credentials">
 						<legend>Credentials</legend>
