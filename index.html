@@ -2,9 +2,10 @@
 	<head>
 		<title>Learning Registry Easy Publish</title>
 		<link href="css/smoothness/jquery-ui-1.10.2.custom.css" rel="stylesheet" />
-		<link rel="stylesheet" href="css/jquery.fileupload-ui.css" />
+		<link href="css/jquery.fileupload-ui.css" rel="stylesheet" />
+		<link href="css/jquery.ui.selectmenu.css" rel="stylesheet" />
 		<link href="css/easyPub-new.css" rel="stylesheet" />
-		<link rel="stylesheet" type="text/css" href="/_browserid/style.css">
+		<link href="/_browserid/style.css" rel="stylesheet">
 	</head>
 
 	<body>
@@ -37,22 +38,25 @@
 			Backbone.$ = $;
 		</script>
 		<script type="text/javascript" src="js/jquery/jquery-ui-1.10.2.custom.min.js"></script>
-		<!--<script type="text/javascript" src="js/jquery/autoCombobox.js"></script>-->
-		<script type="text/javascript" src="js/jquery/jquery.fileupload.js"></script><!-- old version, why is it here? -->
-		<!--<script type="text/javascript" src="js/jquery/ui/jquery.ui.selectmenu.js"></script>-->
-		<script type="text/javascript" src="js/jquery/ui/jquery.fileupload-ui.js"></script>
+		<script type="text/javascript" src="js/jquery/jquery.fileupload.js"></script>
+		<script type="text/javascript" src="js/jquery/ui/jquery.fileupload-ui.js"></script><!-- both are needed for file upload for some reason -->
 		<script type="text/javascript" src="js/lib/oauth.js"></script>
-		<!--<script type="text/javascript" src="js/data/standardsTree.js"></script>
-		<script type="text/javascript" src="js/data/subjects.js"></script>
-		<script type="text/javascript" src="js/ccss.js"></script>
-		<script type="text/javascript" src="js/treeMenu.js"></script>-->
-		<!--<script type="text/javascript" src="js/easyPub.js"></script>-->
-		<!--<script type="text/javascript" src="js/validator.js"></script>
-		<script type="text/javascript" src="js/fields.js"></script>-->
-		<!--<script type="text/javascript" src="js/dnd.js"></script>-->
-		<script type="text/javascript" src="js/datamanager.js"></script>
+		<script type="text/javascript" src="js/datamanager-new.js"></script>
 		<script type="text/javascript" src="/_browserid/include.js"></script>
 		<script type="text/javascript" src="/_browserid/main.js"></script>
+
+		<!-- used in add/edit page -->
+		<script type="text/javascript" src="js/jquery/autoCombobox.js"></script>
+		<script type="text/javascript" src="js/jquery/ui/jquery.ui.selectmenu.js"></script>
+		<script type="text/javascript" src="js/data/standardsTree.js"></script>
+		<script type="text/javascript" src="js/data/subjects.js"></script>
+		<script type="text/javascript" src="js/ccss.js"></script>
+		<script type="text/javascript" src="js/treeMenu.js"></script>
+		<script type="text/javascript" src="js/easyPub-new.js"></script>
+		<script type="text/javascript" src="js/validator.js"></script>
+		<script type="text/javascript" src="js/fields.js"></script>
+		<!--<script type="text/javascript" src="js/dnd.js"></script>-->
+
 		<script type="text/javascript">
 			require("lib/credentials");
 		</script>
@@ -131,6 +135,7 @@
 						// TODO: get contents
 						var template = _.template($('#edit-template').html(), {});
 						this.$el.html(template);
+						var easyPub = new EasyPublish();
 					}
 				}
 			});
@@ -306,6 +311,23 @@
 					</form>
 				</div>
 			</div>
+			<div id="debugConsole" style="display:none;">
+				<h3>Debug buttons</h3>
+				<!-- <button id="DownloadJSON">Download JSON</button> -->
+				<button id="TestData">Test Data</button>
+				<button id="DL_CSV">DL CSV</button>
+				<button id="DL_JSON">DL JSON</button>
+			</div>
+			<div id="csvHelpDialog" title="CSV Import Help">
+				<p>If you wish to enter data more rapidly, you can submit a CSV file. First click "Download CSV Template" to get a template file. Then add rows of data to that file. Next, import the file by clicking "Select file..." or by dragging the file into the blue area above.</p>
+			</div>
+			<div id="storeHelpDialog" title="Local Storage Help">
+				<p>If you choose this option, your credentials will be stored in your browser using <a href="http://diveintohtml5.info/storage.html">HTML5 Local Storage</a>.</p>
+			</div>
+			<div id="oauthErrorDialog" title="Missing OAuth credentials">
+				<p>Please supply values for all OAuth fields as well as a node URL.</p>
+			</div>
+			<div id="resultsDialog" title="Submission Results"><iframe width="600" height="300"></iframe></div>
 		</script>
 
 		<script type="text/template" id="upload-template">
@@ -314,6 +336,38 @@
 
 		<script type="text/template" id="help-template">
 		help template
+		</script>
+
+
+
+		<!-- make easyPub.js happy -->
+		<script id="successDialogTemplate" type="text/template">
+			<div id="<%= guid %>" title="Successful Post">
+				<p>Your submission "<%= name %>" has been successfully posted to the Learning Registry.
+					You may find it <a href="<%= serverURL %>/obtain?by_doc_ID=true&request_ID=<%= docID %>">here</a>.
+				</p>
+				<p>Your submission "<%= name %>" has been successfully posted to the Learning Registry.
+					You may find it <a href="<%= serverURL %>/obtain?by_doc_ID=true&request_ID=<%= docID %>">here</a>.
+				</p>
+			</div>
+		</script>
+		<script id="failDialogTemplate" type="text/template">
+			<div id="<%= guid %>" title="Post Attempt Failed">
+				<p>Your submission "<%= name %>" failed with the following error: <%= error %>.</p>
+			</div>
+		</script>
+
+		<script id="importFailDialogTemplate" type="text/template">
+			<div id="<%= guid %>" title="Import Attempt Failed">
+				<p>Cannot import CSV file, it is missing the following fields:</p>
+				<p><%= missingFieldsList %></p>
+			</div>
+		</script>
+		<script id="importWarningDialogTemplate" type="text/template">
+			<div id="<%= guid %>" title="Import Warning">
+				<p>Import will proceed but the following columns are extraneous and will be ignored:</p>
+				<p><%= extraHeadersList %></p>
+			</div>
 		</script>
 	</body>
 </html>

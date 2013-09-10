@@ -1,3 +1,8 @@
+body{
+	font: 100% "Trebuchet MS", sans-serif;
+	margin: 20px;
+}
+
 #ez-publish-banner {
 	float: left;
 }
@@ -20,7 +25,11 @@ footer {
 }
 
 
-
+textarea, input[type=text] {
+	font-family: Verdana,Arial,sans-serif;
+	font-size: 0.9em;
+	width: 316px;
+}
 
 .ui-menu .ui-menu-item {
 	margin: 0 16 0 0;
