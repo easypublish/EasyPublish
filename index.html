@@ -15,7 +15,8 @@
 
 			<nav id="main-nav" role="navigation">
 				<ul>
-					<li><a href="#login">Log In</a></li>
+					<li><a href="#logout" class="signed-in">Log Out</a></li>
+					<li><a href="#settings" class="signed-in">Settings</a></li>
 					<li><a href="http://learningregistry.org">Learning Registry</a></li>
 				</ul>
 			</nav>
@@ -89,6 +90,7 @@
 				} else {
 					storedCredentials = false;
 					router.navigate('#login', {trigger:true});
+					$('#main-nav .signed-in').hide();
 				}
 			});
 
@@ -96,7 +98,7 @@
 				el: '.page',
 				render: function () {
 					if (storedCredentials) {
-						$('#main-nav').html(_.template($('#logged-in-nav-template').html()));
+						$('#main-nav .signed-in').show();
 						router.navigate('', {trigger:true});
 					} else {
 						var template = _.template($('#credentials-template').html());
@@ -125,7 +127,7 @@
 								localStorage.getItem("token_secret") &&
 								localStorage.getItem("node_url")) {
 								storedCredentials = true;
-								$('#main-nav').html(_.template($('#logged-in-nav-template').html()));
+								$('#main-nav .signed-in').show();
 								router.navigate('', {trigger:true});
 							}
 						} else {
@@ -156,7 +158,7 @@
 							});
 						}
 					}*/
-					$('#main-nav').html(_.template($('#logged-in-nav-template').html()));
+					$('#main-nav .signed-in').show();
 					router.navigate('', {trigger:true});
 				}
 			});
@@ -278,14 +280,6 @@
 		</script>
 
 		<!-- templates -->
-		<script type="text/template" id="logged-in-nav-template">
-			<ul>
-				<li><a href="#logout">Log Out</a></li>
-				<li><a href="#settings">Settings</a></li>
-				<li><a href="http://learningregistry.org">Learning Registry</a></li>
-			</ul>
-		</script>
-
 		<script type="text/template" id="credentials-template">
 			<form>
 				<h1>Enter Your Credentials</h1>

@@ -20,6 +20,9 @@ body{
 	display: inline-block;
 	margin-left: 1.5em;
 }
+#main-nav .signed-in {
+	display: none;
+}
 footer {
 	clear: both;
 }
