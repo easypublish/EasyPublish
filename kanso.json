@@ -2,7 +2,7 @@
     "name": "EasyPublish",
     "version": "0.0.1",
     "description": "Easy Publish for Learning Registry",
-    "attachments": ["index.html","css", "js", "template.csv"],
+    "attachments": ["index.html","index-old.html","css", "js", "template.csv"],
     "modules":["lib"],
     "load": "lib/app",
 	"dependencies": {
@@ -14,6 +14,7 @@
             "jquery": null,
             "handlebars": null,
             "url": null,
-            "sha1": null
+            "sha1": null,
+            "backbone": null
 	    }
 }

@@ -1,0 +1,198 @@
+<html>
+	<head>
+		<title>Learning Registry Easy Publish</title>
+		<link href="css/smoothness/jquery-ui-1.10.2.custom.css" rel="stylesheet">
+		<link type="text/css" href="css/jquery.ui.selectmenu.css" rel="stylesheet" />
+		<link rel="stylesheet" href="css/jquery.fileupload-ui.css">
+		<link href="css/easyPub.css" rel="stylesheet">
+		<link rel="stylesheet" type="text/css" href="/_browserid/style.css">
+
+		<script type="text/javascript" src="modules.js"></script>
+		<script type="text/javascript">
+			var $ = require("jquery"),
+				jQuery = $;
+				_ = require("underscore"),
+				url = require("url"),
+				Handlebars = require("handlebars");
+
+		</script>
+
+		<!-- script type="text/javascript" src="js/lib/underscore.min.js"></script -->
+		<!-- script type="text/javascript" src="js/jquery/jquery-1.9.1.min.js"></script -->
+		<script type="text/javascript" src="js/jquery/jquery-ui-1.10.2.custom.min.js"></script>
+		<script type="text/javascript" src="js/jquery/autoCombobox.js"></script>
+		<script type="text/javascript" src="js/jquery/jquery.fileupload.js"></script>
+		<script type="text/javascript" src="js/jquery/ui/jquery.ui.selectmenu.js"></script>
+		<script type="text/javascript" src="js/jquery/ui/jquery.fileupload-ui.js"></script>
+
+		<!-- script type="text/javascript" src="js/lib/handlebars.js"></script -->
+		<!-- script type="text/javascript" src="js/lib/uri.min.js"></script -->
+		<script type="text/javascript" src="js/lib/oauth.js"></script>
+		<!-- script type="text/javascript" src="js/lib/sha1.js"></script-->
+
+		<script type="text/javascript" src="js/data/standardsTree.js"></script>
+		<script type="text/javascript" src="js/data/subjects.js"></script>
+		<script type="text/javascript" src="js/ccss.js"></script>
+		<script type="text/javascript" src="js/treeMenu.js"></script>
+		<script type="text/javascript" src="js/easyPub.js"></script>
+		<script type="text/javascript" src="js/validator.js"></script>
+		<script type="text/javascript" src="js/fields.js"></script>
+		<script type="text/javascript" src="js/dnd.js"></script>
+		<script type="text/javascript" src="js/datamanager.js"></script>
+
+		<script type="text/javascript" src="/_browserid/include.js"></script>
+		<script type="text/javascript" src="/_browserid/main.js"></script>
+		<script type="text/javascript">
+			require("lib/credentials");
+		</script>
+
+		<script id="successDialogTemplate" type="text/x-handlebars-template">
+			<div id="{{guid}}" title="Successful Post">
+				<p>Your submission "{{name}}" has been successfully posted to the Learning Registry.
+					You may find it <a href="{{serverURL}}/obtain?by_doc_ID=true&request_ID={{docID}}">here</a>.
+				</p>
+				<p>Your submission "{{name}}" has been successfully posted to the Learning Registry.
+					You may find it <a href="{{serverURL}}/obtain?by_doc_ID=true&request_ID={{docID}}">here</a>.
+				</p>
+			</div>
+		</script>
+		<script id="failDialogTemplate" type="text/x-handlebars-template">
+			<div id="{{guid}}" title="Post Attempt Failed">
+				<p>Your submission "{{name}}" failed with the following error: {{error}}.</p>
+			</div>
+		</script>
+
+		<script id="importFailDialogTemplate" type="text/x-handlebars-template">
+			<div id="{{guid}}" title="Import Attempt Failed">
+				<p>Cannot import CSV file, it is missing the following fields:</p>
+				<p>{{missingFieldsList}}</p>
+			</div>
+		</script>
+		<script id="importWarningDialogTemplate" type="text/x-handlebars-template">
+			<div id="{{guid}}" title="Import Warning">
+				<p>Import will proceed but the following columns are extraneous and will be ignored:</p>
+				<p>{{extraHeadersList}}</p>
+			</div>
+		</script>
+
+		<style>
+			body{
+				font: 100% "Trebuchet MS", sans-serif;
+				margin: 20px;
+			}
+		</style>
+	</head>
+
+
+	<body>
+		<h1>Easy Publish</h1>
+		<div style="width:1150">
+			<div id="rightCol">
+				<form>
+					<fieldset id="credentials">
+						<legend>Credentials</legend>
+						<div id="browserid">
+					<div class="login">
+						<img src="/_browserid/sign_in_blue.png">
+					</div>
+					<div class="picture"></div>
+			    </div>
+						<div class='fieldRow'>
+							<label for="consumer_key">Consumer Key</label><br>
+							<input type="text" id="consumer_key" name="consumer_key" size="50" title="Your OAuth consumer_key" class="text ui-widget-content ui-corner-all oauth"/>
+						</div>
+						<div class='fieldRow'>
+							<label for="consumer_secret">Consumer Secret</label><br>
+							<input type="text" id="consumer_secret" name="consumer_secret" size="50"  title="Your OAuth consumer_secret" class="text ui-widget-content ui-corner-all oauth"/>
+						</div>
+						<div class='fieldRow'>
+							<label for="token_secret">Token Secret</label><br>
+							<input type="text" id="token_secret" name="token_secret" size="50"  title="Your OAuth token_secret" class="text ui-widget-content ui-corner-all oauth"/>
+						</div>
+						<div class='fieldRow'>
+							<label for="node_url">Node URL</label><br>
+							<input type="text" id="node_url" name="node_url"  size="50" title="URL of the node you would like to submit to" class="text ui-widget-content ui-corner-all oauth"/>
+						</div>
+						<div class='fieldRow' id="store_cred_row">
+							<label for="store_cred">Store these credentials in this browser?</label>
+							<input type="checkbox" id="store_cred" name="store_cred"  size="50" title="Store these values in your browser's local storage."/>
+							<span id="store_state">(Not stored)</span>
+		                	<button class="round-btn" id="storeHelp"></button>
+						</div>
+					</fieldset>
+					<p><button id="Submit">Submit Data To Learning Registry</button></p>
+					<fieldset id="dropForm">
+						<legend>Import Data</legend>
+						<div id="drop_zone">	
+							<p id="dropStatus1">Drop a CSV data file here</p>
+							<p id="dropStatus2"></p>
+						</div>
+						<br>
+						<!--<input type="file" id="files" name="file" />-->
+		                <span class="btn btn-success fileinput-button">
+		                    <span>Select File...</span>
+		                    <input type="file" name="files[]" id="csvFile">
+		                </span>
+		                <button class="round-btn" id="csvHelp"></button>
+						<!--<button id="DownloadCSV">Download CSV Template</button>-->
+						<a href="template.csv">Download CSV Template</a>
+						<p>
+							<label for="dataSelect">Select a Dataset:</label>
+							<br><br>
+							<select name="dataSelect" id="dataSelect">
+								<option value='No Data'>No Data</option>
+							</select>
+							<button id="removeRow" class="btn">Remove Row</button>
+						</p>
+						<div>
+							<button id="prevData">Previous</button><button id="nextData">Next</button>
+						</div>
+					</fieldset>
+				</form>
+
+			</div>
+			<div id="middleCol">
+				<form>
+					<!-- <div id="testDiv">TEST</div> -->
+					<fieldset id="alignmentForm">
+						<legend>Standards Alignment</legend>
+						<div class="sublegend">Alignment 1</div>
+						<button id="addAlignment">Add Alignment</button>
+					</fieldset>
+					<fieldset id="authorForm">
+						<legend>Authors</legend>
+						<div class="sublegend">Author 1</div>
+						<button id="addAuthor">Add Author</button>
+					</fieldset>
+					<fieldset id="publisherForm">
+						<legend>Publisher</legend>
+					</fieldset>
+				</form>
+			</div>
+			<div id="leftCol">
+				<form>
+					<fieldset id="mainForm">
+						<legend>Resource Information</legend>
+					</fieldset>
+				</form>
+			</div>
+		</div>
+		<div id="debugConsole" style="display:none;">
+			<h3>Debug buttons</h3>
+			<!-- <button id="DownloadJSON">Download JSON</button> -->
+			<button id="TestData">Test Data</button>
+			<button id="DL_CSV">DL CSV</button>
+			<button id="DL_JSON">DL JSON</button>
+		</div>
+		<div id="csvHelpDialog" title="CSV Import Help">
+			<p>If you wish to enter data more rapidly, you can submit a CSV file. First click "Download CSV Template" to get a template file. Then add rows of data to that file. Next, import the file by clicking "Select file..." or by dragging the file into the blue area above.</p>
+		</div>
+		<div id="storeHelpDialog" title="Local Storage Help">
+			<p>If you choose this option, your credentials will be stored in your browser using <a href="http://diveintohtml5.info/storage.html">HTML5 Local Storage</a>.</p>
+		</div>
+		<div id="oauthErrorDialog" title="Missing OAuth credentials">
+			<p>Please supply values for all OAuth fields as well as a node URL.</p>
+		</div>
+		<div id="resultsDialog" title="Submission Results"><iframe width="600" height="300"></iframe></div>
+	</body>
+</html>
