@@ -57,86 +57,13 @@ function EasyPublish() {
 		position:dialogPosition
 	});
 
-	function supports_html5_storage() {
-	  try {
-	    return 'localStorage' in window && window['localStorage'] !== null;
-	  } catch (e) {
-	    return false;
-	  }
-	}
-	if(supports_html5_storage()) {
-		local_storage = true;
-		var storedCreds = localStorage.getItem("store_credentials");
-		if(storedCreds=="true") {
-			store_credentials = true;
-			$("#store_cred").attr('checked', true);
-			$("#store_state").html("(stored)");
-			restoreCredentials();
-		} else {
-			$("#store_cred").attr('checked', false);
-		}
-	} else {
-		$("#store_cred_row").hide();
-		local_storeage = false;
-	}
-
-	$("#store_cred").change(function() {
-		//var checked = $("#store_cred").val();
-		if(this.checked) {
-			store_credentials = true;
-			localStorage.setItem("store_credentials", true);
-			storeAllCredentials();
-			$("#store_state").html("(stored)");
-		} else {
-			store_credentials = false;
-			localStorage.setItem("store_credentials", false);
-			clearAllCredentials();
-			$("#store_state").html("(not stored)");
-		}
-	});
-
-	$(".oauth").change(function() {
-		if(store_credentials) {
-			storeCredential(this);
-		}
-	});
-
     function getParameterByName(name) {
         name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
         var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
             results = regex.exec(location.search);
         return results == null ? undefined : decodeURIComponent(results[1].replace(/\+/g, " "));
     }
-
-	function clearAllCredentials() { 
-		$(".oauth").each(function( index ){
-			var id = $(this).attr("id");
-			localStorage.removeItem(id);
-		});
-	}
-
-	function restoreCredentials() { 
-		$(".oauth").each(function( index ){
-			var id = $(this).attr("id");
-			var value = localStorage.getItem(id);
-			$(this).val(value);
-		});
-	}
-
-	function storeAllCredentials() { 
-		$(".oauth").each(function( index ){
-			storeCredential($(this));
-		});
-	}
-
-	function storeCredential(credField) {
-		if(local_storage) {
-			var id = $(credField).attr("id");
-			var value = $(credField).val();
-			localStorage.setItem(id, value);
-		}
-	}
-
+	
 	function updateEdFramework(id) {
 		var selection = $("#"+id).val();
 		var indexLoc = id.lastIndexOf("_");

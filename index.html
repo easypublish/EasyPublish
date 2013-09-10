@@ -67,24 +67,52 @@
 			var Router = Backbone.Router.extend({
 				routes: {
 					'login': 'login',
+					'logout': 'logout',
 					'': 'list',
 					'create': 'create',
 					'edit/:id': 'edit',
 					'upload': 'upload',
+					'settings': 'settings',
 					'help': 'help'
 					// not doing bulk edit
 				}
 			});
 			var router = new Router();
 
+			// login and logout event handlers
+			$.couch.browserid.login(function (event, error, user) {
+				hasCredentials = user;
+			});
+			$.couch.browserid.logout(function (event, error, user) {
+				if (error) {
+					alert('Error logging out: ' + error);
+				} else {
+					hasCredentials = false;
+					router.navigate('#login', {trigger:true});
+				}
+			});
+
 			var Credentials = Backbone.View.extend({
 				el: '.page',
 				render: function () {
 					if (hasCredentials) {
+						$('#main-nav').html(_.template($('#logged-in-nav-template').html()));
 						router.navigate('', {trigger:true});
 					} else {
 						var template = _.template($('#credentials-template').html());
 						this.$el.html(template);
+						/*if (window.localStorage != undefined) {
+							if (localStorage.getItem("consumer_key") &&
+								localStorage.getItem("consumer_secret") &&
+								localStorage.getItem("token_secret") &&
+								localStorage.getItem("node_url")) {
+								hasCredentials = true;
+								$('#main-nav').html(_.template($('#logged-in-nav-template').html()));
+								router.navigate('', {trigger:true});
+							}
+						} else {
+							$(".page #store_cred_row").hide();
+						}*/
 					}
 				},
 				events: {
@@ -92,12 +120,37 @@
 				},
 				login: function (event) {
 					event.preventDefault();
+					var form = $(event.target);
 					// TODO: check form
 					hasCredentials = true;
+					/*if (window.localStorage != undefined) {
+						if (form.find('#store_cred').get(0).checked) {
+							// store credentials for next page load
+							form.find('.oauth').each(function (index, el) {
+								var el = $(el);
+								localStorage.setItem(el.attr('id'), el.val());
+							});
+						} else {
+							// clear stored credentials
+							form.find('.oauth').each(function (index, el) {
+								var el = $(el);console.log('clearing ' + el.attr('id'));
+								localStorage.removeItem(el.attr('id'));
+							});
+						}
+					}*/
+					$('#main-nav').html(_.template($('#logged-in-nav-template').html()));
 					router.navigate('', {trigger:true});
 				}
 			});
 			var credentials = new Credentials();
+
+			var Logout = Backbone.View.extend({
+				el: '.page',
+				render: function () {
+					$.couch.browserid.logout();
+				}
+			});
+			var logout = new Logout();
 
 			var List = Backbone.View.extend({
 				el: '.page',
@@ -121,6 +174,7 @@
 					} else {
 						var template = _.template($('#edit-template').html());
 						this.$el.html(template);
+						var easyPub = new EasyPublish();
 					}
 				}
 			});
@@ -154,6 +208,19 @@
 			});
 			var upload = new Upload();
 
+			var Settings = Backbone.View.extend({
+				el: '.page',
+				render: function () {
+					if (!hasCredentials) {
+						router.navigate('login', {trigger:true});
+					} else {
+						var template = _.template($('#settings-template').html(), {});
+						this.$el.html(template);
+					}
+				}
+			});
+			var settings = new Settings();
+
 			var Help = Backbone.View.extend({
 				el: '.page',
 				render: function () {
@@ -165,6 +232,9 @@
 
 			router.on('route:login', function () {
 				credentials.render();
+			});
+			router.on('route:logout', function () {
+				logout.render();
 			});
 			router.on('route:list', function () {
 				list.render();
@@ -178,6 +248,9 @@
 			router.on('route:upload', function () {
 				upload.render();
 			});
+			router.on('route:settings', function () {
+				settings.render();
+			});
 			router.on('route:help', function () {
 				help.render();
 			});
@@ -187,6 +260,14 @@
 		</script>
 
 		<!-- templates -->
+		<script type="text/template" id="logged-in-nav-template">
+			<ul>
+				<li><a href="#logout">Log Out</a></li>
+				<li><a href="#settings">Settings</a></li>
+				<li><a href="http://learningregistry.org">Learning Registry</a></li>
+			</ul>
+		</script>
+
 		<script type="text/template" id="credentials-template">
 			<form>
 				<h1>Enter Your Credentials</h1>
@@ -332,6 +413,10 @@
 
 		<script type="text/template" id="upload-template">
 		upload template
+		</script>
+
+		<script type="text/template" id="settings-template">
+		settings template
 		</script>
 
 		<script type="text/template" id="help-template">
