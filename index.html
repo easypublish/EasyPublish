@@ -62,7 +62,7 @@
 		</script>
 
 		<script>
-		var hasCredentials = false;
+		var storedCredentials = false;
 		$(function () {
 			var Router = Backbone.Router.extend({
 				routes: {
@@ -81,13 +81,13 @@
 
 			// login and logout event handlers
 			$.couch.browserid.login(function (event, error, user) {
-				hasCredentials = user;
+				storedCredentials = user;
 			});
 			$.couch.browserid.logout(function (event, error, user) {
 				if (error) {
 					alert('Error logging out: ' + error);
 				} else {
-					hasCredentials = false;
+					storedCredentials = false;
 					router.navigate('#login', {trigger:true});
 				}
 			});
@@ -95,18 +95,36 @@
 			var Credentials = Backbone.View.extend({
 				el: '.page',
 				render: function () {
-					if (hasCredentials) {
+					if (storedCredentials) {
 						$('#main-nav').html(_.template($('#logged-in-nav-template').html()));
 						router.navigate('', {trigger:true});
 					} else {
 						var template = _.template($('#credentials-template').html());
 						this.$el.html(template);
+						
+						var loginWidget = this.$el.find('#browserid .login');
+						var icon = loginWidget.find('> img');
+						if (icon.is(':hidden')) {
+							// login widget setup only runs once on page load, set it back up after logout
+							loginWidget.show().removeClass('pending');
+							icon.show();
+
+							$('#browserid .picture').empty();
+							loginWidget.find('span').remove();
+							loginWidget.find('a.logout').remove();
+
+							loginWidget.addClass("clickable");
+							loginWidget.click(function() {
+								$.couch.browserid.login();
+							});
+						}
+
 						/*if (window.localStorage != undefined) {
 							if (localStorage.getItem("consumer_key") &&
 								localStorage.getItem("consumer_secret") &&
 								localStorage.getItem("token_secret") &&
 								localStorage.getItem("node_url")) {
-								hasCredentials = true;
+								storedCredentials = true;
 								$('#main-nav').html(_.template($('#logged-in-nav-template').html()));
 								router.navigate('', {trigger:true});
 							}
@@ -122,7 +140,7 @@
 					event.preventDefault();
 					var form = $(event.target);
 					// TODO: check form
-					hasCredentials = true;
+					// TODO: log in with form field data
 					/*if (window.localStorage != undefined) {
 						if (form.find('#store_cred').get(0).checked) {
 							// store credentials for next page load
@@ -155,7 +173,7 @@
 			var List = Backbone.View.extend({
 				el: '.page',
 				render: function () {
-					if (!hasCredentials) {
+					if (!storedCredentials) {
 						router.navigate('login', {trigger:true});
 					} else {
 						// TODO: get contents
@@ -169,7 +187,7 @@
 			var Create = Backbone.View.extend({
 				el: '.page',
 				render: function () {
-					if (!hasCredentials) {
+					if (!storedCredentials) {
 						router.navigate('login', {trigger:true});
 					} else {
 						var template = _.template($('#edit-template').html());
@@ -183,7 +201,7 @@
 			var Edit = Backbone.View.extend({
 				el: '.page',
 				render: function () {
-					if (!hasCredentials) {
+					if (!storedCredentials) {
 						router.navigate('login', {trigger:true});
 					} else {
 						// TODO: get contents
@@ -198,7 +216,7 @@
 			var Upload = Backbone.View.extend({
 				el: '.page',
 				render: function () {
-					if (!hasCredentials) {
+					if (!storedCredentials) {
 						router.navigate('login', {trigger:true});
 					} else {
 						var template = _.template($('#upload-template').html(), {});
@@ -211,7 +229,7 @@
 			var Settings = Backbone.View.extend({
 				el: '.page',
 				render: function () {
-					if (!hasCredentials) {
+					if (!storedCredentials) {
 						router.navigate('login', {trigger:true});
 					} else {
 						var template = _.template($('#settings-template').html(), {});
@@ -276,7 +294,7 @@
 						<img src="/_browserid/sign_in_blue.png">
 					</div>
 					<div class="picture"></div>
-			    </div>
+					</div>
 				<div class='fieldRow'>
 					<label for="consumer_key">Consumer Key</label><br>
 					<input type="text" id="consumer_key" name="consumer_key" size="50" title="Your OAuth consumer_key" class="text ui-widget-content ui-corner-all oauth"/>
@@ -345,11 +363,11 @@
 						<p><button id="Submit">Submit Data To Learning Registry</button></p>
 						<fieldset id="dropForm">
 							<legend>Import Data</legend>
-			                <span class="btn btn-success fileinput-button">
-			                    <span>Select File...</span>
-			                    <input type="file" name="files[]" id="csvFile">
-			                </span>
-			                <button class="round-btn" id="csvHelp"></button>
+											<span class="btn btn-success fileinput-button">
+													<span>Select File...</span>
+													<input type="file" name="files[]" id="csvFile">
+											</span>
+											<button class="round-btn" id="csvHelp"></button>
 							<a href="template.csv">Download CSV Template</a>
 							<p>
 								<label for="dataSelect">Select a Dataset:</label>
