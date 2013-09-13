@@ -94,6 +94,66 @@
 				}
 			});
 
+			// Models
+			var Alignment = Backbone.Model.extend({
+				defaults: {
+					alignmentType:'',
+					educationalFramework:'',
+					'ELA-Standard':'',
+					'Math-Standard':''
+				}
+			});
+			var AlignmentList = Backbone.Collection.extend({
+				model: Alignment
+			});
+			var Author = Backbone.Model.extend({
+				defaults: {
+					author_name:'',
+					author_url:'',
+					author_email:''
+				}
+			});
+			var AuthorList = Backbone.Collection.extend({
+				model: Author
+			});
+			var Item = Backbone.Model.extend({
+				defaults: {
+					id:'',	// not in CSV
+					title:'',
+					url:'',
+					description:'',
+					keywords:'',
+					grade:'',
+					dateCreated:'',
+					dateModified:'',
+					language:'',
+					mediaType:'',
+					learningResourceType:'',
+					interactivityType:'',
+					useRightsUrl:'',
+					isbasedOnUrl:'',
+					alignments:new AlignmentList(),
+					authors:new AuthorList(),
+					publisher_name:'',
+					publisher_url:'',
+					publisher_email:'',
+					status:''	// not in CSV; possible values are Registered, Published, or Error
+				},
+				validate: function (attributes) {
+					// validation, e.g. check that alignments are an array of Alignment objects
+					// and return error string
+				},
+				initialize: function () {
+					this.bind('error', function (model, error) {
+						// do something in case of error
+					});
+				}
+			});
+			var ItemList = Backbone.Collection.extend({
+				model: Item
+			});
+
+			// Views
 			var Credentials = Backbone.View.extend({
 				el: '.page',
 				render: function () {
@@ -179,7 +239,13 @@
 						router.navigate('login', {trigger:true});
 					} else {
 						// TODO: get contents
-						var template = _.template($('#list-template').html());
+						// sample data for now:
+						var data = new ItemList([
+													/*{ id:1, title:'First Item', url:'http://www.example.com/1', description:'asdf', status:'Published' },
+													{ id:2, title:'Second Item', url:'http://www.example.com/2', description:'jkl;', status:'Registered' },
+													{ id:3, title:'Third Item', url:'http://www.example.com/2', description:'1234', status:'Error' }*/
+												]);
+						var template = _.template($('#list-template').html(), {name:storedCredentials.name,data:data.models});
 						this.$el.html(template);
 					}
 				}
@@ -250,6 +316,7 @@
 			});
 			var help = new Help();
 
+			// Routes
 			router.on('route:login', function () {
 				credentials.render();
 			});
@@ -315,13 +382,14 @@
 		</script>
 
 		<script type="text/template" id="list-template">
-			<h1>Welcome ...</h1>
+			<h1>Welcome <%= name %></h1>
 
-			<p>You have registered ....</p>
+			<p>You have registered <%= data.length %> items</p>
 
 			<a href="#create" class="button">Register new item</a>
 			<a href="#upload" class="button">Bulk upload in CSV</a>
 
+			<% if (data.length > 0) { %>
 			<table>
 				<thead>
 					<tr>
@@ -333,28 +401,30 @@
 					</tr>
 				</thead>
 				<tbody>
+					<% _.each(data, function (item) { %>
 					<tr>
-						<td>...</td>
-						<td><a href="...">...</a></td>
-						<td>...</td>
-						<td>...</td>
+						<td><%= item.get('title') %></td>
+						<td><a href="<%= item.get('url') %>"><%= item.get('url') %></a></td>
+						<td><%= item.get('description') %></td>
+						<td><%= item.get('status') %></td>
 						<td>
-							<a href="#edit/...">Edit</a>
+							<a href="#edit/<%= item.get('id') %>">Edit</a>
 							<button class="delete">Delete</button>
 							<button class="publish">Publish</button>
 							<button class="unpublish">Un-publish</button>
 						</td>
 					</tr>
+					<% }); %>
 				</tbody>
 			</table>
 			<!-- pagination -->
+			<% } %>
 		</script>
 
 		<script type="text/template" id="edit-template">
 			<div style="width:1150">
 				<div id="rightCol">
 					<form>
-						<p><button id="Submit">Submit Data To Learning Registry</button></p>
 						<fieldset id="dropForm">
 							<legend>Import Data</legend>
 											<span class="btn btn-success fileinput-button">
@@ -403,6 +473,10 @@
 						</fieldset>
 					</form>
 				</div>
+				<p>
+					<button id="Save">Save Data</button>
+					<button id="Submit">Submit Data To Learning Registry</button>
+				</p>
 			</div>
 			<div id="debugConsole" style="display:none;">
 				<h3>Debug buttons</h3>
@@ -413,12 +487,6 @@
 			</div>
 			<div id="csvHelpDialog" title="CSV Import Help">
 				<p>If you wish to enter data more rapidly, you can submit a CSV file. First click "Download CSV Template" to get a template file. Then add rows of data to that file. Next, import the file by clicking "Select file..." or by dragging the file into the blue area above.</p>
-			</div>
-			<div id="storeHelpDialog" title="Local Storage Help">
-				<p>If you choose this option, your credentials will be stored in your browser using <a href="http://diveintohtml5.info/storage.html">HTML5 Local Storage</a>.</p>
-			</div>
-			<div id="oauthErrorDialog" title="Missing OAuth credentials">
-				<p>Please supply values for all OAuth fields as well as a node URL.</p>
 			</div>
 			<div id="resultsDialog" title="Submission Results"><iframe width="600" height="300"></iframe></div>
 		</script>

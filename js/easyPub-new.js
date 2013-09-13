@@ -137,6 +137,18 @@ function EasyPublish() {
 		}
 		return false;
 	});
+	var saveButton = $("#Save");
+	saveButton.button();
+	saveButton.click(function() {
+		savedDocs = [];
+		var valid = validateAll();
+		if(valid) {
+			dataManager.saveData();
+		} else {
+			alert("Please correct the indicated problems");
+		}
+		return false;
+	});
 	/*var downloadCSVButton = $("#DownloadCSV");
 	downloadCSVButton.button();
 	downloadCSVButton.click(function() {
@@ -505,24 +517,9 @@ function EasyPublish() {
     }
 
     this.getOAuthData = function() {
-    	var cons_key = $("#consumer_key").val();
-    	var cons_sec = $("#consumer_secret").val();
-    	var tok_sec = $("#token_secret").val();
-    	var n_url = $("#node_url").val();
-
-    	if(cons_key && cons_sec && tok_sec && n_url) {
-	    	var oauth_data = {
-		        consumer_key: cons_key,
-		        consumer_secret: cons_sec,
-		        token: 'node_sign_token',
-		        token_secret: tok_sec,
-		        node_url: n_url
-	    	}
-	    	return oauth_data;
-	    } else {
-	    	$('#oauthErrorDialog').dialog("open");
-	    	return null;
-	    }
+    	var oauth_data = storedCredentials.oauth;
+    	oauth_data.token = 'node_sign_token';
+	    return oauth_data;
 	}
 
 	this.getAuthors = function() {
