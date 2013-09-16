@@ -58,27 +58,44 @@
 		<script type="text/javascript" src="js/fields.js"></script>
 		<!--<script type="text/javascript" src="js/dnd.js"></script>-->
 
+		<script type="text/javascript" src="js/backbone.localStorage-min.js"></script>
+
 		<script type="text/javascript">
 			require("lib/credentials");
 		</script>
 
 		<script>
 		var storedCredentials = false;
+
+		var Router = Backbone.Router.extend({
+			routes: {
+				'login': 'login',
+				'logout': 'logout',
+				'': 'list',
+				'create': 'create',
+				'edit/:id': 'edit',
+				'upload': 'upload',
+				'settings': 'settings',
+				'help': 'help'
+				// not doing bulk edit
+			}
+		});
+		var router = new Router();
+
+		// Models
+		var Item = Backbone.Model.extend({
+			defaults: {
+				data:'',
+				status:'Unpublished'	// Allowed values are Published, Unpublished, and Error
+			}
+		});
+		var ItemList = Backbone.Collection.extend({
+			model: Item,
+			localStorage: new Backbone.LocalStorage("EZPublishItems")
+		});
+		var Items = new ItemList();
+
 		$(function () {
-			var Router = Backbone.Router.extend({
-				routes: {
-					'login': 'login',
-					'logout': 'logout',
-					'': 'list',
-					'create': 'create',
-					'edit/:id': 'edit',
-					'upload': 'upload',
-					'settings': 'settings',
-					'help': 'help'
-					// not doing bulk edit
-				}
-			});
-			var router = new Router();
 
 			// login and logout event handlers
 			$.couch.browserid.login(function (event, error, user) {
@@ -92,65 +109,6 @@
 					router.navigate('#login', {trigger:true});
 					$('#main-nav .signed-in').hide();
 				}
-			});
-
-			// Models
-			var Alignment = Backbone.Model.extend({
-				defaults: {
-					alignmentType:'',
-					educationalFramework:'',
-					'ELA-Standard':'',
-					'Math-Standard':''
-				}
-			});
-			var AlignmentList = Backbone.Collection.extend({
-				model: Alignment
-			});
-			var Author = Backbone.Model.extend({
-				defaults: {
-					author_name:'',
-					author_url:'',
-					author_email:''
-				}
-			});
-			var AuthorList = Backbone.Collection.extend({
-				model: Author
-			});
-			var Item = Backbone.Model.extend({
-				defaults: {
-					id:'',	// not in CSV
-					title:'',
-					url:'',
-					description:'',
-					keywords:'',
-					grade:'',
-					dateCreated:'',
-					dateModified:'',
-					language:'',
-					mediaType:'',
-					learningResourceType:'',
-					interactivityType:'',
-					useRightsUrl:'',
-					isbasedOnUrl:'',
-					alignments:new AlignmentList(),
-					authors:new AuthorList(),
-					publisher_name:'',
-					publisher_url:'',
-					publisher_email:'',
-					status:''	// not in CSV; possible values are Registered, Published, or Error
-				},
-				validate: function (attributes) {
-					// validation, e.g. check that alignments are an array of Alignment objects
-					// and return error string
-				},
-				initialize: function () {
-					this.bind('error', function (model, error) {
-						// do something in case of error
-					});
-				}
-			});
-			var ItemList = Backbone.Collection.extend({
-				model: Item
 			});
 
 			// Views
@@ -238,16 +196,20 @@
 					if (!storedCredentials) {
 						router.navigate('login', {trigger:true});
 					} else {
-						// TODO: get contents
-						// sample data for now:
-						var data = new ItemList([
-													/*{ id:1, title:'First Item', url:'http://www.example.com/1', description:'asdf', status:'Published' },
-													{ id:2, title:'Second Item', url:'http://www.example.com/2', description:'jkl;', status:'Registered' },
-													{ id:3, title:'Third Item', url:'http://www.example.com/2', description:'1234', status:'Error' }*/
-												]);
-						var template = _.template($('#list-template').html(), {name:storedCredentials.name,data:data.models});
+						Items.fetch();
+						var template = _.template($('#list-template').html(), {name:storedCredentials.name,data:Items.models});
 						this.$el.html(template);
 					}
+				},
+				events: {
+					'click .delete': 'delete'
+				},
+				delete: function (event) {
+					event.preventDefault();
+					var button = $(event.target);
+					var id = button.attr('data-item');
+					Items.findWhere({id:id}).destroy();
+					button.closest('tr').remove();
 				}
 			});
 			var list = new List();
@@ -260,7 +222,19 @@
 					} else {
 						var template = _.template($('#edit-template').html());
 						this.$el.html(template);
-						var easyPub = new EasyPublish();
+						this.easyPub = new EasyPublish();
+					}
+				},
+				events: {
+					'click #Save': 'save'
+				},
+				save: function (event) {
+					event.preventDefault();
+					if(this.easyPub.validateAll()) {
+						this.easyPub.dataManager.saveData();
+						router.navigate('', {trigger:true});
+					} else {
+						alert("Please correct the indicated problems");
 					}
 				}
 			});
@@ -402,14 +376,15 @@
 				</thead>
 				<tbody>
 					<% _.each(data, function (item) { %>
+					<% var properties = item.get('data')[0].resource_data.items[0].properties; %>
 					<tr>
-						<td><%= item.get('title') %></td>
-						<td><a href="<%= item.get('url') %>"><%= item.get('url') %></a></td>
-						<td><%= item.get('description') %></td>
+						<td><%= properties.name %></td>
+						<td><a href="<%= properties.url %>"><%= properties.url %></a></td>
+						<td><%= properties.url %></td>
 						<td><%= item.get('status') %></td>
 						<td>
 							<a href="#edit/<%= item.get('id') %>">Edit</a>
-							<button class="delete">Delete</button>
+							<button class="delete" data-item="<%= item.get('id') %>">Delete</button>
 							<button class="publish">Publish</button>
 							<button class="unpublish">Un-publish</button>
 						</td>
