@@ -385,8 +385,13 @@
 						<td>
 							<a href="#edit/<%= item.get('id') %>">Edit</a>
 							<button class="delete" data-item="<%= item.get('id') %>">Delete</button>
+							<% if (item.get('status') == 'Unpublished') { %>
 							<button class="publish">Publish</button>
+							<% } else if (item.get('status') == 'Published') { %>
 							<button class="unpublish">Un-publish</button>
+							<% } else { %>
+							<!-- can only edit if status is error -->
+							<% } %>
 						</td>
 					</tr>
 					<% }); %>
