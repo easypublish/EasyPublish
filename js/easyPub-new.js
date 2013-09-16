@@ -11,6 +11,7 @@ function EasyPublish() {
 	this.fieldManager = new FieldManager();
 	// var dnd = new DragAndDrop(this);
 	var dataManager = new DataManager(this);
+	this.dataManager = dataManager;
 	var validator = new Validator();
 
 	var importIndex = 0;
@@ -138,17 +139,7 @@ function EasyPublish() {
 		return false;
 	});
 	var saveButton = $("#Save");
-	saveButton.button();
-	saveButton.click(function() {
-		savedDocs = [];
-		var valid = validateAll();
-		if(valid) {
-			dataManager.saveData();
-		} else {
-			alert("Please correct the indicated problems");
-		}
-		return false;
-	});
+	saveButton.button();	// click event handled by backbone event
 	/*var downloadCSVButton = $("#DownloadCSV");
 	downloadCSVButton.button();
 	downloadCSVButton.click(function() {
@@ -658,6 +649,7 @@ function EasyPublish() {
 		validateFields(that.fieldManager.publisherFields);
 	    return valid;
 	}
+	this.validateAll = validateAll;
 
 
 }

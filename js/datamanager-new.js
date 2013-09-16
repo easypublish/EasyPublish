@@ -283,6 +283,19 @@ function DataManager(easyPub) {
 
     }
 
+
+
+    //TODO - handle arrays of form data
+    this.saveData = function () {
+        if (window.File && window.FileReader && window.FileList && window.Blob) {
+            envelopes = makeAllEnvelopes();
+            Items.create({data:envelopes, status:'Unpublished'});
+            // item.save();
+        } else {
+            alert('The File APIs are not fully supported in this browser. You will not be able to save locally before publishing.');
+        }
+    }
+
     function getOAuthInfo(oauth_data) {
 
         var message = {
