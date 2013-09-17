@@ -190,7 +190,7 @@ function DataManager(easyPub) {
         return envelope;
     }
 
-    function makeAllEnvelopes() {
+    this.makeAllEnvelopes = function() {
         var envelopes = [];
         var numRows = easyPub.getNumImportRows();
         if(numRows==0) {
@@ -209,99 +209,7 @@ function DataManager(easyPub) {
         var envelope = makeEnvelope();
         console.log(envelope);
     }
-
-    //TODO - handle arrays of form data
-    this.submitData = function (envelopes, cb) {
-        if (envelopes == undefined) {
-            envelopes = makeAllEnvelopes();
-        }
-
-        var oauth_data = storedCredentials.oauth;
-        if(oauth_data==null) {
-            console.log("null oauth_data, aborting submit")
-            return;
-        } else {
-            var message = {
-                parameters: {},
-                body: {
-                    documents: envelopes
-                }
-            };
-            request = oauthRequest(oauth_data.node_url + '/publish', message, oauth_data);
-            
-            request.done(function(msg) {
-                console.log("Done");
-                console.log(msg);
-                if(msg.OK) {
-                    if (window.File && window.FileReader && window.FileList && window.Blob) {
-                        Items.create({data:envelopes, status:'Published'});
-                    }
-                    if (cb) {
-                        cb(msg.document_results);
-                    }
-                } else {
-                    alert("Submission failed:\n" + JSON.stringify(msg.document_results));
-                }
-            });
-
-            request.fail(function(msg) {
-                console.log("Fail");
-                console.log(msg);
-                alert("Submission failed.");
-            });
-        }
-
-    }
-
-
-
-    //TODO - handle arrays of form data
-    this.saveData = function () {
-        if (window.File && window.FileReader && window.FileList && window.Blob) {
-            envelopes = makeAllEnvelopes();
-            Items.create({data:envelopes, status:'Unpublished'});
-        } else {
-            alert('The File APIs are not fully supported in this browser. You will not be able to save locally before publishing.');
-        }
-    }
-
-    function oauthRequest(path, message, accessor, undefined) {
-        message.action = path;
-        message.method = 'POST';
-        OAuth.completeRequest(message, accessor);
-        var parameters = message.parameters;
-        var options = {
-            headers: {
-                Authorization: OAuth.getAuthorizationHeader('', parameters)
-            },
-            data: JSON.stringify(message.body)
-        }
-
-        // var options = {
-        //     contentType: "application/x-www-form-urlencoded",
-        //     headers: {
-        //         Authorization: OAuth.getAuthorizationHeader('', parameters),
-        //         Accept: "application/json"
-        //     },
-        //     data: OAuth.formEncode(parameters)
-        // }
-
-        return commonAjax('POST', path, options);
-    }
-
-    function commonAjax(method, url, options) {
-        var settings = {
-            type: method,
-            contentType: "application/json",
-            dataType: "json"
-        }
-        if (options) {
-            settings = _.extend(settings, options);
-        }
-        var request = $.ajax(url, settings);
-
-        return request;
-    }
+    
 
     function displayResults(results) {
         var output = JSON.stringify(results);

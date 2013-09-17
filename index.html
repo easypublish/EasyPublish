@@ -65,6 +65,35 @@
 		</script>
 
 		<script>
+
+    function oauthRequest(path, message, accessor, undefined) {
+        message.action = path;
+        message.method = 'POST';
+        OAuth.completeRequest(message, accessor);
+        var parameters = message.parameters;
+        var options = {
+            headers: {
+                Authorization: OAuth.getAuthorizationHeader('', parameters)
+            },
+            data: JSON.stringify(message.body)
+        }
+
+        return commonAjax('POST', path, options);
+    }
+    function commonAjax(method, url, options) {
+        var settings = {
+            type: method,
+            contentType: "application/json",
+            dataType: "json"
+        }
+        if (options) {
+            settings = _.extend(settings, options);
+        }
+        var request = $.ajax(url, settings);
+
+        return request;
+    }
+
 		var storedCredentials = false;
 
 		var Router = Backbone.Router.extend({
@@ -87,7 +116,43 @@
 			defaults: {
 				data:'',
 				status:'Unpublished'	// Allowed values are Published, Unpublished, and Error
-			}
+			},
+			publish: function (cb) {
+		        var envelopes = this.get('data');
+
+		        var oauth_data = storedCredentials.oauth;
+		        if(oauth_data==null) {
+		            console.log("null oauth_data, aborting submit")
+		            return;
+		        } else {
+		            var message = {
+		                parameters: {},
+		                body: {
+		                    documents: envelopes
+		                }
+		            };
+		            request = oauthRequest(oauth_data.node_url + '/publish', message, oauth_data);
+		            
+		            request.done(function(msg) {
+		                console.log("Done");
+		                console.log(msg);
+		                if(msg.OK) {
+		                    if (cb) {
+		                        cb(msg.document_results);
+		                    }
+		                } else {
+		                    alert("Submission failed:\n" + JSON.stringify(msg.document_results));
+		                }
+		            });
+
+		            request.fail(function(msg) {
+		                console.log("Fail");
+		                console.log(msg);
+		                alert("Submission failed.");
+		            });
+		        }
+
+		    }
 		});
 		var ItemList = Backbone.Collection.extend({
 			model: Item,
@@ -269,7 +334,10 @@
 				publish: function (event) {
 					event.preventDefault();
 					if(this.easyPub.validateAll()) {
-						this.easyPub.dataManager.submitData(undefined, function () {
+						var data = this.easyPub.dataManager.makeAllEnvelopes();
+						var item = Items.create({data:data, status:'Unpublished'});
+						item.publish(function () {
+							item.save({'status':'Published'});
 							router.navigate('', {trigger:true});
 						});
 					} else {
@@ -278,11 +346,16 @@
 				},
 				save: function (event) {
 					event.preventDefault();
-					if(this.easyPub.validateAll()) {
-						this.easyPub.dataManager.saveData();
-						router.navigate('', {trigger:true});
+					if (window.File && window.FileReader && window.FileList && window.Blob) {
+						if(this.easyPub.validateAll()) {
+							var data = this.easyPub.dataManager.makeAllEnvelopes();
+							Items.create({data:data, status:'Unpublished'});
+							router.navigate('', {trigger:true});
+						} else {
+							alert("Please correct the indicated problems");
+						}
 					} else {
-						alert("Please correct the indicated problems");
+						alert('The File APIs are not fully supported in this browser. You will not be able to save locally before publishing.');
 					}
 				}
 			});
