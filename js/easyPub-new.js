@@ -127,17 +127,7 @@ function EasyPublish() {
 	buildForm("publisher", this.fieldManager.publisherFields);
 
 	var submitButton = $("#Submit");
-	submitButton.button();
-	submitButton.click(function() {
-		submittedDocs = [];
-		var valid = validateAll();
-		if(valid) {
-			dataManager.submitData();
-		} else {
-			alert("Please correct the indicated problems");
-		}
-		return false;
-	});
+	submitButton.button();	// click event handled by backbone event
 	var saveButton = $("#Save");
 	saveButton.button();	// click event handled by backbone event
 	/*var downloadCSVButton = $("#DownloadCSV");
@@ -509,7 +499,6 @@ function EasyPublish() {
 
     this.getOAuthData = function() {
     	var oauth_data = storedCredentials.oauth;
-    	oauth_data.token = 'node_sign_token';
 	    return oauth_data;
 	}
 

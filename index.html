@@ -210,9 +210,13 @@
 				},
 				publish: function (event) {
 					event.preventDefault();
-
+					var button = $(event.target);
+					var id = button.attr('data-item');
+					var item = Items.findWhere({id:id});
+					console.log(item);
 				},
 				unpublish: function (event, cb) {
+					// TODO
 					event.preventDefault();
 					var success = true;
 					if (success && cb) {
@@ -259,7 +263,18 @@
 					}
 				},
 				events: {
-					'click #Save': 'save'
+					'click #Save': 'save',
+					'click #Submit': 'publish'
+				},
+				publish: function (event) {
+					event.preventDefault();
+					if(this.easyPub.validateAll()) {
+						this.easyPub.dataManager.submitData(undefined, function () {
+							router.navigate('', {trigger:true});
+						});
+					} else {
+						alert("Please correct the indicated problems");
+					}
 				},
 				save: function (event) {
 					event.preventDefault();
@@ -425,9 +440,9 @@
 								<% } %>
 									<button class="delete" data-item="<%= item.get('id') %>">Delete</button>
 								<% if (item.get('status') == 'Unpublished') { %>
-									<button class="publish">Publish</button>
+									<button class="publish" data-item="<%= item.get('id') %>">Publish</button>
 								<% } else if (item.get('status') == 'Published') { %>
-									<button class="unpublish">Un-publish</button>
+									<button class="unpublish" data-item="<%= item.get('id') %>">Un-publish</button>
 								<% } else { %>
 									<!-- no publish or unpublish if status is error -->
 									<% } %>

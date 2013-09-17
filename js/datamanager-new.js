@@ -211,76 +211,43 @@ function DataManager(easyPub) {
     }
 
     //TODO - handle arrays of form data
-    this.submitData = function () {
-        envelopes = makeAllEnvelopes();
+    this.submitData = function (envelopes, cb) {
+        if (envelopes == undefined) {
+            envelopes = makeAllEnvelopes();
+        }
 
-        var oauth_data = easyPub.getOAuthData();
+        var oauth_data = storedCredentials.oauth;
         if(oauth_data==null) {
             console.log("null oauth_data, aborting submit")
             return;
         } else {
-            req_info = getOAuthInfo(oauth_data);
-            req_info.message.body = {
-                documents: envelopes
+            var message = {
+                parameters: {},
+                body: {
+                    documents: envelopes
+                }
             };
-            console.log("req_info:");
-            console.log(req_info);
-            request = oauthRequest(oauth_data.node_url + '/publish', req_info.message, req_info.accessor);
+            request = oauthRequest(oauth_data.node_url + '/publish', message, oauth_data);
             
             request.done(function(msg) {
                 console.log("Done");
                 console.log(msg);
                 if(msg.OK) {
-                    alert("Submission succeeded, press OK to view the node reply.");
-                    //easyPub.submissionComplete(true);
-                    displayResults(msg.document_results);
                     if (window.File && window.FileReader && window.FileList && window.Blob) {
                         Items.create({data:envelopes, status:'Published'});
                     }
-                } else {
-                    alert("Submission failed, press OK to view the node reply.");
-                    displayResults(msg.document_results);
-                    //easyPub.submissionComplete(false);
-                }
-                
-                /*
-                var results = msg.document_results;
-                for(key in results) {
-                    var nextResult = results[key];
-                    console.log("nextResult: ");
-                    console.log(nextResult);
-                    var OK = nextResult.OK;
-                    if(OK) {
-                        console.log("success, doc_ID: " + nextResult.doc_ID);
-                        var tempData = {
-                            guid:nextResult.doc_ID,
-                            name:easyPub.getValue("title"),
-                            serverURL: nodeURL,
-                            docID:nextResult.doc_ID
-                        };
-                        successDialogHtml = successDialogTemplate(tempData);
-                        $("body").append(successDialogHtml);
-                        $("#"+nextResult.doc_ID).dialog({position:{my: "top", at: "top", of: $("#middleCol")}});
-                        easyPub.submissionComplete(true);
-                    } else {
-                        console.log("error: " + nextResult.error);
-                        var tempData = {
-                            guid:easyPub.getValue("title"),
-                            error:nextResult.error,
-                            name:formData.Name
-                        };
-                        failDialogHtml = failDialogTemplate(tempData);
-                        $("body").append(failDialogHtml);
-                        $("#"+formData.Name).dialog({position:{my: "top", at: "top", of: $("#middleCol")}});
-                        easyPub.submissionComplete(false);
+                    if (cb) {
+                        cb(msg.document_results);
                     }
-                }*/
+                } else {
+                    alert("Submission failed:\n" + JSON.stringify(msg.document_results));
+                }
             });
+
             request.fail(function(msg) {
                 console.log("Fail");
                 console.log(msg);
                 alert("Submission failed.");
-                easyPub.submissionComplete(false);
             });
         }
 
@@ -296,24 +263,6 @@ function DataManager(easyPub) {
         } else {
             alert('The File APIs are not fully supported in this browser. You will not be able to save locally before publishing.');
         }
-    }
-
-    function getOAuthInfo(oauth_data) {
-
-        var message = {
-            parameters: {}
-        };
-        var accessor = {
-            consumerKey: oauth_data.consumer_key,
-            consumerSecret: oauth_data.consumer_secret,
-            token: oauth_data.token,
-            tokenSecret: oauth_data.token_secret
-        };
-
-        return {
-            message: message,
-            accessor: accessor
-        };
     }
 
     function oauthRequest(path, message, accessor, undefined) {
