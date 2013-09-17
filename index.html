@@ -118,39 +118,46 @@
 				status:'Unpublished'	// Allowed values are Published, Unpublished, and Error
 			},
 			publish: function (cb) {
-		        var envelopes = this.get('data');
+				var instance = this;
 
-		        var oauth_data = storedCredentials.oauth;
-		        if(oauth_data==null) {
-		            console.log("null oauth_data, aborting submit")
-		            return;
-		        } else {
-		            var message = {
-		                parameters: {},
-		                body: {
-		                    documents: envelopes
-		                }
-		            };
-		            request = oauthRequest(oauth_data.node_url + '/publish', message, oauth_data);
-		            
-		            request.done(function(msg) {
-		                console.log("Done");
-		                console.log(msg);
-		                if(msg.OK) {
-		                    if (cb) {
-		                        cb(msg.document_results);
-		                    }
-		                } else {
-		                    alert("Submission failed:\n" + JSON.stringify(msg.document_results));
-		                }
-		            });
+				if (this.get('status') != 'Error') {
+			        var envelopes = this.get('data');
 
-		            request.fail(function(msg) {
-		                console.log("Fail");
-		                console.log(msg);
-		                alert("Submission failed.");
-		            });
-		        }
+			        var oauth_data = storedCredentials.oauth;
+			        if(oauth_data==null) {
+			            console.log("null oauth_data, aborting submit")
+			            return;
+			        } else {
+			            var message = {
+			                parameters: {},
+			                body: {
+			                    documents: envelopes
+			                }
+			            };
+			            request = oauthRequest(oauth_data.node_url + '/publish', message, oauth_data);
+			            
+			            request.done(function(msg) {
+			                console.log("Done");
+			                console.log(msg);
+			                if(msg.OK) {
+			                	instance.save('status','Published');
+			                    if (cb) {
+			                        cb(msg.document_results);
+			                    }
+			                } else {
+			                    alert("Submission failed:\n" + JSON.stringify(msg.document_results));
+			                }
+			            });
+
+			            request.fail(function(msg) {
+			                console.log("Fail");
+			                console.log(msg);
+			                alert("Submission failed.");
+			            });
+			        }
+			    } else {
+			    	alert("You cannot publish items with errors.");
+			    }
 
 		    }
 		});
@@ -278,7 +285,9 @@
 					var button = $(event.target);
 					var id = button.attr('data-item');
 					var item = Items.findWhere({id:id});
-					console.log(item);
+					item.publish(function () {
+						button.closest('tr').find('.status').text(item.get('status'));
+					});
 				},
 				unpublish: function (event, cb) {
 					// TODO
@@ -337,7 +346,6 @@
 						var data = this.easyPub.dataManager.makeAllEnvelopes();
 						var item = Items.create({data:data, status:'Unpublished'});
 						item.publish(function () {
-							item.save({'status':'Published'});
 							router.navigate('', {trigger:true});
 						});
 					} else {
@@ -505,7 +513,7 @@
 							<td><%= properties.name %></td>
 							<td><a href="<%= properties.url %>"><%= properties.url %></a></td>
 							<td><%= properties.url %></td>
-							<td><%= item.get('status') %></td>
+							<td class="status"><%= item.get('status') %></td>
 							<td>
 								<% if (item.get('status') != 'Published') { %>
 									<!-- for now, no editing published items -->
