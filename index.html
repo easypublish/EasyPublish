@@ -271,41 +271,18 @@
 						Items.fetch();
 						var template = _.template($('#list-template').html(), {name:storedCredentials.name,data:Items.models});
 						this.$el.html(template);
+						Items.each(this.addOne, this);
+						var count = new Count();
+						count.render();
 					}
 				},
 				events: {
-					'click .publish': 'publish',
-					'click .unpublish': 'unpublish',
-					'click .delete': 'delete',
 					'click .selectall': 'selectall',
 					'submit .bulkactions': 'doInBulk'
 				},
-				publish: function (event) {
-					event.preventDefault();
-					var button = $(event.target);
-					var id = button.attr('data-item');
-					var item = Items.findWhere({id:id});
-					item.publish(function () {
-						button.closest('tr').find('.status').text(item.get('status'));
-					});
-				},
-				unpublish: function (event, cb) {
-					// TODO
-					event.preventDefault();
-					var success = true;
-					if (success && cb) {
-						cb(event);
-					}
-				},
-				delete: function (event) {
-					event.preventDefault();
-					var button = $(event.target);
-					var id = button.attr('data-item');
-					// first, unpublish, then delete locally on success
-					this.unpublish(event, function (event) {
-						Items.findWhere({id:id}).destroy();
-						button.closest('tr').remove();
-					});
+				addOne: function (item) {
+					var view = new ListItem({model: item});
+					this.$("#item-list").append(view.render().el);
 				},
 				selectall: function (event) {
 					event.preventDefault();
@@ -324,7 +301,57 @@
 				}
 			});
 			var list = new List();
-
+			var ListItem = Backbone.View.extend({
+				tagName: 'tr',
+				initialize: function () {
+					this.listenTo(this.model, 'change', this.render);
+					this.listenTo(this.model, 'destroy', this.remove);
+					this.listenTo(list, 'render', this.destroy);
+				},
+				render: function () {
+					var template = _.template($('#item-template').html(), {item:this.model});
+					this.$el.html(template);
+					return this;
+				},
+				events: {
+					'click .publish': 'publish',
+					'click .unpublish': 'unpublish',
+					'click .delete': 'delete'
+				},
+				publish: function (event) {
+					event.preventDefault();
+					this.model.publish(function () {
+					});
+				},
+				unpublish: function (event, cb) {
+					// TODO
+					event.preventDefault();
+					var success = true;
+					if (success && cb) {
+						cb(event);
+					}
+				},
+				delete: function (event) {
+					event.preventDefault();
+					var instance = this;
+					this.unpublish(event, function (event) {
+						instance.model.destroy();
+					});
+				}
+			});
+			var Count = Backbone.View.extend({
+				el: '#count',
+				initialize: function () {
+					this.listenTo(Items, 'add', this.render);
+					this.listenTo(Items, 'destroy', this.render);
+					this.listenTo(list, 'render', this.destroy);
+				},
+				render: function () {
+					var template = _.template($('#count-template').html(), {total:Items.length});
+					this.$el.html(template);
+				}
+			});
+			
 			var Create = Backbone.View.extend({
 				el: '.page',
 				render: function () {
@@ -487,7 +514,7 @@
 		<script type="text/template" id="list-template">
 			<h1>Welcome <%= name %></h1>
 
-			<p>You have registered <%= data.length %> items</p>
+			<p id="count"></p>
 
 			<a href="#create" class="button">Register new item</a>
 			<a href="#upload" class="button">Bulk upload in CSV</a>
@@ -505,31 +532,7 @@
 							<th></th>
 						</tr>
 					</thead>
-					<tbody>
-						<% _.each(data, function (item) { %>
-						<% var properties = item.get('data')[0].resource_data.items[0].properties; %>
-						<tr>
-							<td><input name="items" type="checkbox" data-item="<%= item.get('id') %>" /></td>
-							<td><%= properties.name %></td>
-							<td><a href="<%= properties.url %>"><%= properties.url %></a></td>
-							<td><%= properties.url %></td>
-							<td class="status"><%= item.get('status') %></td>
-							<td>
-								<% if (item.get('status') != 'Published') { %>
-									<!-- for now, no editing published items -->
-									<a href="#edit/<%= item.get('id') %>">Edit</a>
-								<% } %>
-									<button class="delete" data-item="<%= item.get('id') %>">Delete</button>
-								<% if (item.get('status') == 'Unpublished') { %>
-									<button class="publish" data-item="<%= item.get('id') %>">Publish</button>
-								<% } else if (item.get('status') == 'Published') { %>
-									<button class="unpublish" data-item="<%= item.get('id') %>">Un-publish</button>
-								<% } else { %>
-									<!-- no publish or unpublish if status is error -->
-									<% } %>
-							</td>
-						</tr>
-						<% }); %>
+					<tbody id="item-list">
 					</tbody>
 				</table>
 				<div>
@@ -544,6 +547,33 @@
 			</form>
 			<!-- pagination -->
 			<% } %>
+		</script>
+
+		<script type="text/template" id="item-template">
+			<% var properties = item.get('data')[0].resource_data.items[0].properties; %>
+			<td><input name="items" type="checkbox" data-item="<%= item.get('id') %>" /></td>
+			<td><%= properties.name %></td>
+			<td><a href="<%= properties.url %>"><%= properties.url %></a></td>
+			<td><%= properties.url %></td>
+			<td class="status"><%= item.get('status') %></td>
+			<td>
+				<% if (item.get('status') != 'Published') { %>
+					<!-- for now, no editing published items -->
+					<a href="#edit/<%= item.get('id') %>">Edit</a>
+				<% } %>
+					<button class="delete" data-item="<%= item.get('id') %>">Delete</button>
+				<% if (item.get('status') == 'Unpublished') { %>
+					<button class="publish" data-item="<%= item.get('id') %>">Publish</button>
+				<% } else if (item.get('status') == 'Published') { %>
+					<button class="unpublish" data-item="<%= item.get('id') %>">Un-publish</button>
+				<% } else { %>
+					<!-- no publish or unpublish if status is error -->
+					<% } %>
+			</td>
+		</script>
+
+		<script type="text/template" id="count-template">
+			You have registered <%= total %> items
 		</script>
 
 		<script type="text/template" id="edit-template">
