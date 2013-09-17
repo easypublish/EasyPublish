@@ -234,6 +234,9 @@ function DataManager(easyPub) {
                     alert("Submission succeeded, press OK to view the node reply.");
                     //easyPub.submissionComplete(true);
                     displayResults(msg.document_results);
+                    if (window.File && window.FileReader && window.FileList && window.Blob) {
+                        Items.create({data:envelopes, status:'Published'});
+                    }
                 } else {
                     alert("Submission failed, press OK to view the node reply.");
                     displayResults(msg.document_results);
@@ -290,7 +293,6 @@ function DataManager(easyPub) {
         if (window.File && window.FileReader && window.FileList && window.Blob) {
             envelopes = makeAllEnvelopes();
             Items.create({data:envelopes, status:'Unpublished'});
-            // item.save();
         } else {
             alert('The File APIs are not fully supported in this browser. You will not be able to save locally before publishing.');
         }
