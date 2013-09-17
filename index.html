@@ -202,15 +202,47 @@
 					}
 				},
 				events: {
-					'click .delete': 'delete'
+					'click .publish': 'publish',
+					'click .unpublish': 'unpublish',
+					'click .delete': 'delete',
+					'click .selectall': 'selectall',
+					'submit .bulkactions': 'doInBulk'
+				},
+				publish: function (event) {
+					event.preventDefault();
+
+				},
+				unpublish: function (event, cb) {
+					event.preventDefault();
+					var success = true;
+					if (success && cb) {
+						cb(event);
+					}
 				},
 				delete: function (event) {
-					// TODO: also un-publish
 					event.preventDefault();
 					var button = $(event.target);
 					var id = button.attr('data-item');
-					Items.findWhere({id:id}).destroy();
-					button.closest('tr').remove();
+					// first, unpublish, then delete locally on success
+					this.unpublish(event, function (event) {
+						Items.findWhere({id:id}).destroy();
+						button.closest('tr').remove();
+					});
+				},
+				selectall: function (event) {
+					event.preventDefault();
+					var button = $(event.target);
+					var fieldname = button.attr('data-checkboxes');
+					button.closest('form').find('[name="' + fieldname + '"]').prop('checked', true);
+				},
+				doInBulk: function (event) {
+					event.preventDefault();
+					var form = $(event.target);
+					var selected = form.find('[name="items"]:checked');
+					var action = form.find('[name="bulkmenu"]').val();
+					selected.each(function (index, el) {
+						$(el).closest('tr').find('.' + action).trigger('click');
+					});
 				}
 			});
 			var list = new List();
@@ -365,42 +397,55 @@
 			<a href="#upload" class="button">Bulk upload in CSV</a>
 
 			<% if (data.length > 0) { %>
-			<table>
-				<thead>
-					<tr>
-						<th>Title</th>
-						<th>Link</th>
-						<th>Description</th>
-						<th>Status</th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-					<% _.each(data, function (item) { %>
-					<% var properties = item.get('data')[0].resource_data.items[0].properties; %>
-					<tr>
-						<td><%= properties.name %></td>
-						<td><a href="<%= properties.url %>"><%= properties.url %></a></td>
-						<td><%= properties.url %></td>
-						<td><%= item.get('status') %></td>
-						<td>
-							<% if (item.get('status') != 'Published') { %>
-								<!-- for now, no editing published items -->
-								<a href="#edit/<%= item.get('id') %>">Edit</a>
-							<% } %>
-								<button class="delete" data-item="<%= item.get('id') %>">Delete</button>
-							<% if (item.get('status') == 'Unpublished') { %>
-								<button class="publish">Publish</button>
-							<% } else if (item.get('status') == 'Published') { %>
-								<button class="unpublish">Un-publish</button>
-							<% } else { %>
-								<!-- no publish or unpublish if status is error -->
-							<% } %>
-						</td>
-					</tr>
-					<% }); %>
-				</tbody>
-			</table>
+			<form class="bulkactions">
+				<table>
+					<thead>
+						<tr>
+							<th></th>
+							<th>Title</th>
+							<th>Link</th>
+							<th>Description</th>
+							<th>Status</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						<% _.each(data, function (item) { %>
+						<% var properties = item.get('data')[0].resource_data.items[0].properties; %>
+						<tr>
+							<td><input name="items" type="checkbox" data-item="<%= item.get('id') %>" /></td>
+							<td><%= properties.name %></td>
+							<td><a href="<%= properties.url %>"><%= properties.url %></a></td>
+							<td><%= properties.url %></td>
+							<td><%= item.get('status') %></td>
+							<td>
+								<% if (item.get('status') != 'Published') { %>
+									<!-- for now, no editing published items -->
+									<a href="#edit/<%= item.get('id') %>">Edit</a>
+								<% } %>
+									<button class="delete" data-item="<%= item.get('id') %>">Delete</button>
+								<% if (item.get('status') == 'Unpublished') { %>
+									<button class="publish">Publish</button>
+								<% } else if (item.get('status') == 'Published') { %>
+									<button class="unpublish">Un-publish</button>
+								<% } else { %>
+									<!-- no publish or unpublish if status is error -->
+									<% } %>
+							</td>
+						</tr>
+						<% }); %>
+					</tbody>
+				</table>
+				<div>
+					<button type="button" class="selectall" data-checkboxes="items">Select All</button>
+					<select name="bulkmenu">
+						<option value="delete">Delete</option>
+						<option value="publish">Publish</option>
+						<option value="unpublish">Unpublish</option>
+					</select>
+					<button type="submit">Go</button>
+				</div>
+			</form>
 			<!-- pagination -->
 			<% } %>
 		</script>
