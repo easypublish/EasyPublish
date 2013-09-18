@@ -158,7 +158,6 @@
 			    } else {
 			    	alert("You cannot publish items with errors.");
 			    }
-
 		    }
 		});
 		var ItemList = Backbone.Collection.extend({
@@ -278,7 +277,10 @@
 				},
 				events: {
 					'click .selectall': 'selectall',
-					'submit .bulkactions': 'doInBulk'
+					'submit .bulkactions': 'doInBulk',
+					'click .showAll': 'showAll',
+					'click .showPublished': 'showPublished',
+					'click .showUnpublished': 'showUnpublished'
 				},
 				addOne: function (item) {
 					var view = new ListItem({model: item});
@@ -298,6 +300,33 @@
 					selected.each(function (index, el) {
 						$(el).closest('tr').find('.' + action).trigger('click');
 					});
+				},
+				showAll: function (event) {
+					event.preventDefault();
+					this.$("#item-list").empty();
+					this.$(".filterButtons button").removeClass('selected');
+					$(event.target).addClass('selected');
+					Items.each(this.addOne, this);
+				},
+				showPublished: function (event) {
+					event.preventDefault();
+					this.$("#item-list").empty();
+					this.$(".filterButtons button").removeClass('selected');
+					$(event.target).addClass('selected');
+					var filtered = Items.where({status:'Published'});
+					for (var i=0,l=filtered.length; i<l; i++) {
+						this.addOne(filtered[i]);
+					}
+				},
+				showUnpublished: function (event) {
+					event.preventDefault();
+					this.$("#item-list").empty();
+					this.$(".filterButtons button").removeClass('selected');
+					$(event.target).addClass('selected');
+					var filtered = Items.where({status:'Unpublished'});
+					for (var i=0,l=filtered.length; i<l; i++) {
+						this.addOne(filtered[i]);
+					}
 				}
 			});
 			var list = new List();
@@ -521,6 +550,12 @@
 
 			<% if (data.length > 0) { %>
 			<form class="bulkactions">
+				<div class="filterButtons">
+					Show:
+					<button type="button" class="showAll selected">All</button>
+					<button type="button" class="showUnpublished">Registered</button>
+					<button type="button" class="showPublished">Published</button>
+				</div>
 				<table>
 					<thead>
 						<tr>
@@ -573,7 +608,13 @@
 		</script>
 
 		<script type="text/template" id="count-template">
-			You have registered <%= total %> items
+			<% if (total == 0) { %>
+				You have registered 0 items
+			<% } else if (total == 1) { %>
+				You have registered 1 item
+			<% } else { %>
+				You have registered <%= total %> items
+			<% } %>
 		</script>
 
 		<script type="text/template" id="edit-template">
