@@ -197,25 +197,6 @@ function DataManager(easyPub) {
         var envelope = makeEnvelope();
         console.log(envelope);
     }
-    
-
-    function displayResults(results) {
-        var output = JSON.stringify(results);
-        var filetype = 'text/json';
-        window.URL = window.webkitURL || window.URL;
-        blob = new Blob([output], {
-            type: filetype
-        });
-        url = window.URL.createObjectURL(blob);
-        // document.location = url;
-        displayDialog(url);
-    }
-
-
-    function displayDialog(url) {
-        $('#resultsDialog > iframe').attr("src", url);
-        $('#resultsDialog').dialog("open");
-    }
 
     this.downloadData = function(type) {
         var output;
@@ -242,7 +223,7 @@ function DataManager(easyPub) {
     }
 
 
-    function toCSV(data) {
+    this.toCSV = function(data) {
         console.log("toCSV");
         console.log(data);
         var csv = "";

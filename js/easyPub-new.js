@@ -3,7 +3,7 @@ $(function() {
 });
 
 EasyPublish.prototype.constructor = EasyPublish;
-function EasyPublish() {
+function EasyPublish(edit_data) {
 
 	var editors = {};
 
@@ -21,8 +21,6 @@ function EasyPublish() {
 
 	var alignmentCount = 1;
 	var authorCount = 1;
-	var store_credentials = false;
-	var local_storeage = false;
 
 	var dialogPosition  = {my: "top", at: "top", of: $("#middleCol")};
 
@@ -136,6 +134,10 @@ function EasyPublish() {
 		window.location = "template.csv";
 		return false;
 	});*/
+
+	if (edit_data != undefined) {
+		setEditData(edit_data.resource_data.items[0].properties);
+	}
 
 	var dlCSVButton = $("#DL_CSV");
 	dlCSVButton.button();
@@ -425,6 +427,42 @@ function EasyPublish() {
     			continue;
     		}
             var val = importedData[key][index];
+        	if(key.match(indexTest)) {
+        		match = indexTest.exec(key);
+        		var base = match[1];
+        		var key_index = match[2];
+        		if(key.match(authorTest)) {
+        			if(key_index>authorCount) {
+        				addAuthor();
+        			}
+        		} else if (key.match(alignmentTest)) {
+        			if(key_index>alignmentCount) {
+        				addAlignment();
+        			}
+        		}
+        	}
+            var field = that.fieldManager.fieldDictionary[key];
+            if (field) {
+                field.value(val);
+            } else {
+            	console.log("no field found for key: " + key + ", val: " +  val);
+            }
+        	if(key.lastIndexOf("educationalFramework")>=0) {
+        		updateEdFramework(key);
+        	}
+    	}
+    }
+
+    function setEditData(data) {
+    	//console.trace();
+        var mathTest = /[\w]*Math[\w]*/;
+        var elaTest = /[\w]*Language[\w]*/;
+    	var indexTest = /([\w]*)_(\d+)$/;
+    	var authorTest = /[\w]*author[\w]*/;
+    	var alignmentTest = /[\w]*(alignmentType|educationalFramework|Standard)[\w]*/;
+
+    	for(var key in data) {
+            var val = data[key];
         	if(key.match(indexTest)) {
         		match = indexTest.exec(key);
         		var base = match[1];

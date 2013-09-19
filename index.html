@@ -387,14 +387,14 @@
 					if (!storedCredentials) {
 						router.navigate('login', {trigger:true});
 					} else {
-						var template = _.template($('#edit-template').html());
+						var template = _.template($('#edit-template').html(), {action:'create'});
 						this.$el.html(template);
 						this.easyPub = new EasyPublish();
 					}
 				},
 				events: {
-					'click #Save': 'save',
-					'click #Submit': 'publish'
+					'click #create #Save': 'save',
+					'click #create #Submit': 'publish'
 				},
 				publish: function (event) {
 					event.preventDefault();
@@ -427,14 +427,44 @@
 
 			var Edit = Backbone.View.extend({
 				el: '.page',
-				render: function () {
+				render: function (item) {
+					this.item = item;
 					if (!storedCredentials) {
 						router.navigate('login', {trigger:true});
 					} else {
-						// TODO: get contents
-						var template = _.template($('#edit-template').html(), {});
+						var template = _.template($('#edit-template').html(), {action:'edit'});
 						this.$el.html(template);
-						var easyPub = new EasyPublish();
+						this.easyPub = new EasyPublish(item.get('data')[0]);
+					}
+				},
+				events: {
+					'click #edit #Save': 'save',
+					'click #edit #Submit': 'publish'
+				},
+				publish: function (event) {
+					event.preventDefault();
+					if(this.easyPub.validateAll()) {
+						var data = this.easyPub.dataManager.makeAllEnvelopes();
+						this.item.save({data:data});
+						item.publish(function () {
+							router.navigate('', {trigger:true});
+						});
+					} else {
+						alert("Please correct the indicated problems");
+					}
+				},
+				save: function (event) {
+					event.preventDefault();
+					if (window.File && window.FileReader && window.FileList && window.Blob) {
+						if(this.easyPub.validateAll()) {
+							var data = this.easyPub.dataManager.makeAllEnvelopes();
+							this.item.save({data:data});
+							router.navigate('', {trigger:true});
+						} else {
+							alert("Please correct the indicated problems");
+						}
+					} else {
+						alert('The File APIs are not fully supported in this browser. You will not be able to save locally before publishing.');
 					}
 				}
 			});
@@ -488,8 +518,13 @@
 			router.on('route:create', function () {
 				create.render();
 			});
-			router.on('route:edit', function () {
-				edit.render();
+			router.on('route:edit', function (id) {
+				var item = Items.findWhere({id:id});
+				if (item != undefined) {
+					edit.render(item);
+				} else {
+					router.navigate('create', {trigger:true});
+				}
 			});
 			router.on('route:upload', function () {
 				upload.render();
@@ -618,7 +653,7 @@
 		</script>
 
 		<script type="text/template" id="edit-template">
-			<div style="width:1150">
+			<div style="width:1150" id="<%= action %>">
 				<div id="rightCol">
 					<form>
 						<fieldset id="dropForm">
