@@ -9,7 +9,7 @@ function EasyPublish() {
 
 	var that = this;
 	this.fieldManager = new FieldManager();
-	// var dnd = new DragAndDrop(this);
+	var dnd = new DragAndDrop(this);
 	var dataManager = new DataManager(this);
 	this.dataManager = dataManager;
 	var validator = new Validator();

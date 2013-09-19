@@ -1,17 +1,5 @@
 function DataManager(easyPub) {
 
-    var nodeURL = "http://sandbox.learningregistry.org";
-
-    var service = "publish";
-
-    /*var default_oauth_data = {
-        consumer_key: 'john.brecht@sri.com',
-        consumer_secret: 'ATjaQAYRMhK0e7gppFBK2pZTtPzaBRFD',
-        token: 'node_sign_token',
-        token_secret: '7Hy6hsuz702wfuepQpfOgfP3WUCGunGF',
-        node_url: nodeURL
-    }*/
-
     function stripEmptyProperties(properties) {
         for(var key in properties) {
             var next = properties[key];
