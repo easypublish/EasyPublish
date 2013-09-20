@@ -136,7 +136,9 @@ function EasyPublish(edit_data) {
 	});*/
 
 	if (edit_data != undefined) {
-		setEditData(edit_data.resource_data.items[0].properties);
+		console.log(edit_data);
+		console.log(dataManager.mapPayloadToFields(edit_data.resource_data.items[0].properties));
+		setEditData(dataManager.mapPayloadToFields(edit_data.resource_data.items[0].properties));
 	}
 
 	var dlCSVButton = $("#DL_CSV");
@@ -551,9 +553,9 @@ function EasyPublish(edit_data) {
 		if(authorCount>1) {
 			for(var i=2; i<=authorCount; i++) {
 				var author = {
-				    name: [$("#author_name"+i).val()],
-		            url:  [$("#author_url"+i).val()],
-		            email:  [$("#author_email"+i).val()]
+				    name: [$("#author_name_"+i).val()],
+		            url:  [$("#author_url_"+i).val()],
+		            email:  [$("#author_email_"+i).val()]
 				}
 				authors[i-1] = author;
 			}
@@ -576,7 +578,7 @@ function EasyPublish(edit_data) {
 			var standardField;
 			if(edFramework.lastIndexOf("Math")>=0) {
 				standardField = this.fieldManager.fieldDictionary["Math-Standard"];
-			} else if(edFramework.lastIndexOf("ELA")>=0) {
+			} else if(edFramework.lastIndexOf("Language")>=0) {
 				standardField = this.fieldManager.fieldDictionary["ELA-Standard"];
 			}
 			if(standardField) {

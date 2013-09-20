@@ -96,6 +96,63 @@ function DataManager(easyPub) {
         return payload;
     }
 
+    // Remap data from payload to csv field names
+    // Ideally we wouldn't need this because we'd use the same objects and names everywhere 
+    this.mapPayloadToFields = function (data, index) {
+        var fieldData = {}
+        for(var key in data) {
+            var val = data[key];
+            if (key == 'educationalAlignment' || key == 'author' || key == 'publisher') {
+                // pull grade out of educationalAlignments array
+                if (key == 'educationalAlignment') {
+                    for (var i=0,l=val.length; i<l; i++) {
+                        var properties = val[i].properties;
+                        if (properties.alignmentType[0] == 'educationLevel') {
+                            fieldData['grade'] = properties.targetName;
+                            val.splice(i, 1);
+                            break;
+                        }
+                    }
+                }
+                // run through things with mutliple values recursively, making sure the names map correctly
+                for (var i=0,l=val.length; i<l; i++) {
+                    var properties = val[i].properties;
+                    // rename property names
+                    if (key == 'educationalAlignment') {
+                        properties = {
+                            'alignmentType':properties.alignmentType,
+                            'educationalFramework':properties.educationalFramework,
+                            'ELA-Standard':(properties.educationalFramework[0][0].lastIndexOf("Language")>=0)?properties.targetName:'',
+                            'Math-Standard':(properties.educationalFramework[0][0].lastIndexOf("Math")>=0)?properties.targetName:''
+                        }
+                    } else if (key == 'author') {
+                        properties = {
+                            'author_name':properties.name,
+                            'author_url':properties.url,
+                            'author_email':properties.email
+                        }
+                    } else if (key == 'publisher') {
+                        properties = {
+                            'publisher_name':properties.name,
+                            'publisher_url':properties.url,
+                            'publisher_email':properties.email
+                        }
+                    }
+                    var subval = this.mapPayloadToFields(properties, i);
+                    for (var field in subval) {
+                        fieldData[field] = subval[field];
+                    }
+                }
+            } else {
+                // final field values and non-recursive fields
+                if (key == 'name') key = 'title';
+                if (index != undefined && index > 0) key = key + '_' + (index + 1);
+                fieldData[key] = val;
+            }
+        }
+        return fieldData;
+    }
+
 
     function buildFullAlignmentsArray() {
 
