@@ -111,6 +111,14 @@ function TreeMenu(id, type) {
 		ccss.buildStandardsListElement(this.menu, choices);
 	}
 
+	this.setSelected = function (text) {
+		var item = this.menu.find('[dotNotation="'+text+'"]');
+		if (item) {
+			currentSelectionData = item.attr('value');
+			currentSelectionText = item.attr('dotNotation');
+		}
+	}
+
 	this.initGUI = function() {
 		$("#selectMenu" + this.id).menu( {select: selected, trigger: $("#selectButton" + that.id)} );
 		$("#selectMenu" + this.id).hide();

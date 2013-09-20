@@ -194,6 +194,7 @@ Field = function(name, type, options, index) {
 		}
 		if(this.type==Field.TREE_CHOICE || this.type==Field.STANDARDS_TREE_CHOICE) {
 			this.input = this.treeMenu.input;
+			this.treeMenu.setSelected(val);
 		}
 		if(val || val=="") {
 			this.input.val(val);

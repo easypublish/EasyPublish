@@ -136,8 +136,6 @@ function EasyPublish(edit_data) {
 	});*/
 
 	if (edit_data != undefined) {
-		console.log(edit_data);
-		console.log(dataManager.mapPayloadToFields(edit_data.resource_data.items[0].properties));
 		setEditData(dataManager.mapPayloadToFields(edit_data.resource_data.items[0].properties));
 	}
 
