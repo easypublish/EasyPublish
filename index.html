@@ -30,6 +30,8 @@
 			&copy; 2013 Learning Registry
 		</footer>
 
+		<div id="dialogContainer"></div>
+
 		<script type="text/javascript" src="modules.js"></script>
 		<script type="text/javascript">
 			var $ = require("jquery"),
@@ -104,8 +106,7 @@
 				'create': 'create',
 				'edit/:id': 'edit',
 				'upload': 'upload',
-				'settings': 'settings',
-				'help': 'help'
+				'settings': 'settings'
 				// not doing bulk edit
 			}
 		});
@@ -224,6 +225,23 @@
 			});
 			var logout = new Logout();
 
+			var Help = Backbone.View.extend({
+				tagName: 'div',
+				render: function () {
+					var view = this;
+					var template = _.template($('#help-template').html(), {});
+					this.$el.html(template);
+					$('#dialogContainer').append(this.el);
+					this.$el.dialog({
+						autoOpen: true,
+						close: function (event, ui) {
+							$(this).dialog('destroy').remove();
+							view.remove();
+						}
+					});
+				}
+			});
+
 			var List = Backbone.View.extend({
 				el: '.page',
 				render: function () {
@@ -243,7 +261,8 @@
 					'submit .bulkactions': 'doInBulk',
 					'click .showAll': 'showAll',
 					'click .showPublished': 'showPublished',
-					'click .showUnpublished': 'showUnpublished'
+					'click .showUnpublished': 'showUnpublished',
+					'click .help': 'showHelp'
 				},
 				addOne: function (item) {
 					var view = new ListItem({model: item});
@@ -290,6 +309,11 @@
 					for (var i=0,l=filtered.length; i<l; i++) {
 						this.addOne(filtered[i]);
 					}
+				},
+				showHelp: function (event) {
+					event.preventDefault();
+					var help = new Help();
+					help.render();
 				}
 			});
 			var list = new List();
@@ -459,15 +483,6 @@
 			});
 			var settings = new Settings();
 
-			var Help = Backbone.View.extend({
-				el: '.page',
-				render: function () {
-					var template = _.template($('#help-template').html(), {});
-					this.$el.html(template);
-				}
-			});
-			var help = new Help();
-
 			// Routes
 			router.on('route:login', function () {
 				credentials.render();
@@ -495,9 +510,6 @@
 			router.on('route:settings', function () {
 				settings.render();
 			});
-			router.on('route:help', function () {
-				help.render();
-			});
 
 			Backbone.history.start();
 		});
@@ -523,6 +535,7 @@
 				<div class="control-row">
 					<a href="#create" class="button">Register new item</a>
 					<a href="#upload" class="button">Bulk upload in CSV</a>
+					<a href="#help" class="help">Help</a>
 				</div>
 
 				<% if (data.length > 0) { %>
@@ -672,7 +685,7 @@
 		</script>
 
 		<script type="text/template" id="help-template">
-		help template
+			<p>TODO: help template</p>
 		</script>
 
 
