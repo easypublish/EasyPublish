@@ -171,6 +171,8 @@
 			// login and logout event handlers
 			$.couch.browserid.login(function (event, error, user) {
 				storedCredentials = user;
+				$('#main-nav .signed-in').show();
+				router.navigate('', {trigger:true});
 			});
 			$.couch.browserid.logout(function (event, error, user) {
 				if (error) {
@@ -209,46 +211,7 @@
 								$.couch.browserid.login();
 							});
 						}
-
-						/*if (window.localStorage != undefined) {
-							if (localStorage.getItem("consumer_key") &&
-								localStorage.getItem("consumer_secret") &&
-								localStorage.getItem("token_secret") &&
-								localStorage.getItem("node_url")) {
-								storedCredentials = true;
-								$('#main-nav .signed-in').show();
-								router.navigate('', {trigger:true});
-							}
-						} else {
-							$(".page #store_cred_row").hide();
-						}*/
 					}
-				},
-				events: {
-					'submit form': 'login'
-				},
-				login: function (event) {
-					event.preventDefault();
-					var form = $(event.target);
-					// TODO: check form
-					// TODO: log in with form field data
-					/*if (window.localStorage != undefined) {
-						if (form.find('#store_cred').get(0).checked) {
-							// store credentials for next page load
-							form.find('.oauth').each(function (index, el) {
-								var el = $(el);
-								localStorage.setItem(el.attr('id'), el.val());
-							});
-						} else {
-							// clear stored credentials
-							form.find('.oauth').each(function (index, el) {
-								var el = $(el);console.log('clearing ' + el.attr('id'));
-								localStorage.removeItem(el.attr('id'));
-							});
-						}
-					}*/
-					$('#main-nav .signed-in').show();
-					router.navigate('', {trigger:true});
 				}
 			});
 			var credentials = new Credentials();
@@ -542,37 +505,13 @@
 
 		<!-- templates -->
 		<script type="text/template" id="credentials-template">
-			<form>
-				<h1>Enter Your Credentials</h1>
-				<div id="browserid">
-					<div class="login">
-						<img src="/_browserid/sign_in_blue.png">
-					</div>
-					<div class="picture"></div>
-					</div>
-				<div class='fieldRow'>
-					<label for="consumer_key">Consumer Key</label><br>
-					<input type="text" id="consumer_key" name="consumer_key" size="50" title="Your OAuth consumer_key" class="text ui-widget-content ui-corner-all oauth"/>
+			<h1>Enter Your Credentials</h1>
+			<div id="browserid" class="control-row">
+				<div class="login">
+					<img src="/_browserid/sign_in_blue.png">
 				</div>
-				<div class='fieldRow'>
-					<label for="consumer_secret">Consumer Secret</label><br>
-					<input type="text" id="consumer_secret" name="consumer_secret" size="50"  title="Your OAuth consumer_secret" class="text ui-widget-content ui-corner-all oauth"/>
-				</div>
-				<div class='fieldRow'>
-					<label for="token_secret">Token Secret</label><br>
-					<input type="text" id="token_secret" name="token_secret" size="50"  title="Your OAuth token_secret" class="text ui-widget-content ui-corner-all oauth"/>
-				</div>
-				<div class='fieldRow'>
-					<label for="node_url">Node URL</label><br>
-					<input type="text" id="node_url" name="node_url"  size="50" title="URL of the node you would like to submit to" class="text ui-widget-content ui-corner-all oauth"/>
-				</div>
-				<div class='fieldRow' id="store_cred_row">
-					<input type="checkbox" id="store_cred" name="store_cred"  size="50" title="Store these values in your browser's local storage."/>
-					<label for="store_cred">Remember me</label>
-				</div>
-
-				<button type="submit">Log in</button>
-			</form>
+				<div class="picture"></div>
+			</div>
 		</script>
 
 		<script type="text/template" id="list-template">
