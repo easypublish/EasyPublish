@@ -576,16 +576,18 @@
 		</script>
 
 		<script type="text/template" id="list-template">
-			<h1>Welcome <%= name %></h1>
-
-			<p id="count"></p>
-
-			<a href="#create" class="button">Register new item</a>
-			<a href="#upload" class="button">Bulk upload in CSV</a>
-
-			<% if (data.length > 0) { %>
 			<form class="bulkactions">
-				<div class="filterButtons">
+				<h1>Welcome <%= name %></h1>
+
+				<p id="count"></p>
+
+				<div class="control-row">
+					<a href="#create" class="button">Register new item</a>
+					<a href="#upload" class="button">Bulk upload in CSV</a>
+				</div>
+
+				<% if (data.length > 0) { %>
+				<div class="filterButtons control-row">
 					Show:
 					<button type="button" class="showAll selected">All</button>
 					<button type="button" class="showUnpublished">Registered</button>
@@ -605,18 +607,19 @@
 					<tbody id="item-list">
 					</tbody>
 				</table>
-				<div>
-					<button type="button" class="selectall" data-checkboxes="items">Select All</button>
-					<select name="bulkmenu">
-						<option value="delete">Delete</option>
-						<option value="publish">Publish</option>
-						<option value="unpublish">Unpublish</option>
-					</select>
-					<button type="submit">Go</button>
+				<div class="control-row">
+					<button type="button" class="selectall button-link" data-checkboxes="items">Select All</button>
+					<span class="inline-form">
+						<select name="bulkmenu">
+							<option value="delete">Delete</option>
+							<option value="publish">Publish</option>
+							<option value="unpublish">Unpublish</option>
+						</select>
+						<button type="submit" class="button">Go</button>
+					</span>
 				</div>
+				<% } %>
 			</form>
-			<!-- pagination -->
-			<% } %>
 		</script>
 
 		<script type="text/template" id="item-template">
@@ -629,13 +632,13 @@
 			<td>
 				<% if (item.get('status') != 'Published') { %>
 					<!-- for now, no editing published items -->
-					<a href="#edit/<%= item.get('id') %>">Edit</a>
+					<a href="#edit/<%= item.get('id') %>" class="button">Edit</a>
 				<% } %>
-					<button class="delete" data-item="<%= item.get('id') %>">Delete</button>
+					<button class="delete button" data-item="<%= item.get('id') %>">Delete</button>
 				<% if (item.get('status') == 'Unpublished') { %>
-					<button class="publish" data-item="<%= item.get('id') %>">Publish</button>
+					<button class="publish button" data-item="<%= item.get('id') %>">Publish</button>
 				<% } else if (item.get('status') == 'Published') { %>
-					<button class="unpublish" data-item="<%= item.get('id') %>">Un-publish</button>
+					<button class="unpublish button" data-item="<%= item.get('id') %>">Un-publish</button>
 				<% } else { %>
 					<!-- no publish or unpublish if status is error -->
 					<% } %>
@@ -653,35 +656,9 @@
 		</script>
 
 		<script type="text/template" id="edit-template">
-			<div style="width:1150" id="<%= action %>">
-				<div id="rightCol">
-					<form>
-						<fieldset id="dropForm">
-							<legend>Import Data</legend>
-											<span class="btn btn-success fileinput-button">
-													<span>Select File...</span>
-													<input type="file" name="files[]" id="csvFile">
-											</span>
-											<button class="round-btn" id="csvHelp"></button>
-							<a href="template.csv">Download CSV Template</a>
-							<p>
-								<label for="dataSelect">Select a Dataset:</label>
-								<br><br>
-								<select name="dataSelect" id="dataSelect">
-									<option value='No Data'>No Data</option>
-								</select>
-								<button id="removeRow" class="btn">Remove Row</button>
-							</p>
-							<div>
-								<button id="prevData">Previous</button><button id="nextData">Next</button>
-							</div>
-						</fieldset>
-					</form>
-
-				</div>
+			<div id="<%= action %>">
 				<div id="middleCol">
 					<form>
-						<!-- <div id="testDiv">TEST</div> -->
 						<fieldset id="alignmentForm">
 							<legend>Standards Alignment</legend>
 							<div class="sublegend">Alignment 1</div>
@@ -699,16 +676,38 @@
 				</div>
 				<div id="leftCol">
 					<form>
+						<fieldset id="dropForm">
+							<legend>Import Data</legend>
+							<span class="btn btn-success fileinput-button">
+									<span>Select File...</span>
+									<input type="file" name="files[]" id="csvFile">
+							</span>
+							<button class="round-btn" id="csvHelp"></button>
+							<a href="template.csv">Download CSV Template</a>
+							<p>
+								<label for="dataSelect">Select a Dataset:</label>
+								<br><br>
+								<select name="dataSelect" id="dataSelect">
+									<option value='No Data'>No Data</option>
+								</select>
+								<button id="removeRow" class="btn">Remove Row</button>
+							</p>
+							<div>
+								<button id="prevData">Previous</button><button id="nextData">Next</button>
+							</div>
+						</fieldset>
+					</form>
+					<form>
 						<fieldset id="mainForm">
 							<legend>Resource Information</legend>
 						</fieldset>
 					</form>
 				</div>
-				<p>
-					<button id="Save">Save Data</button>
-					<button id="Submit">Submit Data To Learning Registry</button>
+				<div class="control-row">
+					<button id="Save" class="button">Save Data</button>
+					<button id="Submit" class="button">Submit Data To Learning Registry</button>
 					<a href="#" id="Back">Back to item list</button>
-				</p>
+				</div>
 			</div>
 			<div id="debugConsole" style="display:none;">
 				<h3>Debug buttons</h3>

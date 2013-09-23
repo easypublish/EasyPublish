@@ -1,6 +1,14 @@
-body{
+html{
 	font: 100% "Trebuchet MS", sans-serif;
-	margin: 20px;
+	background-color: #e2e2e2;
+	padding: 15px;
+}
+body {
+	margin: 0 auto;
+	padding: 20px;
+	background-color: white;
+	box-shadow: 0 0 5px rgba(0,0,0,.2);
+	width: 840px;
 }
 
 #ez-publish-banner {
@@ -14,16 +22,111 @@ body{
 }
 #main-nav ul {
 	text-align: right;
-	text-transform: uppercase;
+	border-color: #f3f3f3;
+	border-style: solid;
+	border-width: 1px 0;
+	padding: 10px 0;
 }
 #main-nav li {
 	display: inline-block;
-	margin-left: 1.5em;
+	border-color: #f3f3f3;
+	border-style: solid;
+	border-width: 0 0 0 1px;
+	padding: 0 10px;
+}
+#main-nav li:first-child {
+	border-left: none;
 }
 #main-nav .signed-in {
 	display: none;
 }
+#main-nav a {
+	color: #787878;
+	text-transform: uppercase;
+	text-decoration: none;
+}
 footer {
+	clear: both;
+	background-color: #2a2a2a;
+	border-top: 3px solid #6b6b6b;
+	margin: 0 -20px -20px;
+	padding: 0 20px;
+	line-height: 2;
+	color: #6b6b6b;
+}
+
+
+h1, h2, h3, h4, h5, h6 {
+	color: #2965af;
+}
+
+
+a {
+	color: #2965af;
+}
+.button-link {
+	padding: 0;
+	background: none;
+	border: none;
+	color: #2965af;
+	text-decoration: underline;
+	cursor: pointer;
+	font-style: inherit;
+	font-size: inherit;
+	font-family: inherit;
+	font-weight: inherit;
+}
+
+
+.button {
+	color: white;
+	background-color: #7fbd3f;
+	font-weight: bold;
+	border: 1px solid #68a22d;
+	border-radius: 3px;
+	display: inline-block;
+	text-decoration: none;
+	padding: 4px 7px;
+	font-style: inherit;
+	font-size: inherit;
+	font-family: inherit;
+	cursor: pointer;
+}
+.inline-form .button {
+	padding: 0;
+	font-size: 12px;
+}
+
+
+table {
+	border-collapse: collapse;
+	width: 100%;
+	margin: 20px 0;
+}
+thead tr {
+	background-color: #ebebeb;
+	border: 1px solid #cfcfcf;
+	border-radius: 3px;
+	color: #1a1a1a;
+}
+thead th {
+	padding: 5px 15px;
+	text-align: left;
+	font-weight: normal;
+}
+tbody tr {
+	border-bottom: 1px dashed #b5b5b5;
+}
+tbody tr:nth-child(even) {
+	background-color: #e5f0fd;
+}
+tbody td {
+	padding: 15px;
+	text-align: left;
+}
+
+.control-row {
+	margin: 20px 0;
 	clear: both;
 }
 
@@ -31,7 +134,7 @@ footer {
 textarea, input[type=text] {
 	font-family: Verdana,Arial,sans-serif;
 	font-size: 0.9em;
-	width: 316px;
+	width: 346px;
 }
 
 .ui-menu .ui-menu-item {
@@ -41,6 +144,15 @@ textarea, input[type=text] {
 
 .filterButtons .selected {
 	border: 3px solid black;
+}
+
+
+
+
+
+/* === Specific page and widget styles === */
+.selectall {
+	margin-right: 20px;
 }
 
 /*
@@ -60,11 +172,12 @@ textarea, input[type=text] {
 }
 
 #leftCol  {
-  width:400;
+	margin-right: 20px;
+	width: 410px;
 }
 #middleCol  {
-  width:400;
   float:right;
+	width: 410px;
 }
 .fieldRow {
 	margin:2px;
@@ -75,7 +188,9 @@ textarea, input[type=text] {
 }
 #rightCol {
 	float:right;
-	width:350px;
+}
+#edit #dropForm {
+	display: none;
 }
 #drop_zone {
 	height:50px;
@@ -113,7 +228,6 @@ fieldset {
 	border:0px solid green;
 	background-color:gainsboro;
 	border-radius: 15px;
-	margin-right: 20px;
 	margin-bottom: 15px;
 }
 

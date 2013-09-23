@@ -124,10 +124,6 @@ function EasyPublish(edit_data) {
 	buildForm("author", this.fieldManager.authorFields);
 	buildForm("publisher", this.fieldManager.publisherFields);
 
-	var submitButton = $("#Submit");
-	submitButton.button();	// click event handled by backbone event
-	var saveButton = $("#Save");
-	saveButton.button();	// click event handled by backbone event
 	/*var downloadCSVButton = $("#DownloadCSV");
 	downloadCSVButton.button();
 	downloadCSVButton.click(function() {
