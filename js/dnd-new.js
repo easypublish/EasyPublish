@@ -23,8 +23,13 @@ function DragAndDrop(easyPub) {
         }
       }
 
-      var fileButton = document.getElementById('csvFile');
-      fileButton.addEventListener('change', handleFileSelect, false);
+      function bind(id) {
+        var fileButton = document.getElementById(id);
+        fileButton.addEventListener('change', handleFileSelect, false);            
+      }
 
-      
+      return {
+        bind: bind
+      }
+
 }

@@ -10,6 +10,8 @@ function EasyPublish(edit_data) {
 	var that = this;
 	this.fieldManager = new FieldManager();
 	var dnd = new DragAndDrop(this);
+    dnd.bind("csvFile");
+    
 	var dataManager = new DataManager(this);
 	this.dataManager = dataManager;
 	var validator = new Validator();

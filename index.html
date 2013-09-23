@@ -57,6 +57,7 @@
 		<script type="text/javascript" src="js/validator.js"></script>
 		<script type="text/javascript" src="js/fields.js"></script>
 		<script type="text/javascript" src="js/dnd-new.js"></script>
+		<script type="text/javascript" src="js/upload.js"></script>
 
 		<script type="text/javascript" src="js/backbone.localStorage-min.js"></script>
 
@@ -479,6 +480,19 @@
 						var template = _.template($('#upload-template').html(), {});
 						this.$el.html(template);
 					}
+				},
+				events: {
+					'click #LoadCancel': 'cancel',
+					'click #LoadData': 'load'
+				},
+				cancel: function (event) {
+					event.preventDefault();
+					console.log("Cancelled");
+					router.navigate('', {trigger:true});
+				},
+				load: function(event) {
+					event.preventDefault();
+					console.log("Loaded");
 				}
 			});
 			var upload = new Upload();
@@ -724,7 +738,21 @@
 		</script>
 
 		<script type="text/template" id="upload-template">
-		upload template
+		<form>
+			<fieldset id="dropForm">
+				<legend>Import Data</legend>
+				<span class="btn btn-success fileinput-button">
+						<span>Select File...</span>
+						<input type="file" name="files[]" id="csvFile">
+				</span>
+				<button class="round-btn" id="csvHelp"></button>
+				<a href="template.csv">Download CSV Template</a>
+				<div>
+					<button type="button" id="LoadCancel">Cancel</button>
+					<button type="button" id="LoadData">Load</button>
+				</div>
+			</fieldset>
+		</form>
 		</script>
 
 		<script type="text/template" id="settings-template">
