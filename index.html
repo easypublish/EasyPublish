@@ -552,7 +552,6 @@
 						<select name="bulkmenu">
 							<option value="delete">Delete</option>
 							<option value="publish">Publish</option>
-							<option value="unpublish">Unpublish</option>
 						</select>
 						<button type="submit" class="button">Go</button>
 					</span>
@@ -563,24 +562,27 @@
 
 		<script type="text/template" id="item-template">
 			<% var properties = item.get('data')[0].resource_data.items[0].properties; %>
-			<td><input name="items" type="checkbox" data-item="<%= item.get('id') %>" /></td>
+			<td>
+				<% if (item.get('status') != 'Published') { %>
+					<!-- for now, no modifying published items -->
+					<input name="items" type="checkbox" data-item="<%= item.get('id') %>" />
+				<% } %>
+			</td>
 			<td><%= properties.name %></td>
 			<td><a href="<%= properties.url %>"><%= properties.url %></a></td>
-			<td><%= properties.description %></td>
+			<td>
+				<% if (properties.description != undefined) { %>
+					<%= properties.description %>
+				<% } %>
+			</td>
 			<td class="status"><%= item.get('status') %></td>
 			<td>
 				<% if (item.get('status') != 'Published') { %>
-					<!-- for now, no editing published items -->
+					<!-- for now, no modifying published items -->
 					<a href="#edit/<%= item.get('id') %>" class="button">Edit</a>
-				<% } %>
 					<button class="delete button" data-item="<%= item.get('id') %>">Delete</button>
-				<% if (item.get('status') == 'Unpublished') { %>
 					<button class="publish button" data-item="<%= item.get('id') %>">Publish</button>
-				<% } else if (item.get('status') == 'Published') { %>
-					<button class="unpublish button" data-item="<%= item.get('id') %>">Un-publish</button>
-				<% } else { %>
-					<!-- no publish or unpublish if status is error -->
-					<% } %>
+				<% } %>
 			</td>
 		</script>
 
