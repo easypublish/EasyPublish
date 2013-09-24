@@ -148,21 +148,6 @@ function EasyPublish(edit_data) {
 	}
 
 
-	$( document ).tooltip({ position: { my: "left top", at: "right+15 top", collision: "flipfit" } });
-
-	this.submissionComplete = function(success) {
-		if(success) {
-			that.importedData = {
-				numRows:0
-			};
-        	clearFields();
-        	buildDataSelections();
-	    } else {
-
-	    }
-	}
-
-
 	this.fileDropped = function(fileData) {
         var arrData = this.dataManager.CSVToArray(fileData);
         var objData = this.dataManager.twoDArrayToObjectArray(arrData, this.fieldManager.englishNameDictionary);
