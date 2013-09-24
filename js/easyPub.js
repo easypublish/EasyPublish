@@ -12,8 +12,7 @@ function EasyPublish(edit_data) {
 	var dnd = new DragAndDrop(this);
     dnd.bind("csvFile");
     
-	var dataManager = new DataManager(this);
-	this.dataManager = dataManager;
+	this.dataManager = new DataManager(this);
 	var validator = new Validator();
 
 	var importIndex = 0;
@@ -46,14 +45,6 @@ function EasyPublish(edit_data) {
     
 
 	$('#csvHelpDialog').dialog({
-		autoOpen:false,
-		position:dialogPosition
-	});
-	$('#oauthErrorDialog').dialog({
-		autoOpen:false,
-		position:dialogPosition
-	});
-	$('#storeHelpDialog').dialog({
 		autoOpen:false,
 		position:dialogPosition
 	});
@@ -134,20 +125,20 @@ function EasyPublish(edit_data) {
 	});*/
 
 	if (edit_data != undefined) {
-		setEditData(dataManager.mapPayloadToFields(edit_data.resource_data.items[0].properties));
+		setEditData(this.dataManager.mapPayloadToFields(edit_data.resource_data.items[0].properties));
 	}
 
 	var dlCSVButton = $("#DL_CSV");
 	dlCSVButton.button();
 	dlCSVButton.click(function() {
-		dataManager.downloadData("csv");
+		this.dataManager.downloadData("csv");
 		return false;
 	});	
 
 	var dlJSONButton = $("#DL_JSON");
 	dlJSONButton.button();
 	dlJSONButton.click(function() {
-		dataManager.downloadData("json");
+		this.dataManager.downloadData("json");
 		return false;
 	});
 
@@ -156,39 +147,6 @@ function EasyPublish(edit_data) {
     if (enableDebug !== undefined) {
         $("#debugConsole").show();
     }
-
-    var resultDialog = $("#resultsDialog").dialog({
-        autoOpen: false,
-        modal: true,
-        width: 634
-    });
-
-
-	var storeHelpButton = $("#storeHelp");
-	storeHelpButton.button( {
-      icons: {
-        primary: "ui-icon-help"
-      },
-      text: false
-
-	});
-	storeHelpButton.click(function() {
-		$("#storeHelpDialog").dialog( "open" );
-		return false;
-	});
-
-	var CSVHelpButton = $("#csvHelp");
-	CSVHelpButton.button( {
-      icons: {
-        primary: "ui-icon-help"
-      },
-      text: false
-
-	});
-	CSVHelpButton.click(function() {
-		$("#csvHelpDialog").dialog( "open" );
-		return false;
-	});
 
 	var testDataButton = $("#TestData");
 	testDataButton.button();
@@ -338,8 +296,8 @@ function EasyPublish(edit_data) {
 
 
 	this.fileDropped = function(fileData) {
-        var arrData = dataManager.CSVToArray(fileData);
-        var objData = dataManager.twoDArrayToObjectArray(arrData, this.fieldManager.englishNameDictionary);
+        var arrData = this.dataManager.CSVToArray(fileData);
+        var objData = this.dataManager.twoDArrayToObjectArray(arrData, this.fieldManager.englishNameDictionary);
         var valid = true; //validateImportData(arrData);
         if(valid) {
 			var rowCount = arrData.length;
