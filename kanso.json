@@ -2,7 +2,7 @@
     "name": "EasyPublish",
     "version": "0.0.1",
     "description": "Easy Publish for Learning Registry",
-    "attachments": ["index.html","index-old.html","css", "js", "template.csv"],
+    "attachments": ["index.html","index-old.html","css", "js", "img", "template.csv"],
     "modules":["lib"],
     "load": "lib/app",
 	"dependencies": {
