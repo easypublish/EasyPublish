@@ -697,7 +697,7 @@
 				<button id="DL_JSON">DL JSON</button>
 			</div>
 			<div id="csvHelpDialog" title="CSV Import Help">
-				<p>If you wish to enter data more rapidly, you can submit a CSV file. First click "Download CSV Template" to get a template file. Then add rows of data to that file. Next, import the file by clicking "Select file..." or by dragging the file into the blue area above.</p>
+				<p>If you wish to enter data more rapidly, you can submit a CSV file. First click "Download CSV Template" to get a template file. Then add rows of data to that file. Next, import the file by clicking "Select file..."</p>
 			</div>
 			<div id="resultsDialog" title="Submission Results"><iframe width="600" height="300"></iframe></div>
 		</script>
@@ -721,7 +721,7 @@
 		</script>
 
 		<script type="text/template" id="settings-template">
-		settings template
+			<p>TODO: settings template</p>
 		</script>
 
 		<script type="text/template" id="help-template">
@@ -731,22 +731,6 @@
 
 
 		<!-- make easyPub.js happy -->
-		<script id="successDialogTemplate" type="text/template">
-			<div id="<%= guid %>" title="Successful Post">
-				<p>Your submission "<%= name %>" has been successfully posted to the Learning Registry.
-					You may find it <a href="<%= serverURL %>/obtain?by_doc_ID=true&request_ID=<%= docID %>">here</a>.
-				</p>
-				<p>Your submission "<%= name %>" has been successfully posted to the Learning Registry.
-					You may find it <a href="<%= serverURL %>/obtain?by_doc_ID=true&request_ID=<%= docID %>">here</a>.
-				</p>
-			</div>
-		</script>
-		<script id="failDialogTemplate" type="text/template">
-			<div id="<%= guid %>" title="Post Attempt Failed">
-				<p>Your submission "<%= name %>" failed with the following error: <%= error %>.</p>
-			</div>
-		</script>
-
 		<script id="importFailDialogTemplate" type="text/template">
 			<div id="<%= guid %>" title="Import Attempt Failed">
 				<p>Cannot import CSV file, it is missing the following fields:</p>
