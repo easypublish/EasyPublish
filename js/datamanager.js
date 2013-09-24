@@ -1,22 +1,5 @@
 function DataManager(easyPub) {
 
-    var nodeURL = "http://sandbox.learningregistry.org";
-
-    var service = "publish";
-
-    var succTempSrc = document.getElementById("successDialogTemplate").innerHTML;
-    successDialogTemplate = Handlebars.compile(succTempSrc);
-    var failTempSrc = document.getElementById("failDialogTemplate").innerHTML;
-    failDialogTemplate = Handlebars.compile(failTempSrc);
-
-    /*var default_oauth_data = {
-        consumer_key: 'john.brecht@sri.com',
-        consumer_secret: 'ATjaQAYRMhK0e7gppFBK2pZTtPzaBRFD',
-        token: 'node_sign_token',
-        token_secret: '7Hy6hsuz702wfuepQpfOgfP3WUCGunGF',
-        node_url: nodeURL
-    }*/
-
     function stripEmptyProperties(properties) {
         for(var key in properties) {
             var next = properties[key];
@@ -113,6 +96,63 @@ function DataManager(easyPub) {
         return payload;
     }
 
+    // Remap data from payload to csv field names
+    // Ideally we wouldn't need this because we'd use the same objects and names everywhere 
+    this.mapPayloadToFields = function (data, index) {
+        var fieldData = {}
+        for(var key in data) {
+            var val = data[key];
+            if (key == 'educationalAlignment' || key == 'author' || key == 'publisher') {
+                // pull grade out of educationalAlignments array
+                if (key == 'educationalAlignment') {
+                    for (var i=0,l=val.length; i<l; i++) {
+                        var properties = val[i].properties;
+                        if (properties.alignmentType[0] == 'educationLevel') {
+                            fieldData['grade'] = properties.targetName;
+                            val.splice(i, 1);
+                            break;
+                        }
+                    }
+                }
+                // run through things with mutliple values recursively, making sure the names map correctly
+                for (var i=0,l=val.length; i<l; i++) {
+                    var properties = val[i].properties;
+                    // rename property names
+                    if (key == 'educationalAlignment') {
+                        properties = {
+                            'alignmentType':properties.alignmentType,
+                            'educationalFramework':properties.educationalFramework,
+                            'ELA-Standard':(properties.educationalFramework[0][0].lastIndexOf("Language")>=0)?properties.targetName:'',
+                            'Math-Standard':(properties.educationalFramework[0][0].lastIndexOf("Math")>=0)?properties.targetName:''
+                        }
+                    } else if (key == 'author') {
+                        properties = {
+                            'author_name':properties.name,
+                            'author_url':properties.url,
+                            'author_email':properties.email
+                        }
+                    } else if (key == 'publisher') {
+                        properties = {
+                            'publisher_name':properties.name,
+                            'publisher_url':properties.url,
+                            'publisher_email':properties.email
+                        }
+                    }
+                    var subval = this.mapPayloadToFields(properties, i);
+                    for (var field in subval) {
+                        fieldData[field] = subval[field];
+                    }
+                }
+            } else {
+                // final field values and non-recursive fields
+                if (key == 'name') key = 'title';
+                if (index != undefined && index > 0) key = key + '_' + (index + 1);
+                fieldData[key] = val;
+            }
+        }
+        return fieldData;
+    }
+
 
     function buildFullAlignmentsArray() {
 
@@ -195,7 +235,7 @@ function DataManager(easyPub) {
         return envelope;
     }
 
-    function makeAllEnvelopes() {
+    this.makeAllEnvelopes = function() {
         var envelopes = [];
         var numRows = easyPub.getNumImportRows();
         if(numRows==0) {
@@ -213,153 +253,6 @@ function DataManager(easyPub) {
     this.testEnvelope = function() {
         var envelope = makeEnvelope();
         console.log(envelope);
-    }
-
-    //TODO - handle arrays of form data
-    this.submitData = function () {
-        envelopes = makeAllEnvelopes();
-
-        var oauth_data = easyPub.getOAuthData();
-        if(oauth_data==null) {
-            console.log("null oauth_data, aborting submit")
-            return;
-        } else {
-            req_info = getOAuthInfo(oauth_data);
-            req_info.message.body = {
-                documents: envelopes
-            };
-            console.log("req_info:");
-            console.log(req_info);
-            request = oauthRequest(oauth_data.node_url + '/publish', req_info.message, req_info.accessor);
-            
-            request.done(function(msg) {
-                console.log("Done");
-                console.log(msg);
-                if(msg.OK) {
-                    alert("Submission succeeded, press OK to view the node reply.");
-                    //easyPub.submissionComplete(true);
-                    displayResults(msg.document_results);
-                } else {
-                    alert("Submission failed, press OK to view the node reply.");
-                    displayResults(msg.document_results);
-                    //easyPub.submissionComplete(false);
-                }
-                
-                /*
-                var results = msg.document_results;
-                for(key in results) {
-                    var nextResult = results[key];
-                    console.log("nextResult: ");
-                    console.log(nextResult);
-                    var OK = nextResult.OK;
-                    if(OK) {
-                        console.log("success, doc_ID: " + nextResult.doc_ID);
-                        var tempData = {
-                            guid:nextResult.doc_ID,
-                            name:easyPub.getValue("title"),
-                            serverURL: nodeURL,
-                            docID:nextResult.doc_ID
-                        };
-                        successDialogHtml = successDialogTemplate(tempData);
-                        $("body").append(successDialogHtml);
-                        $("#"+nextResult.doc_ID).dialog({position:{my: "top", at: "top", of: $("#middleCol")}});
-                        easyPub.submissionComplete(true);
-                    } else {
-                        console.log("error: " + nextResult.error);
-                        var tempData = {
-                            guid:easyPub.getValue("title"),
-                            error:nextResult.error,
-                            name:formData.Name
-                        };
-                        failDialogHtml = failDialogTemplate(tempData);
-                        $("body").append(failDialogHtml);
-                        $("#"+formData.Name).dialog({position:{my: "top", at: "top", of: $("#middleCol")}});
-                        easyPub.submissionComplete(false);
-                    }
-                }*/
-            });
-            request.fail(function(msg) {
-                console.log("Fail");
-                console.log(msg);
-                alert("Submission failed.");
-                easyPub.submissionComplete(false);
-            });
-        }
-
-    }
-
-    function getOAuthInfo(oauth_data) {
-
-        var message = {
-            parameters: {}
-        };
-        var accessor = {
-            consumerKey: oauth_data.consumer_key,
-            consumerSecret: oauth_data.consumer_secret,
-            token: oauth_data.token,
-            tokenSecret: oauth_data.token_secret
-        };
-
-        return {
-            message: message,
-            accessor: accessor
-        };
-    }
-
-    function oauthRequest(path, message, accessor, undefined) {
-        message.action = path;
-        message.method = 'POST';
-        OAuth.completeRequest(message, accessor);
-        var parameters = message.parameters;
-        var options = {
-            headers: {
-                Authorization: OAuth.getAuthorizationHeader('', parameters)
-            },
-            data: JSON.stringify(message.body)
-        }
-
-        // var options = {
-        //     contentType: "application/x-www-form-urlencoded",
-        //     headers: {
-        //         Authorization: OAuth.getAuthorizationHeader('', parameters),
-        //         Accept: "application/json"
-        //     },
-        //     data: OAuth.formEncode(parameters)
-        // }
-
-        return commonAjax('POST', path, options);
-    }
-
-    function commonAjax(method, url, options) {
-        var settings = {
-            type: method,
-            contentType: "application/json",
-            dataType: "json"
-        }
-        if (options) {
-            settings = _.extend(settings, options);
-        }
-        var request = $.ajax(url, settings);
-
-        return request;
-    }
-
-    function displayResults(results) {
-        var output = JSON.stringify(results);
-        var filetype = 'text/json';
-        window.URL = window.webkitURL || window.URL;
-        blob = new Blob([output], {
-            type: filetype
-        });
-        url = window.URL.createObjectURL(blob);
-        // document.location = url;
-        displayDialog(url);
-    }
-
-
-    function displayDialog(url) {
-        $('#resultsDialog > iframe').attr("src", url);
-        $('#resultsDialog').dialog("open");
     }
 
     this.downloadData = function(type) {
@@ -387,7 +280,7 @@ function DataManager(easyPub) {
     }
 
 
-    function toCSV(data) {
+    this.toCSV = function(data) {
         console.log("toCSV");
         console.log(data);
         var csv = "";

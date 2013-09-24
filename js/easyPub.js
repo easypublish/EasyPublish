@@ -1,16 +1,19 @@
 $(function() { 
-	var easyPub = new EasyPublish();
+	// var easyPub = new EasyPublish();
 });
 
 EasyPublish.prototype.constructor = EasyPublish;
-function EasyPublish() {
+function EasyPublish(edit_data) {
 
 	var editors = {};
 
 	var that = this;
 	this.fieldManager = new FieldManager();
 	var dnd = new DragAndDrop(this);
+    dnd.bind("csvFile");
+    
 	var dataManager = new DataManager(this);
+	this.dataManager = dataManager;
 	var validator = new Validator();
 
 	var importIndex = 0;
@@ -20,8 +23,6 @@ function EasyPublish() {
 
 	var alignmentCount = 1;
 	var authorCount = 1;
-	var store_credentials = false;
-	var local_storeage = false;
 
 	var dialogPosition  = {my: "top", at: "top", of: $("#middleCol")};
 
@@ -57,86 +58,13 @@ function EasyPublish() {
 		position:dialogPosition
 	});
 
-	function supports_html5_storage() {
-	  try {
-	    return 'localStorage' in window && window['localStorage'] !== null;
-	  } catch (e) {
-	    return false;
-	  }
-	}
-	if(supports_html5_storage()) {
-		local_storage = true;
-		var storedCreds = localStorage.getItem("store_credentials");
-		if(storedCreds=="true") {
-			store_credentials = true;
-			$("#store_cred").attr('checked', true);
-			$("#store_state").html("(stored)");
-			restoreCredentials();
-		} else {
-			$("#store_cred").attr('checked', false);
-		}
-	} else {
-		$("#store_cred_row").hide();
-		local_storeage = false;
-	}
-
-	$("#store_cred").change(function() {
-		//var checked = $("#store_cred").val();
-		if(this.checked) {
-			store_credentials = true;
-			localStorage.setItem("store_credentials", true);
-			storeAllCredentials();
-			$("#store_state").html("(stored)");
-		} else {
-			store_credentials = false;
-			localStorage.setItem("store_credentials", false);
-			clearAllCredentials();
-			$("#store_state").html("(not stored)");
-		}
-	});
-
-	$(".oauth").change(function() {
-		if(store_credentials) {
-			storeCredential(this);
-		}
-	});
-
     function getParameterByName(name) {
         name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
         var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
             results = regex.exec(location.search);
         return results == null ? undefined : decodeURIComponent(results[1].replace(/\+/g, " "));
     }
-
-	function clearAllCredentials() { 
-		$(".oauth").each(function( index ){
-			var id = $(this).attr("id");
-			localStorage.removeItem(id);
-		});
-	}
-
-	function restoreCredentials() { 
-		$(".oauth").each(function( index ){
-			var id = $(this).attr("id");
-			var value = localStorage.getItem(id);
-			$(this).val(value);
-		});
-	}
-
-	function storeAllCredentials() { 
-		$(".oauth").each(function( index ){
-			storeCredential($(this));
-		});
-	}
-
-	function storeCredential(credField) {
-		if(local_storage) {
-			var id = $(credField).attr("id");
-			var value = $(credField).val();
-			localStorage.setItem(id, value);
-		}
-	}
-
+	
 	function updateEdFramework(id) {
 		var selection = $("#"+id).val();
 		var indexLoc = id.lastIndexOf("_");
@@ -198,24 +126,16 @@ function EasyPublish() {
 	buildForm("author", this.fieldManager.authorFields);
 	buildForm("publisher", this.fieldManager.publisherFields);
 
-	var submitButton = $("#Submit");
-	submitButton.button();
-	submitButton.click(function() {
-		submittedDocs = [];
-		var valid = validateAll();
-		if(valid) {
-			dataManager.submitData();
-		} else {
-			alert("Please correct the indicated problems");
-		}
-		return false;
-	});
 	/*var downloadCSVButton = $("#DownloadCSV");
 	downloadCSVButton.button();
 	downloadCSVButton.click(function() {
 		window.location = "template.csv";
 		return false;
 	});*/
+
+	if (edit_data != undefined) {
+		setEditData(dataManager.mapPayloadToFields(edit_data.resource_data.items[0].properties));
+	}
 
 	var dlCSVButton = $("#DL_CSV");
 	dlCSVButton.button();
@@ -531,6 +451,42 @@ function EasyPublish() {
     	}
     }
 
+    function setEditData(data) {
+    	//console.trace();
+        var mathTest = /[\w]*Math[\w]*/;
+        var elaTest = /[\w]*Language[\w]*/;
+    	var indexTest = /([\w]*)_(\d+)$/;
+    	var authorTest = /[\w]*author[\w]*/;
+    	var alignmentTest = /[\w]*(alignmentType|educationalFramework|Standard)[\w]*/;
+
+    	for(var key in data) {
+            var val = data[key];
+        	if(key.match(indexTest)) {
+        		match = indexTest.exec(key);
+        		var base = match[1];
+        		var key_index = match[2];
+        		if(key.match(authorTest)) {
+        			if(key_index>authorCount) {
+        				addAuthor();
+        			}
+        		} else if (key.match(alignmentTest)) {
+        			if(key_index>alignmentCount) {
+        				addAlignment();
+        			}
+        		}
+        	}
+            var field = that.fieldManager.fieldDictionary[key];
+            if (field) {
+                field.value(val);
+            } else {
+            	console.log("no field found for key: " + key + ", val: " +  val);
+            }
+        	if(key.lastIndexOf("educationalFramework")>=0) {
+        		updateEdFramework(key);
+        	}
+    	}
+    }
+
     function clearFields() {
     	for(key in that.fieldManager.fieldDictionary) {
             var field = that.fieldManager.fieldDictionary[key];
@@ -540,8 +496,8 @@ function EasyPublish() {
     	}
     }
 
-    var importFailDialogTemplate = null;
-    var importWarningDialogTemplate = null;
+    var importFailDialogSrc = null;
+    var importWarningDialogSrc = null;
     function validateImportData(arrData) {
     	var header = arrData[0];
     	var fields = _.keys(that.fieldManager.fieldDictionary);
@@ -549,30 +505,28 @@ function EasyPublish() {
     	var extraHeaders = _.difference(header, intersection);
     	var missingFields = _.difference(fields, intersection);
     	if(missingFields.length>0) {
-    		if(!importFailDialogTemplate) {
+    		if(!importFailDialogSrc) {
     			var importFailDialogSrc = document.getElementById("importFailDialogTemplate").innerHTML;
-    			importFailDialogTemplate = Handlebars.compile(importFailDialogSrc);
     		}
     		var timestamp = new Date().getTime();
             var tempData = {
                 guid:timestamp,
                 missingFieldsList:missingFields.join()
             };
-			importFailDialogHtml = importFailDialogTemplate(tempData);
+			importFailDialogHtml = _.template(importFailDialogSrc, tempData);
             $("body").append(importFailDialogHtml);
             $("#"+timestamp).dialog({position:dialogPosition});
             return false;
     	} else if(extraHeaders.length>0) {
-    		if(!importWarningDialogTemplate) {
+    		if(!importWarningDialogSrc) {
     			var importWarningDialogSrc = document.getElementById("importWarningDialogTemplate").innerHTML;
-    			importWarningDialogTemplate = Handlebars.compile(importWarningDialogSrc);
     		}
     		var timestamp = new Date().getTime();
             var tempData = {
                 guid:timestamp,
                 extraHeadersList:extraHeaders.join()
             };
-			importWarningDialogHtml = importWarningDialogTemplate(tempData);
+			importWarningDialogHtml = _.template(importWarningDialogSrc, tempData);
             $("body").append(importWarningDialogHtml);
             $("#"+timestamp).dialog({position:dialogPosition});
     	}
@@ -580,24 +534,8 @@ function EasyPublish() {
     }
 
     this.getOAuthData = function() {
-    	var cons_key = $("#consumer_key").val();
-    	var cons_sec = $("#consumer_secret").val();
-    	var tok_sec = $("#token_secret").val();
-    	var n_url = $("#node_url").val();
-
-    	if(cons_key && cons_sec && tok_sec && n_url) {
-	    	var oauth_data = {
-		        consumer_key: cons_key,
-		        consumer_secret: cons_sec,
-		        token: 'node_sign_token',
-		        token_secret: tok_sec,
-		        node_url: n_url
-	    	}
-	    	return oauth_data;
-	    } else {
-	    	$('#oauthErrorDialog').dialog("open");
-	    	return null;
-	    }
+    	var oauth_data = storedCredentials.oauth;
+	    return oauth_data;
 	}
 
 	this.getAuthors = function() {
@@ -611,9 +549,9 @@ function EasyPublish() {
 		if(authorCount>1) {
 			for(var i=2; i<=authorCount; i++) {
 				var author = {
-				    name: [$("#author_name"+i).val()],
-		            url:  [$("#author_url"+i).val()],
-		            email:  [$("#author_email"+i).val()]
+				    name: [$("#author_name_"+i).val()],
+		            url:  [$("#author_url_"+i).val()],
+		            email:  [$("#author_email_"+i).val()]
 				}
 				authors[i-1] = author;
 			}
@@ -636,7 +574,7 @@ function EasyPublish() {
 			var standardField;
 			if(edFramework.lastIndexOf("Math")>=0) {
 				standardField = this.fieldManager.fieldDictionary["Math-Standard"];
-			} else if(edFramework.lastIndexOf("ELA")>=0) {
+			} else if(edFramework.lastIndexOf("Language")>=0) {
 				standardField = this.fieldManager.fieldDictionary["ELA-Standard"];
 			}
 			if(standardField) {
@@ -736,6 +674,7 @@ function EasyPublish() {
 		validateFields(that.fieldManager.publisherFields);
 	    return valid;
 	}
+	this.validateAll = validateAll;
 
 
 }
@@ -774,4 +713,3 @@ FieldEditorRow = function(field) {
 	}
 	$('<br>').appendTo(this.elem);
 }
-
