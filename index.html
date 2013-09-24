@@ -428,6 +428,18 @@
 							},
 							disabled: true 
 						});
+
+						// Author and alignment buttons
+						this.$el.find("#addAuthor").button({
+							icons: {
+								secondary: "ui-icon-plus",
+							}
+						});
+						this.$el.find("#addAlignment").button({
+							icons: {
+								secondary: "ui-icon-plus",
+							}
+						});
 					}
 				},
 				events: {
@@ -436,7 +448,9 @@
 					'click #csvHelp': 'help',
 					'click #prevData': 'prevImportData',
 					'click #nextData': 'nextImportData',
-					'click #removeRow': 'removeImportRow'
+					'click #removeRow': 'removeImportRow',
+					'click #addAuthor': 'addAuthor',
+					'click #addAlignment': 'addAlignment'
 				},
 				publish: function (event) {
 					event.preventDefault();
@@ -503,6 +517,14 @@
 				removeImportRow: function (event) {
 					event.preventDefault();
 					// this didn't seem to do anything in old EasyPub.js, either
+				},
+				addAuthor: function (event) {
+					event.preventDefault();
+					this.easyPub.addAuthor();
+				},
+				addAlignment: function (event) {
+					event.preventDefault();
+					this.easyPub.addAlignment();
 				}
 			});
 			var create = new Create();

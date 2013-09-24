@@ -87,17 +87,7 @@ function EasyPublish(edit_data) {
 	}
 
 
-	var addAuthorButton = $("#addAuthor");
-	addAuthorButton.button({
-		icons: {
-			secondary: "ui-icon-plus",
-		}
-	});
-	addAuthorButton.click(function() {
-		addAuthor();
-		return false;
-	});
-	function addAuthor() {
+	this.addAuthor = function () {
 		authorCount++;
 		$("#addAuthor").before('<div class="sublegend">Author '+authorCount+'</div>');
 		for(var i=0; i<3; i++) {
@@ -114,17 +104,7 @@ function EasyPublish(edit_data) {
 		}
 	}
 
-	var addAlignmentButton = $("#addAlignment");
-	addAlignmentButton.button({
-		icons: {
-			secondary: "ui-icon-plus",
-		}
-	});
-	addAlignmentButton.click(function() {
-		addAlignment();
-		return false;
-	});
-	function addAlignment() {
+	this.addAlignment = function () {
 		alignmentCount++;
 		$("#addAlignment").before('<div class="sublegend">Alignment '+alignmentCount+'</div>');
 		for(var i=0; i<4; i++) {
@@ -278,11 +258,11 @@ function EasyPublish(edit_data) {
         		var key_index = match[2];
         		if(key.match(authorTest)) {
         			if(key_index>authorCount) {
-        				addAuthor();
+        				that.addAuthor();
         			}
         		} else if (key.match(alignmentTest)) {
         			if(key_index>alignmentCount) {
-        				addAlignment();
+        				that.addAlignment();
         			}
         		}
         	}
@@ -314,11 +294,11 @@ function EasyPublish(edit_data) {
         		var key_index = match[2];
         		if(key.match(authorTest)) {
         			if(key_index>authorCount) {
-        				addAuthor();
+        				that.addAuthor();
         			}
         		} else if (key.match(alignmentTest)) {
         			if(key_index>alignmentCount) {
-        				addAlignment();
+        				that.addAlignment();
         			}
         		}
         	}
