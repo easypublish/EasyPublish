@@ -308,9 +308,9 @@ function EasyPublish(edit_data) {
     	}
     }
 
-    var importFailDialogSrc = null;
-    var importWarningDialogSrc = null;
     function validateImportData(arrData) {
+		var importFailDialogSrc = null;
+		var importWarningDialogSrc = null;
     	var header = arrData[0];
     	var fields = _.keys(that.fieldManager.fieldDictionary);
     	var intersection = _.intersection(header, fields);
@@ -450,7 +450,7 @@ function EasyPublish(edit_data) {
 		}
 	}
 
-	function validateAll() {
+	this.validateAll = function () {
 		var valid = true;
 		storeCurrentImportData();
 		if(that.importedData.numRows>0) {
@@ -486,7 +486,6 @@ function EasyPublish(edit_data) {
 		validateFields(that.fieldManager.publisherFields);
 	    return valid;
 	}
-	this.validateAll = validateAll;
 
 
 }
