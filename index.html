@@ -388,8 +388,18 @@
 					event.preventDefault();
 					if(this.easyPub.validateAll()) {
 						var data = this.easyPub.dataManager.makeAllEnvelopes();
+						// publish all items all together
 						var item = Items.create({data:data, status:'Unpublished'});
 						item.publish(function () {
+							// then create new items if there is more than one imported item
+							var arr = item.get('data');
+							if (arr.length > 1) {
+								for (var i=1,l=arr.length; i<l; i++) {
+									Items.create({data:[arr[i]], status:'Published'});
+								}
+								item.set('data', [arr[0]]);
+								item.save();
+							}
 							router.navigate('', {trigger:true});
 						});
 					} else {
@@ -401,7 +411,9 @@
 					if (window.File && window.FileReader && window.FileList && window.Blob) {
 						if(this.easyPub.validateAll()) {
 							var data = this.easyPub.dataManager.makeAllEnvelopes();
-							Items.create({data:data, status:'Unpublished'});
+							for (var i=0,l=data.length; i<l; i++) {
+								Items.create({data:[data[i]], status:'Unpublished'});
+							}
 							router.navigate('', {trigger:true});
 						} else {
 							alert("Please correct the indicated problems");
