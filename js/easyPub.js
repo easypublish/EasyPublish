@@ -15,8 +15,8 @@ function EasyPublish(edit_data) {
 	this.dataManager = new DataManager(this);
 	var validator = new Validator();
 
-	var importIndex = 0;
-	var importedData = {
+	this.importIndex = 0;
+	this.importedData = {
 		numRows:0
 	};
 
@@ -24,37 +24,6 @@ function EasyPublish(edit_data) {
 	var authorCount = 1;
 
 	var dialogPosition  = {my: "top", at: "top", of: $("#middleCol")};
-
-	var dataSelect = $('#dataSelect');
-	dataSelect.selectmenu({
-		style:'popup',
-		width: 300,
-	    change: function(e, object){
-	        setImportIndex(dataSelect.selectmenu("index"), false, true);
-	    }
-	});
-	dataSelect.selectmenu('disable');
-
-    var removeRowButton = $('#removeRow');
-    removeRowButton.button({
-        disabled: true
-    });
-    removeRowButton.click(function(){
-        
-    });
-    
-
-	$('#csvHelpDialog').dialog({
-		autoOpen:false,
-		position:dialogPosition
-	});
-
-    function getParameterByName(name) {
-        name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-            results = regex.exec(location.search);
-        return results == null ? undefined : decodeURIComponent(results[1].replace(/\+/g, " "));
-    }
 	
 	function updateEdFramework(id) {
 		var selection = $("#"+id).val();
@@ -82,7 +51,7 @@ function EasyPublish(edit_data) {
 		updateEdFramework(id);
 	}
 
-	function buildForm(name, fields) {
+	this.buildForm = function(name, fields) {
 		var formSection = $("#"+name+"Form");
 
 		for(key in fields) {
@@ -112,91 +81,10 @@ function EasyPublish(edit_data) {
 		$("#ELA-StandardRow").hide();
 		$("#Math-StandardRow").hide();
 	}
-	buildForm("main", this.fieldManager.mainFields);
-	buildForm("alignment", this.fieldManager.alignmentFields);
-	buildForm("author", this.fieldManager.authorFields);
-	buildForm("publisher", this.fieldManager.publisherFields);
-
-	/*var downloadCSVButton = $("#DownloadCSV");
-	downloadCSVButton.button();
-	downloadCSVButton.click(function() {
-		window.location = "template.csv";
-		return false;
-	});*/
 
 	if (edit_data != undefined) {
 		setEditData(this.dataManager.mapPayloadToFields(edit_data.resource_data.items[0].properties));
 	}
-
-	var dlCSVButton = $("#DL_CSV");
-	dlCSVButton.button();
-	dlCSVButton.click(function() {
-		this.dataManager.downloadData("csv");
-		return false;
-	});	
-
-	var dlJSONButton = $("#DL_JSON");
-	dlJSONButton.button();
-	dlJSONButton.click(function() {
-		this.dataManager.downloadData("json");
-		return false;
-	});
-
-
-    var enableDebug = getParameterByName("debug");
-    if (enableDebug !== undefined) {
-        $("#debugConsole").show();
-    }
-
-	var testDataButton = $("#TestData");
-	testDataButton.button();
-	testDataButton.click(function() {
-		for(key in that.fieldManager.fieldDictionary) {
-			var field = that.fieldManager.fieldDictionary[key];
-			var data = field.id+"DATA";
-			if(field.type==Field.URL) {
-				data = "http://www."+data+".com";
-			}else if(field.type==Field.DURATION) {
-				data = "P5Y";
-			}else if(field.type==Field.DATE) {
-				data = "2013-01-01";
-			}else if(field.type==Field.EMAIL) {
-				data = data+"@data.com";
-			}else if(field.type==Field.RANGE) {
-				data = "1-10";
-			}
-			field.value(data);
-		}
-		return false;
-	});
-
-	var previousDataButton = $("#prevData");
-	previousDataButton.button({
-		icons: {
-			primary: "ui-icon-arrowthick-1-w",
-		},
-		disabled: true 
-	});
-	previousDataButton.click(function() {
-		if(importIndex>0) {
-			setImportIndex(importIndex-1, true, true);
-		}
-		return false;
-	});
-
-	var nextDataButton = $("#nextData");
-	nextDataButton.button({
-		icons: {
-			secondary: "ui-icon-arrowthick-1-e",
-		},
-		disabled: true 
-	});
-	nextDataButton.click(function() {
-		if(importIndex<importedData.numRows-1) {
-			setImportIndex(importIndex+1, true, true);
-		}
-		return false;
-	});
 
 
 	var addAuthorButton = $("#addAuthor");
@@ -265,17 +153,17 @@ function EasyPublish(edit_data) {
 		$("#ELA-Standard_"+ alignmentCount + "Row").hide();
 	}
 
-	function setImportIndex(newIndex, updateDataSelect, storeCurrent) {
+	this.setImportIndex = function(newIndex, updateDataSelect, storeCurrent) {
 		if(storeCurrent) {
 			storeCurrentImportData();
 		}
-		importIndex = newIndex;
-		that.setCurrentImportData(importIndex);
-    	previousDataButton.button("option", "disabled", importIndex==0);
-    	nextDataButton.button("option", "disabled", importIndex==importedData.numRows-1);
-        removeRowButton.button("option", "disabled", importedData.numRows==0);
+		that.importIndex = newIndex;
+		that.setCurrentImportData(that.importIndex);
+    	$('#prevData').button("option", "disabled", that.importIndex==0);
+    	$('#nextData').button("option", "disabled", that.importIndex==that.importedData.numRows-1);
+        $('#removeRow').button("option", "disabled", that.importedData.numRows==0);
     	if(updateDataSelect) {
-    		dataSelect.selectmenu("index", importIndex);
+    		$('#dataSelect').selectmenu("index", that.importIndex);
     	}
 	}
 
@@ -284,7 +172,7 @@ function EasyPublish(edit_data) {
 
 	this.submissionComplete = function(success) {
 		if(success) {
-			importedData = {
+			that.importedData = {
 				numRows:0
 			};
         	clearFields();
@@ -302,25 +190,26 @@ function EasyPublish(edit_data) {
         if(valid) {
 			var rowCount = arrData.length;
 	        $("#dropStatus2").append("Found " + rowCount + " row(s) of data");
-        	importedData = objData;
-        	importIndex = 0;
-        	previousDataButton.button("option", "disabled", true);
+        	that.importedData = objData;
+        	that.importIndex = 0;
+        	$('#prevData').button("option", "disabled", true);
         	if(rowCount>1) {
-        		nextDataButton.button("option", "disabled", false);
-                removeRowButton.button("option", "disabled", false);
+        		$('#nextData').button("option", "disabled", false);
+                $('#removeRow').button("option", "disabled", false);
         	}
         	buildDataSelections();
-        	that.setCurrentImportData(importIndex);
+        	that.setCurrentImportData(that.importIndex);
 	    }
     }
 
     function buildDataSelections() {
+    	var dataSelect = $('#dataSelect');
     	dataSelect.selectmenu("destroy")
     	dataSelect.empty();
-    	if(importedData.numRows>0) {
+    	if(that.importedData.numRows>0) {
 	    	var sel = true;
-	    	for(var i=0; i<importedData.numRows; i++) {
-	    		var name = importedData.title[i];
+	    	for(var i=0; i<that.importedData.numRows; i++) {
+	    		var name = that.importedData.title[i];
                 var title = "-- UNDEFINED TITLE --";
                 if (name.trim().length > 0) {
                     title = name;
@@ -338,18 +227,18 @@ function EasyPublish(edit_data) {
 				style:'popup',
 				width: 300,
 			    change: function(e, object){
-			        setImportIndex(dataSelect.selectmenu("index"), false, true);
+			        that.setImportIndex(dataSelect.selectmenu("index"), false, true);
 			    }
 			});
 			dataSelect.selectmenu('enable');
-    		dataSelect.selectmenu("index", importIndex);
+    		dataSelect.selectmenu("index", that.importIndex);
 		}else{
 			dataSelect.append("<option value='No Data'>No Data</option>");
 			dataSelect.selectmenu({
 				style:'popup',
 				width: 300,
 			    change: function(e, object){
-			        setImportIndex(dataSelect.selectmenu("index"), false, true);
+			        that.setImportIndex(dataSelect.selectmenu("index"), false, true);
 			    }
 			});
 			dataSelect.selectmenu('disable');
@@ -358,16 +247,16 @@ function EasyPublish(edit_data) {
 
     function storeCurrentImportData() {
     	//console.trace();
-    	for(key in importedData) {
+    	for(key in that.importedData) {
             var field = that.fieldManager.fieldDictionary[key];
             if (field) {
-                importedData[key][importIndex] = field.value();
+                that.importedData[key][that.importIndex] = field.value();
             }
     	}
     }
 
     this.getNumImportRows = function() {
-    	return importedData.numRows;
+    	return that.importedData.numRows;
     }
 
     this.setCurrentImportData = function(index) {
@@ -378,11 +267,11 @@ function EasyPublish(edit_data) {
     	var authorTest = /[\w]*author[\w]*/;
     	var alignmentTest = /[\w]*(alignmentType|educationalFramework|Standard)[\w]*/;
 
-    	for(var key in importedData) {
+    	for(var key in that.importedData) {
     		if(key=="numRows") {
     			continue;
     		}
-            var val = importedData[key][index];
+            var val = that.importedData[key][index];
         	if(key.match(indexTest)) {
         		match = indexTest.exec(key);
         		var base = match[1];
@@ -599,10 +488,10 @@ function EasyPublish(edit_data) {
 	function validateAll() {
 		var valid = true;
 		storeCurrentImportData();
-		if(importedData.numRows>0) {
+		if(that.importedData.numRows>0) {
 			var index = 0;
-			while(valid && index<importedData.numRows) {
-				setImportIndex(index, true);
+			while(valid && index<that.importedData.numRows) {
+				that.setImportIndex(index, true);
 				valid = validateForm();
 				index++;
 			}
