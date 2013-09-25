@@ -80,7 +80,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 
-a {
+a, .ui-widget-content a {
 	color: #096aa9;
 }
 .button-link {
@@ -165,7 +165,7 @@ tbody td {
 textarea, input[type=text] {
 	font-family: Verdana,Arial,sans-serif;
 	font-size: 0.9em;
-	width: 345px;
+	width: 335px;
 }
 
 .ui-menu .ui-menu-item {
@@ -206,6 +206,10 @@ textarea, input[type=text] {
 	margin-right: 1.5em;
 }
 
+#dropStatus2 {
+	clear: both;
+}
+
 /*
 .ui-menu .ui-menu-item .ui-menu-multilevel {width: 80px;}
 */
@@ -243,29 +247,9 @@ textarea, input[type=text] {
 #edit #dropForm {
 	display: none;
 }
-#drop_zone {
-	height:50px;
-	width:250px;
-	padding: 10px;
-	background-color:powderblue;
-	border-radius: 15px;
-	border-style: dashed;
-	border-color: green;
-	display: table;
-}
-
-#drop_zone  p {
-  display: table-cell; 
-  vertical-align: middle;
-  text-align: center; 
-	font-size: 1.1em;
-	font-weight: bold;
-	color: black;
-}
 
 fieldset {
   padding: 1em;
-  font:75%/1 sans-serif;
 }
 label {
 	/*float:left;

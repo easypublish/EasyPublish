@@ -235,6 +235,9 @@
 					$('#dialogContainer').append(this.el);
 					this.$el.dialog({
 						autoOpen: true,
+						width: 410,
+						position: {my:'top',at:'top',of:'.page'},
+						modal:true,
 						close: function (event, ui) {
 							$(this).dialog('destroy').remove();
 							view.remove();
@@ -245,11 +248,14 @@
 
 			var List = Backbone.View.extend({
 				el: '.page',
+				initialize: function () {
+					Items.fetch();
+					this.listenTo(Items, 'add', this.addOne);
+				},
 				render: function () {
 					if (!storedCredentials) {
 						router.navigate('login', {trigger:true});
 					} else {
-						Items.fetch();
 						var template = _.template($('#list-template').html(), {name:storedCredentials.name,data:Items.models});
 						this.$el.html(template);
 						Items.each(this.addOne, this);
@@ -263,12 +269,18 @@
 					'click .showAll': 'showAll',
 					'click .showPublished': 'showPublished',
 					'click .showUnpublished': 'showUnpublished',
+					'click .showErrors': 'showErrors',
 					'click .help': 'showHelp',
 					'click #bulkUpload': 'showUpload'
 				},
 				addOne: function (item) {
-					var view = new ListItem({model: item});
-					this.$("#item-list").append(view.render().el);
+					var table = this.$("#item-list");
+					if (table.length > 0) {
+						var view = new ListItem({model: item});
+						table.append(view.render().el);
+					} else {
+						this.render();
+					}
 				},
 				selectall: function (event) {
 					event.preventDefault();
@@ -308,6 +320,16 @@
 					this.$(".filterButtons button").removeClass('selected');
 					$(event.target).addClass('selected');
 					var filtered = Items.where({status:'Unpublished'});
+					for (var i=0,l=filtered.length; i<l; i++) {
+						this.addOne(filtered[i]);
+					}
+				},
+				showErrors: function (event) {
+					event.preventDefault();
+					this.$("#item-list").empty();
+					this.$(".filterButtons button").removeClass('selected');
+					$(event.target).addClass('selected');
+					var filtered = Items.where({status:'Error'});
 					for (var i=0,l=filtered.length; i<l; i++) {
 						this.addOne(filtered[i]);
 					}
@@ -374,6 +396,15 @@
 					this.$el.html(template);
 				}
 			});
+
+			var Notification = Backbone.View.extend({
+				el: '#notification-area',
+				render: function (total, errors) {console.log('rendering notification?');
+					var template = _.template($('#notification-template').html(), {total:total,errors:errors});
+					this.$el.html(template);
+				}
+			});
+			var notification = new Notification();
 			
 			var Create = Backbone.View.extend({
 				el: '.page',
@@ -386,16 +417,16 @@
 						var view = this;
 						var template = _.template($('#edit-template').html(), {action:this.action});
 						this.$el.html(template);
-						if (this.item) {
-							this.easyPub = new EasyPublish(this.item.get('data')[0]);
-						} else {
-							this.easyPub = new EasyPublish();
-						}
+						this.easyPub = new EasyPublish();
 
 						this.easyPub.buildForm("main", this.easyPub.fieldManager.mainFields);
 						this.easyPub.buildForm("alignment", this.easyPub.fieldManager.alignmentFields);
 						this.easyPub.buildForm("author", this.easyPub.fieldManager.authorFields);
 						this.easyPub.buildForm("publisher", this.easyPub.fieldManager.publisherFields);
+
+						if (this.item) {
+							this.easyPub.setEditData(this.item.get('data')[0]);
+						}
 
 						// Dynamic buttons and menus in the Import Data box
 						var dataSelect = this.$el.find('#dataSelect');
@@ -539,6 +570,9 @@
 					this.$el.dialog({
 						autoOpen: true,
 						title: $('#upload-template').attr('data-dialog-title'),
+						width: 410,
+						modal: true,
+						position: {my:'top',at:'top',of:'.page'},
 						close: function (event, ui) {
 							$(this).dialog('destroy').remove();
 							view.remove();
@@ -550,7 +584,7 @@
 						},
 						text: false
 					});
-					// var uploader = new Uploader();
+					this.easyPub = new EasyPublish();
 				},
 				events: {
 					'click #LoadCancel': 'cancel',
@@ -559,13 +593,39 @@
 				},
 				cancel: function (event) {
 					event.preventDefault();
-					console.log("Cancelled");
 					this.$el.dialog('close');
 				},
 				load: function(event) {
 					event.preventDefault();
-					console.log("Loaded");
-					this.$el.dialog('close');
+					var view = this;
+					if (this.easyPub.importedData.numRows > 0) {
+						var validation = this.easyPub.validateImportData();
+						var importIndex = 0;
+						// override getValue function to get data from import instead of form
+						this.easyPub.getValue = function (id) {
+							var field = view.easyPub.importedData[id];
+							if (field) {
+								return field[importIndex];
+							} else {
+								return '';
+							}
+						}
+						// save each row
+						for (importIndex=0; importIndex<this.easyPub.importedData.numRows; importIndex++) {
+							this.easyPub.setCurrentImportData(importIndex);
+                			var envelope = [this.easyPub.dataManager.makeEnvelope()];
+                			if (validation.messages[importIndex].valid) {
+                				var status = 'Unpublished';
+                			} else {
+                				var status = 'Error';
+                			}
+                			Items.create({data:envelope,status:status});
+						}
+						notification.render(this.easyPub.importedData.numRows, validation.totalErrorRows);
+						this.$el.dialog('close');
+					} else {
+						alert('Please provide data to import.');
+					}
 				},
 				help: function (event) {
 					event.preventDefault();
@@ -634,6 +694,8 @@
 			<form class="bulkactions">
 				<h1>Welcome <%= name %></h1>
 
+				<div id="notification-area"></div>
+
 				<p id="count"></p>
 
 				<div class="control-row">
@@ -647,7 +709,8 @@
 					Show:
 					<button type="button" class="showAll selected">All</button><!-- no gap
 					--><button type="button" class="showUnpublished">Registered</button><!-- no gap
-					--><button type="button" class="showPublished">Published</button>
+					--><button type="button" class="showPublished">Published</button><!-- no gap
+					--><button type="button" class="showErrors">Errors</button>
 				</div>
 				<table>
 					<thead>
@@ -685,8 +748,16 @@
 					<input name="items" type="checkbox" data-item="<%= item.get('id') %>" />
 				<% } %>
 			</td>
-			<td><%= properties.name %></td>
-			<td><a href="<%= properties.url %>"><%= properties.url %></a></td>
+			<td>
+				<% if (properties.name != undefined) { %>
+					<%= properties.name %>
+				<% } %>
+			</td>
+			<td>
+				<% if (properties.url != undefined) { %>
+					<a href="<%= properties.url %>"><%= properties.url %></a>
+				<% } %>
+			</td>
 			<td>
 				<% if (properties.description != undefined) { %>
 					<%= properties.description %>
@@ -711,6 +782,15 @@
 			<% } else { %>
 				You have registered <%= total %> items
 			<% } %>
+		</script>
+
+		<script type="text/template" id="notification-template">
+			<p class="success">
+				<%= total %> resources added.
+				<% if (errors > 0) { %>
+					<%= errors %> of them have errors that will need to be corrected before you can publish them.
+				<% } %>
+			</p>
 		</script>
 
 		<script type="text/template" id="edit-template">
@@ -776,9 +856,10 @@
 			</span>
 			<button class="round-btn" id="csvHelp"></button>
 			<a href="template.csv">Download CSV Template</a>
+			<div id="dropStatus2"></div>
 			<div class="control-row">
-				<button type="button" id="LoadCancel">Cancel</button>
-				<button type="button" id="LoadData">Load</button>
+				<button type="button" id="LoadData" class="button">Load</button>
+				<button type="button" id="LoadCancel" class="button-link">Cancel</button>
 			</div>
 		</script>
 
@@ -788,22 +869,6 @@
 
 		<script type="text/template" id="csv-help-template">
 			<p>If you wish to enter data more rapidly, you can submit a CSV file. First click "Download CSV Template" to get a template file. Then add rows of data to that file. Next, import the file by clicking "Select file..."</p>
-		</script>
-
-
-
-		<!-- make easyPub.js happy -->
-		<script id="importFailDialogTemplate" type="text/template">
-			<div id="<%= guid %>" title="Import Attempt Failed">
-				<p>Cannot import CSV file, it is missing the following fields:</p>
-				<p><%= missingFieldsList %></p>
-			</div>
-		</script>
-		<script id="importWarningDialogTemplate" type="text/template">
-			<div id="<%= guid %>" title="Import Warning">
-				<p>Import will proceed but the following columns are extraneous and will be ignored:</p>
-				<p><%= extraHeadersList %></p>
-			</div>
 		</script>
 	</body>
 </html>

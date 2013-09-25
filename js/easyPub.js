@@ -3,7 +3,7 @@ $(function() {
 });
 
 EasyPublish.prototype.constructor = EasyPublish;
-function EasyPublish(edit_data) {
+function EasyPublish() {
 
 	var editors = {};
 
@@ -34,10 +34,10 @@ function EasyPublish(edit_data) {
 		};
 		var mathRow = "#Math-Standard" + index + "Row";
 		var elaRow = "#ELA-Standard" + index + "Row";
-		if(selection.indexOf("Math")>=0) {
+		if(selection && selection.indexOf("Math")>=0) {
 			$(mathRow).show();
 			$(elaRow).hide();
-		} else if(selection.indexOf("Language")>=0) {
+		} else if(selection && selection.indexOf("Language")>=0) {
 			$(mathRow).hide();
 			$(elaRow).show();
 		}else {
@@ -80,10 +80,6 @@ function EasyPublish(edit_data) {
 		}
 		$("#ELA-StandardRow").hide();
 		$("#Math-StandardRow").hide();
-	}
-
-	if (edit_data != undefined) {
-		setEditData(this.dataManager.mapPayloadToFields(edit_data.resource_data.items[0].properties));
 	}
 
 
@@ -151,20 +147,17 @@ function EasyPublish(edit_data) {
 	this.fileDropped = function(fileData) {
         var arrData = this.dataManager.CSVToArray(fileData);
         var objData = this.dataManager.twoDArrayToObjectArray(arrData, this.fieldManager.englishNameDictionary);
-        var valid = true; //validateImportData(arrData);
-        if(valid) {
-			var rowCount = arrData.length;
-	        $("#dropStatus2").append("Found " + rowCount + " row(s) of data");
-        	that.importedData = objData;
-        	that.importIndex = 0;
-        	$('#prevData').button("option", "disabled", true);
-        	if(rowCount>1) {
-        		$('#nextData').button("option", "disabled", false);
-                $('#removeRow').button("option", "disabled", false);
-        	}
-        	buildDataSelections();
-        	that.setCurrentImportData(that.importIndex);
-	    }
+		var rowCount = objData.numRows;
+        $("#dropStatus2").append("Found " + rowCount + " row(s) of data");
+    	that.importedData = objData;
+    	that.importIndex = 0;
+    	$('#prevData').button("option", "disabled", true);
+    	if(rowCount>1) {
+    		$('#nextData').button("option", "disabled", false);
+            $('#removeRow').button("option", "disabled", false);
+    	}
+    	buildDataSelections();
+    	that.setCurrentImportData(that.importIndex);
     }
 
     function buildDataSelections() {
@@ -263,8 +256,9 @@ function EasyPublish(edit_data) {
     	}
     }
 
-    function setEditData(data) {
-    	//console.trace();
+    this.setEditData = function(data) {
+    	data = this.dataManager.mapPayloadToFields(data.resource_data.items[0].properties);
+
         var mathTest = /[\w]*Math[\w]*/;
         var elaTest = /[\w]*Language[\w]*/;
     	var indexTest = /([\w]*)_(\d+)$/;
@@ -308,41 +302,33 @@ function EasyPublish(edit_data) {
     	}
     }
 
-    function validateImportData(arrData) {
-		var importFailDialogSrc = null;
-		var importWarningDialogSrc = null;
-    	var header = arrData[0];
-    	var fields = _.keys(that.fieldManager.fieldDictionary);
-    	var intersection = _.intersection(header, fields);
-    	var extraHeaders = _.difference(header, intersection);
-    	var missingFields = _.difference(fields, intersection);
-    	if(missingFields.length>0) {
-    		if(!importFailDialogSrc) {
-    			var importFailDialogSrc = document.getElementById("importFailDialogTemplate").innerHTML;
-    		}
-    		var timestamp = new Date().getTime();
-            var tempData = {
-                guid:timestamp,
-                missingFieldsList:missingFields.join()
-            };
-			importFailDialogHtml = _.template(importFailDialogSrc, tempData);
-            $("body").append(importFailDialogHtml);
-            $("#"+timestamp).dialog({position:dialogPosition});
-            return false;
-    	} else if(extraHeaders.length>0) {
-    		if(!importWarningDialogSrc) {
-    			var importWarningDialogSrc = document.getElementById("importWarningDialogTemplate").innerHTML;
-    		}
-    		var timestamp = new Date().getTime();
-            var tempData = {
-                guid:timestamp,
-                extraHeadersList:extraHeaders.join()
-            };
-			importWarningDialogHtml = _.template(importWarningDialogSrc, tempData);
-            $("body").append(importWarningDialogHtml);
-            $("#"+timestamp).dialog({position:dialogPosition});
-    	}
-    	return true;
+    this.validateImportData = function () {
+    	var fields = that.fieldManager.fieldDictionary;
+    	var messages = [];
+    	var totalValidRows = 0;
+    	var totalErrorRows = 0;
+    	for (var i=0; i<that.importedData.numRows; i++) {
+    		var rowMessages = {valid:true};
+	    	for(key in fields) {
+				var nextField = fields[key];
+				var message = validator.validateField(nextField, that.importedData[key][i]);
+				if(message!="") {
+					rowMessages[key] = message;
+					rowMessages.valid = false;
+				}
+			}
+			messages.push(rowMessages);
+			if (rowMessages.valid) {
+				totalValidRows++;
+			} else {
+				totalErrorRows++;
+			}
+		}
+		return {
+			totalValidRows: totalValidRows,
+			totalErrorRows: totalErrorRows,
+			messages: messages
+		};
     }
 
     this.getOAuthData = function() {

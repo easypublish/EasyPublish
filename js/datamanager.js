@@ -213,7 +213,7 @@ function DataManager(easyPub) {
         return fullAuthorsArray;
     }
 
-    function makeEnvelope() {
+    this.makeEnvelope = function() {
         var payload = makePayload();
         var envelope = {
             "doc_type": "resource_data",
@@ -239,11 +239,11 @@ function DataManager(easyPub) {
         var envelopes = [];
         var numRows = easyPub.getNumImportRows();
         if(numRows==0) {
-            envelopes.push(makeEnvelope());
+            envelopes.push(this.makeEnvelope());
         } else { 
             for(var i=0; i<numRows; i++) {
                 easyPub.setCurrentImportData(i);
-                var envelope = makeEnvelope();
+                var envelope = this.makeEnvelope();
                 envelopes.push(envelope);
             }
         }
@@ -251,7 +251,7 @@ function DataManager(easyPub) {
     }
 
     this.testEnvelope = function() {
-        var envelope = makeEnvelope();
+        var envelope = this.makeEnvelope();
         console.log(envelope);
     }
 
@@ -259,7 +259,7 @@ function DataManager(easyPub) {
         var output;
         var filetype;
         if (type == "json") {
-            var data = makeEnvelope();
+            var data = this.makeEnvelope();
             output = JSON.stringify(data);
             filetype = 'text/json';
         } else if (type == "csv") {

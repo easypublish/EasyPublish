@@ -86,13 +86,15 @@ function Validator() {
         generic:"Invalid."
     }
 
-    this.validateField = function(field) {
+    this.validateField = function(field, value) {
 		var input = $("#"+field.id);
 		if(field.type==Field.CHOICE) {
 			input = input.next();
 		}
 
-		var value = input.val().trim();
+        if (value == undefined) {
+		    var value = input.val().trim();
+        }
 
         if(value=="") {
     		if(field.required) {
