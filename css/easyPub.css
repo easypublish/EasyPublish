@@ -193,6 +193,16 @@ textarea, input[type=text] {
 }
 
 
+#notification-area .success {
+	color: #7cbe4c;
+	background-image: url('../img/check.png');
+	background-position: left top;
+	background-repeat: no-repeat;
+	padding-left: 35px;
+	padding: 6px 0 6px 35px;
+	min-height: 30px;
+}
+
 
 
 

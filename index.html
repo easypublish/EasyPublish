@@ -399,12 +399,16 @@
 
 			var Notification = Backbone.View.extend({
 				el: '#notification-area',
+				initialize: function () {
+					this.listenTo(Items, 'add', this.destroy);
+					this.listenTo(Items, 'destroy', this.destroy);
+					this.listenTo(list, 'render', this.destroy);
+				},
 				render: function (total, errors) {console.log('rendering notification?');
 					var template = _.template($('#notification-template').html(), {total:total,errors:errors});
 					this.$el.html(template);
 				}
 			});
-			var notification = new Notification();
 			
 			var Create = Backbone.View.extend({
 				el: '.page',
@@ -621,7 +625,7 @@
                 			}
                 			Items.create({data:envelope,status:status});
 						}
-						notification.render(this.easyPub.importedData.numRows, validation.totalErrorRows);
+						new Notification().render(this.easyPub.importedData.numRows, validation.totalErrorRows);
 						this.$el.dialog('close');
 					} else {
 						alert('Please provide data to import.');
@@ -786,9 +790,19 @@
 
 		<script type="text/template" id="notification-template">
 			<p class="success">
-				<%= total %> resources added.
+				<% if (total == 0) { %>
+					0 resources uploaded.
+				<% } else if (total == 1) { %>
+					1 resource uploaded.
+				<% } else { %>
+					<%= total %> resources uploaded.
+				<% } %>
 				<% if (errors > 0) { %>
-					<%= errors %> of them have errors that will need to be corrected before you can publish them.
+					<% if (errors == 1) { %>
+						<%= errors %> of them has errors that will need to be corrected before you can publish it.
+					<% } else { %>
+						<%= errors %> of them have errors that will need to be corrected before you can publish them.
+					<% } %>
 				<% } %>
 			</p>
 		</script>
