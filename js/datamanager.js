@@ -107,7 +107,7 @@ function DataManager(easyPub) {
                 if (key == 'educationalAlignment') {
                     for (var i=0,l=val.length; i<l; i++) {
                         var properties = val[i].properties;
-                        if (properties.alignmentType[0] == 'educationLevel') {
+                        if (properties.alignmentType && properties.alignmentType[0] == 'educationLevel') {
                             fieldData['grade'] = properties.targetName;
                             val.splice(i, 1);
                             break;

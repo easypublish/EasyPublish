@@ -347,9 +347,9 @@ function EasyPublish() {
 		if(authorCount>1) {
 			for(var i=2; i<=authorCount; i++) {
 				var author = {
-				    name: [$("#author_name_"+i).val()],
-		            url:  [$("#author_url_"+i).val()],
-		            email:  [$("#author_email_"+i).val()]
+				    name: [this.getValue("author_name_"+i)],
+		            url:  [this.getValue("author_url_"+i)],
+		            email:  [this.getValue("author_email_"+i)]
 				}
 				authors[i-1] = author;
 			}
