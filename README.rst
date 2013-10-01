@@ -56,6 +56,33 @@ Installation
         http://lrdev.local/apps/_design/EasyPublish/index.html
 
 
+Configuration Notes
+===================
+
+If you would like to configure 'pretty URLs', a reverse proxy must be configured to redirect to CouchDB's _rewrite service.
+
+NGINX config sample
+-------------------
+
+The following rewrite and location should be added to your existing Learning Registry NGINX configuration within the existing `server` block.
+
+    .. code-block:: nginx
+
+        server {
+
+            rewrite /(apps/EasyPublish)$ /$1/ redirect;
+
+            location ~ /apps/EasyPublish {
+                rewrite /apps/EasyPublish/(.*) /apps/_design/EasyPublish/_rewrite/$1 break;
+                proxy_pass http://127.0.0.1:5984;
+                proxy_redirect off;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Ssl on;
+            }
+
+        }
 
 .. _Learning Registry: http://learningregistry.org
 .. _Learning Registry Node: http://docs.learningregistry.org/en/latest/install/index.html
