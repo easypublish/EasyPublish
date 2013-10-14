@@ -213,6 +213,10 @@ textarea, input[type=text] {
 }
 
 .selectall {
+	
+}
+
+.selectnone {
 	margin-right: 1.5em;
 }
 

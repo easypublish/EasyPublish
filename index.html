@@ -273,6 +273,7 @@
 				},
 				events: {
 					'click .selectall': 'selectall',
+					'click .selectnone': 'selectnone',
 					'submit .bulkactions': 'doInBulk',
 					'click .showAll': 'showAll',
 					'click .showPublished': 'showPublished',
@@ -295,6 +296,12 @@
 					var button = $(event.target);
 					var fieldname = button.attr('data-checkboxes');
 					button.closest('form').find('[name="' + fieldname + '"]').prop('checked', true);
+				},
+				selectnone: function (event) {
+					event.preventDefault();
+					var button = $(event.target);
+					var fieldname = button.attr('data-checkboxes');
+					button.closest('form').find('[name="' + fieldname + '"]').prop('checked', false);
 				},
 				doInBulk: function (event) {
 					event.preventDefault();
@@ -739,7 +746,8 @@
 					</tbody>
 				</table>
 				<div class="control-row">
-					<button type="button" class="selectall button-link" data-checkboxes="items">Select All</button>
+					Select <button type="button" class="selectall button-link" data-checkboxes="items">All</button> |
+					<button type="button" class="selectnone button-link" data-checkboxes="items">None</button>
 					<span class="inline-form">
 						<select name="bulkmenu">
 							<option value="delete">Delete</option>
