@@ -140,8 +140,17 @@
 			            request.done(function(msg) {
 			                console.log("Done");
 			                console.log(msg);
-			                if(msg.OK) {
+			                var envelopes = instance.get('data');
+			                if(msg.OK 
+			                	&& msg.document_results.length == envelopes.length) {
 			                	instance.save('status','Published');
+			                	for (var envIdx=0; envIdx<envelopes.length; envIdx++) {
+			                		if (msg.document_results[envIdx].OK) {
+			                			envelopes[envIdx].doc_ID = msg.document_results[envIdx].doc_ID
+			                		}
+			                	}
+			                	instance.save('data',envelopes);
+
 			                    if (cb) {
 			                        cb(msg.document_results);
 			                    }
@@ -744,7 +753,10 @@
 		</script>
 
 		<script type="text/template" id="item-template">
-			<% var properties = item.get('data')[0].resource_data.items[0].properties; %>
+			<% 
+				var envelope = item.get('data')[0],
+					properties = envelope.resource_data.items[0].properties; 
+			%>
 			<td>
 				<% if (item.get('status') != 'Published') { %>
 					<!-- for now, no modifying published items -->
@@ -766,7 +778,13 @@
 					<%= properties.description %>
 				<% } %>
 			</td>
-			<td class="status"><%= item.get('status') %></td>
+			<td class="status">
+				<% if (envelope.doc_ID != undefined) { %>
+					<a href="/obtain?by_doc_ID=true&request_id=<%= envelope.doc_ID %>" target="_blank"><%= item.get('status') %></a>
+				<% } else { %>
+					<%= item.get('status') %>
+				<% } %>
+			</td>
 			<td>
 				<% if (item.get('status') != 'Published') { %>
 					<!-- for now, no modifying published items -->
