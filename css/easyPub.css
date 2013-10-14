@@ -270,18 +270,19 @@ label {
 	/*font-weight:bold;*/
 }
 fieldset { 
-	border:0px solid green;
-	background-color:gainsboro;
+	border:2px solid rgb(124, 190, 76);
+	/*background-color:gainsboro;*/
 	border-radius: 15px;
 	margin-bottom: 15px;
 }
 
 legend {
 	padding: 0.2em 0.5em;
-	border:0px solid gray;
+	/*border:2px solid rgb(124, 190, 76);*/
+	border: 1px solid rgb(182, 182, 182);
 	border-radius: 15px;
-	background-color:gainsboro;
-	color:orangered;
+	background-color:rgb(235, 235, 235);
+	color:rgb(9, 106, 169);
 	font-size:150%;
 	text-align:left;
 	font-weight:bold;
