@@ -182,6 +182,7 @@
 			$.couch.browserid.login(function (event, error, user) {
 				storedCredentials = user;
 				$('#main-nav .signed-in').show();
+				console.log("Logged In!");
 				router.navigate('', {trigger:true});
 			});
 			$.couch.browserid.logout(function (event, error, user) {
@@ -190,6 +191,7 @@
 				} else {
 					storedCredentials = false;
 					router.navigate('#login', {trigger:true});
+					console.log("Logged Out!")
 					$('#main-nav .signed-in').hide();
 				}
 			});
@@ -280,7 +282,8 @@
 					'click .showUnpublished': 'showUnpublished',
 					'click .showErrors': 'showErrors',
 					'click .help': 'showHelp',
-					'click #bulkUpload': 'showUpload'
+					'click #bulkUpload': 'showUpload',
+					'click .export': 'exportData',
 				},
 				addOne: function (item) {
 					var table = this.$("#item-list");
@@ -358,6 +361,42 @@
 					event.preventDefault();
 					var upload = new Upload();
 					upload.render();
+				}, 
+				exportData: function(event) {
+					event.preventDefault();
+					var button = $(event.target);
+					var form = button.parents('form');
+					var what = button.attr('data-export');
+			
+					var format = form.find('[name="formatmenu"]').val();
+
+					var filtered = Items.filter(function(record){
+						if (what == "")
+							return true;
+						return what == record.get("status");
+					});
+
+					var exportItems = _.map(filtered, function(item) {
+						if ("ezjson" == format) {
+							return item.toJSON();
+						} else {
+							return item.get("data");
+						}
+					});
+
+					var eData = {
+						"format": format,
+						"description": (what == ""? "All" : what) + " Documents",
+						"documents": exportItems,
+					}
+
+
+					console.log(exportItems);
+					var b = new Blob([JSON.stringify(eData)], {type: "application/json;charset=UTF-8"});
+
+					var url = window.URL.createObjectURL(b);
+
+					window.open(url, "blobwin");
 				}
 			});
 			var list = new List();
@@ -755,6 +794,17 @@
 						</select>
 						<button type="submit" class="button">Go</button>
 					</span>
+
+					<div class="right">
+					Export 
+						<select name="formatmenu">
+							<option value="ezjson">EZ Publish JSON</option>
+							<option value="lrjson">LR JSON</option>
+						</select>
+						<button type="button" class="export button-link" data-export="">All</button> | 
+						<button type="button" class="export button-link" data-export="Published">Published</button> |
+						<button type="button" class="export button-link" data-export="Unpublished">Registered</button>
+					<div/>
 				</div>
 				<% } %>
 			</form>

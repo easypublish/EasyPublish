@@ -155,6 +155,9 @@ tbody td {
 	font-size: 1.3em;
 }
 
+.control-row .right {
+	float: right;
+}
 
 .inline-form .button {
 	padding: 2px 4px;
