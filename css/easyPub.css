@@ -79,7 +79,6 @@ h1, h2, h3, h4, h5, h6 {
 	color: #3369af;
 }
 
-
 a, .ui-widget-content a {
 	color: #096aa9;
 }
@@ -225,6 +224,14 @@ textarea, input[type=text] {
 
 #dropStatus2 {
 	clear: both;
+}
+
+.filenames {
+	padding-top: 10px;
+}
+
+.filenames span {
+	font-size: .7em;
 }
 
 /*

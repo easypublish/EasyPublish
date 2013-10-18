@@ -256,6 +256,8 @@
 				}
 			});
 
+
+
 			var List = Backbone.View.extend({
 				el: '.page',
 				initialize: function () {
@@ -284,6 +286,7 @@
 					'click .help': 'showHelp',
 					'click #bulkUpload': 'showUpload',
 					'click .export': 'exportData',
+					'click .import': 'importData'
 				},
 				addOne: function (item) {
 					var table = this.$("#item-list");
@@ -397,6 +400,11 @@
 					var url = window.URL.createObjectURL(b);
 
 					window.open(url, "blobwin");
+				},
+				importData: function(event) {
+					event.preventDefault();
+					var importView = new importer.Importer();
+					importView.render();
 				}
 			});
 			var list = new List();
@@ -618,6 +626,8 @@
 			});
 			var create = new Create();
 
+			var importer = require("lib/importer");
+
 			var Upload = Backbone.View.extend({
 				tagName: 'div',
 				render: function () {
@@ -796,7 +806,8 @@
 					</span>
 
 					<div class="right">
-					Export 
+						<div>
+						Export 
 						<select name="formatmenu">
 							<option value="ezjson">EZ Publish JSON</option>
 							<option value="lrjson">LR JSON</option>
@@ -804,6 +815,11 @@
 						<button type="button" class="export button-link" data-export="">All</button> | 
 						<button type="button" class="export button-link" data-export="Published">Published</button> |
 						<button type="button" class="export button-link" data-export="Unpublished">Registered</button>
+						</div>
+						<div>
+						Import 
+						<button type="button" class="import button-link" value="ezjson">EZ Publish JSON</button>
+						</div>
 					<div/>
 				</div>
 				<% } %>
@@ -951,6 +967,20 @@
 				<button type="button" id="LoadCancel" class="button-link">Cancel</button>
 			</div>
 		</script>
+
+		<script type="text/template" id="import-template" data-dialog-title="Import EZ Publish JSON Export File">
+			<span class="btn btn-success fileinput-button">
+					<span>Select File...</span>
+					<input type="file" name="files[]" id="jsonFile">
+			</span>
+			<button class="round-btn" id="importHelp"></button>
+			<div id="importLabel" class="importFiles"></div>
+			<div class="control-row">
+				<button type="button" id="ImportData" class="button" data-file="#jsonFile">Load</button>
+				<button type="button" id="ImportCancel" class="button-link">Cancel</button>
+			</div>
+		</script>
+
 
 		<script type="text/template" id="settings-template">
 			<p>TODO: settings template</p>
