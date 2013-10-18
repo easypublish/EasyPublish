@@ -6,15 +6,16 @@
     "modules":["lib"],
     "load": "lib/app",
 	"dependencies": {
-	        "attachments": null,
-	        "modules": null,
-	        "users": null,
-	        "underscore": null,
-	        "properties": null,
-            "jquery": null,
-            "handlebars": null,
-            "url": null,
-            "sha1": null,
-            "backbone": null
-	    }
+        "attachments": null,
+        "modules": null,
+        "properties": null,
+        "underscore": null,
+        "users": null,
+        "backbone": null,
+        "handlebars": null,
+        "jquery": null,
+        "session": null,
+        "sha1": null,
+        "url": null
+    }
 }
