@@ -312,11 +312,17 @@
 				doInBulk: function (event) {
 					event.preventDefault();
 					var form = $(event.target);
+					var button = $(event.originalEvent.explicitOriginalTarget);
 					var selected = form.find('[name="items"]:checked');
-					var action = form.find('[name="bulkmenu"]').val();
+					if (button) {
+						var action =button.parents("div.control-row").find('[name="bulkmenu"]').val();
+					} else {
+						var action = form.find('[name="bulkmenu"]').val();
+					}
 					selected.each(function (index, el) {
 						$(el).closest('tr').find('.' + action).trigger('click');
 					});
+					window.scrollTo(0,0);
 				},
 				showAll: function (event) {
 					event.preventDefault();
@@ -395,11 +401,21 @@
 
 
 					console.log(exportItems);
-					var b = new Blob([JSON.stringify(eData)], {type: "application/json;charset=UTF-8"});
+					
+					var contentType;
+
+					if (/chrom(e|ium)/.test(navigator.userAgent.toLowerCase())) {
+						contentType = "application/octect-stream";
+					} else {
+						contentType = "application/json"
+					}
+
+					var b = new Blob([JSON.stringify(eData)], {type: contentType});
 
 					var url = window.URL.createObjectURL(b);
-
 					window.open(url, "blobwin");
+
+
 				},
 				importData: function(event) {
 					event.preventDefault();
@@ -725,11 +741,13 @@
 				list.render();
 			});
 			router.on('route:create', function () {
+				window.scrollTo(0,0);
 				create.item = false;
 				create.action = 'create';
 				create.render();
 			});
 			router.on('route:edit', function (id) {
+				window.scrollTo(0,0);
 				var item = Items.findWhere({id:id});
 				if (item != undefined) {
 					create.item = item;
@@ -779,6 +797,17 @@
 					--><button type="button" class="showUnpublished">Registered</button><!-- no gap
 					--><button type="button" class="showPublished">Published</button><!-- no gap
 					--><button type="button" class="showErrors">Errors</button>
+				</div>
+				<div class="control-row">
+					Select <button type="button" class="selectall button-link" data-checkboxes="items">All</button> |
+					<button type="button" class="selectnone button-link" data-checkboxes="items">None</button>
+					<span class="inline-form">
+						<select name="bulkmenu" class="bulkmenu">
+							<option value="delete">Delete</option>
+							<option value="publish">Publish</option>
+						</select>
+						<button type="submit" class="button">Go</button>
+					</span>
 				</div>
 				<table>
 					<thead>
@@ -968,6 +997,7 @@
 			</div>
 		</script>
 
+		
 		<script type="text/template" id="import-template" data-dialog-title="Import EZ Publish JSON Export File">
 			<span class="btn btn-success fileinput-button">
 					<span>Select File...</span>
@@ -975,6 +1005,10 @@
 			</span>
 			<button class="round-btn" id="importHelp"></button>
 			<div id="importLabel" class="importFiles"></div>
+			<div class="control-row">
+				<input type="checkbox" id="importAsNew">
+				Import as new
+			</div>
 			<div class="control-row">
 				<button type="button" id="ImportData" class="button" data-file="#jsonFile">Load</button>
 				<button type="button" id="ImportCancel" class="button-link">Cancel</button>
