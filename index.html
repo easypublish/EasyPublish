@@ -116,19 +116,34 @@
 		var Item = Backbone.Model.extend({
 			defaults: {
 				data:'',
-				status:'Unpublished'	// Allowed values are Published, Unpublished, and Error
+				status:'Unpublished',	// Allowed values are Published, Modified, Unpublished, and Error
+				replacing:false
 			},
 			publish: function (cb) {
 				var instance = this;
 
 				if (this.get('status') != 'Error') {
-			        var envelopes = this.get('data');
+			        var envelopes = this.get('data'),
+			        	replacing = this.get('replacing'),
+			        	oauth_data = storedCredentials.oauth;
 
-			        var oauth_data = storedCredentials.oauth;
+
 			        if(oauth_data==null) {
 			            console.log("null oauth_data, aborting submit")
 			            return;
 			        } else {
+			        	if (replacing) {
+			        		var replacement_ids = _.map(replacing, function(repl_doc){
+		        				return repl_doc.doc_ID;
+		        			});
+
+			        		for (var envIdx=0; envIdx<envelopes.length; envIdx++){
+			        			var replaces_prop = envelopes[envIdx].replaces || [];
+
+			        			envelopes[envIdx].replaces = _.union(replaces_prop, replacement_ids);
+			        		}
+			        	}
+
 			            var message = {
 			                parameters: {},
 			                body: {
@@ -281,6 +296,7 @@
 					'submit .bulkactions': 'doInBulk',
 					'click .showAll': 'showAll',
 					'click .showPublished': 'showPublished',
+					'click .showModified': 'showModified',
 					'click .showUnpublished': 'showUnpublished',
 					'click .showErrors': 'showErrors',
 					'click .help': 'showHelp',
@@ -337,6 +353,20 @@
 					this.$(".filterButtons button").removeClass('selected');
 					$(event.target).addClass('selected');
 					var filtered = Items.where({status:'Published'});
+					for (var i=0,l=filtered.length; i<l; i++) {
+						this.addOne(filtered[i]);
+					}
+					var filtered = Items.where({status:'Modified'});
+					for (var i=0,l=filtered.length; i<l; i++) {
+						this.addOne(filtered[i]);
+					}
+				},
+				showModified: function (event) {
+					event.preventDefault();
+					this.$("#item-list").empty();
+					this.$(".filterButtons button").removeClass('selected');
+					$(event.target).addClass('selected');
+					var filtered = Items.where({status:'Modified'});
 					for (var i=0,l=filtered.length; i<l; i++) {
 						this.addOne(filtered[i]);
 					}
@@ -439,7 +469,9 @@
 				events: {
 					'click .publish': 'publish',
 					'click .unpublish': 'unpublish',
-					'click .delete': 'delete'
+					'click .delete': 'delete',
+					'click .edit': 'edit'
+
 				},
 				publish: function (event) {
 					event.preventDefault();
@@ -460,7 +492,13 @@
 					this.unpublish(event, function (event) {
 						instance.model.destroy();
 					});
+				},
+				edit: function(event) {
+					event.preventDefault();
+					var button = $(event.target);
+					router.navigate('edit/'+button.attr('data-item'), {trigger:true});
 				}
+
 			});
 			var Count = Backbone.View.extend({
 				el: '#count',
@@ -597,7 +635,14 @@
 						if(this.easyPub.validateAll()) {
 							var data = this.easyPub.dataManager.makeAllEnvelopes();
 							if (this.item) {
-								this.item.save({data:data});
+								var replacing = this.item.get('replacing'),
+									newStatus = this.item.get('status');
+
+								if (this.item.get('status') === 'Published') {
+									newStatus = 'Modified';
+									replacing = this.item.get('data');
+								}
+								this.item.save({data:data, status: newStatus, replacing:replacing});
 							} else {
 								for (var i=0,l=data.length; i<l; i++) {
 									Items.create({data:[data[i]], status:'Unpublished'});
@@ -787,7 +832,7 @@
 				<div class="control-row">
 					<a href="#create" class="button">Register new item</a>
 					<button class="button" id="bulkUpload">Bulk upload in CSV</button>
-					<a href="#help" class="help">Help</a>
+					<a href="#help" class="help round-btn">Help</a>
 				</div>
 
 				<% if (data.length > 0) { %>
@@ -796,6 +841,7 @@
 					<button type="button" class="showAll selected">All</button><!-- no gap
 					--><button type="button" class="showUnpublished">Registered</button><!-- no gap
 					--><button type="button" class="showPublished">Published</button><!-- no gap
+					--><button type="button" class="showModified">Modified</button><!-- no gap
 					--><button type="button" class="showErrors">Errors</button>
 				</div>
 				<div class="control-row">
@@ -858,6 +904,7 @@
 		<script type="text/template" id="item-template">
 			<% 
 				var envelope = item.get('data')[0],
+					replacing = item.get('replacing'),
 					properties = envelope.resource_data.items[0].properties; 
 			%>
 			<td>
@@ -884,16 +931,23 @@
 			<td class="status">
 				<% if (envelope.doc_ID != undefined) { %>
 					<a href="/obtain?by_doc_ID=true&request_id=<%= envelope.doc_ID %>" target="_blank"><%= item.get('status') %></a>
+				<% } else if (replacing != false && replacing[0].doc_ID != undefined) { %>
+					<a href="/obtain?by_doc_ID=true&request_id=<%= replacing[0].doc_ID %>" target="_blank"><%= item.get('status') %></a>
 				<% } else { %>
 					<%= item.get('status') %>
 				<% } %>
 			</td>
-			<td>
-				<% if (item.get('status') != 'Published') { %>
-					<!-- for now, no modifying published items -->
-					<a href="#edit/<%= item.get('id') %>" class="button">Edit</a>
+			<td class="btn-controls">
+				<% if (item.get('status') != 'Published' 
+					&&  item.get('status') != 'Modified') { %>
+					<button class="edit button" data-item="<%= item.get('id') %>">Edit</button>					
 					<button class="delete button" data-item="<%= item.get('id') %>">Delete</button>
 					<button class="publish button" data-item="<%= item.get('id') %>">Publish</button>
+				<% } else if (item.get('status') == 'Published'
+					|| item.get('status') == 'Modified') { %>
+					<button class="edit button" data-item="<%= item.get('id') %>">Edit</button>
+					<button class="publish button" data-item="<%= item.get('id') %>">Replace Published</button>
+					<!-- <button class="delete button" data-item="<%= item.get('id') %>"> Delete Published</button> -->
 				<% } %>
 			</td>
 		</script>

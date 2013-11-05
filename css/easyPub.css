@@ -118,6 +118,14 @@ a, .ui-widget-content a {
 	outline: 1px dotted #5b8b38;
 }
 
+.btn-controls > * {
+	display: block;
+	margin: 4px;
+	padding: 0px;
+	text-align: center;
+	width: 100%;
+}
+
 
 table {
 	border-collapse: collapse;
