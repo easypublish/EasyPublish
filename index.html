@@ -466,7 +466,7 @@
 				var git = kanso.git;
 
 				if (git) { %>
-			Git SHA: <a class="git-details" target="_blank" href="https://github.com/easypublish/EasyPublish/commit/<%= git.commit %>"><%= git.commit %></a>
+			Git SHA: <a class="git-details" target="_blank" href="https://github.com/easypublish/EasyPublish/commits/<%= git.commit %>"><%= git.commit %></a>
 			<% } %>
 
 			<% if (git.uncommitted && git.uncommitted.length > 0) { %>
