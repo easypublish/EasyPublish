@@ -28,6 +28,7 @@
 		</div>
 
 		<footer role="contentinfo">
+			<div id="version-info" class="copy"></div>
 			<div class="copy">&copy; 2013 Learning Registry</div>
 		</footer>
 
@@ -65,37 +66,11 @@
 
 		<script type="text/javascript">
 			require("lib/credentials");
+
+			var utils = require("lib/util");
 		</script>
 
 		<script>
-
-    function oauthRequest(path, message, accessor, undefined) {
-        message.action = path;
-        message.method = 'POST';
-        OAuth.completeRequest(message, accessor);
-        var parameters = message.parameters;
-        var options = {
-            headers: {
-                Authorization: OAuth.getAuthorizationHeader('', parameters)
-            },
-            data: JSON.stringify(message.body)
-        }
-
-        return commonAjax('POST', path, options);
-    }
-    function commonAjax(method, url, options) {
-        var settings = {
-            type: method,
-            contentType: "application/json",
-            dataType: "json"
-        }
-        if (options) {
-            settings = _.extend(settings, options);
-        }
-        var request = $.ajax(url, settings);
-
-        return request;
-    }
 
 		var storedCredentials = false;
 
@@ -113,82 +88,9 @@
 		var router = new Router();
 
 		// Models
-		var Item = Backbone.Model.extend({
-			defaults: {
-				data:'',
-				status:'Unpublished',	// Allowed values are Published, Modified, Unpublished, and Error
-				replacing:false
-			},
-			publish: function (cb) {
-				var instance = this;
-
-				if (this.get('status') != 'Error') {
-			        var envelopes = this.get('data'),
-			        	replacing = this.get('replacing'),
-			        	oauth_data = storedCredentials.oauth;
-
-
-			        if(oauth_data==null) {
-			            console.log("null oauth_data, aborting submit")
-			            return;
-			        } else {
-			        	if (replacing) {
-			        		var replacement_ids = _.map(replacing, function(repl_doc){
-		        				return repl_doc.doc_ID;
-		        			});
-
-			        		for (var envIdx=0; envIdx<envelopes.length; envIdx++){
-			        			var replaces_prop = envelopes[envIdx].replaces || [];
-
-			        			envelopes[envIdx].replaces = _.union(replaces_prop, replacement_ids);
-			        		}
-			        	}
-
-			            var message = {
-			                parameters: {},
-			                body: {
-			                    documents: envelopes
-			                }
-			            };
-			            request = oauthRequest(oauth_data.node_url + '/publish', message, oauth_data);
-			            
-			            request.done(function(msg) {
-			                console.log("Done");
-			                console.log(msg);
-			                var envelopes = instance.get('data');
-			                if(msg.OK 
-			                	&& msg.document_results.length == envelopes.length) {
-			                	instance.save('status','Published');
-			                	for (var envIdx=0; envIdx<envelopes.length; envIdx++) {
-			                		if (msg.document_results[envIdx].OK) {
-			                			envelopes[envIdx].doc_ID = msg.document_results[envIdx].doc_ID
-			                		}
-			                	}
-			                	instance.save('data',envelopes);
-
-			                    if (cb) {
-			                        cb(msg.document_results);
-			                    }
-			                } else {
-			                    alert("Submission failed:\n" + JSON.stringify(msg.document_results));
-			                }
-			            });
-
-			            request.fail(function(msg) {
-			                console.log("Fail");
-			                console.log(msg);
-			                alert("Submission failed.");
-			            });
-			        }
-			    } else {
-			    	alert("You cannot publish items with errors.");
-			    }
-		    }
-		});
-		var ItemList = Backbone.Collection.extend({
-			model: Item,
-			localStorage: new Backbone.LocalStorage("EZPublishItems")
-		});
+		var models = require("lib/models");
+		var Item = models.Item;
+		var ItemList = models.ItemList;
 		var Items = new ItemList();
 
 		$(function () {
@@ -212,555 +114,30 @@
 			});
 
 			// Views
-			var Credentials = Backbone.View.extend({
-				el: '.page',
-				render: function () {
-					if (storedCredentials) {
-						$('#main-nav .signed-in').show();
-						router.navigate('', {trigger:true});
-					} else {
-						var template = _.template($('#credentials-template').html());
-						this.$el.html(template);
-						
-						var loginWidget = this.$el.find('#browserid .login');
-						var icon = loginWidget.find('> img');
-						if (icon.is(':hidden')) {
-							// login widget setup only runs once on page load, set it back up after logout
-							loginWidget.show().removeClass('pending');
-							icon.show();
-
-							$('#browserid .picture').empty();
-							loginWidget.find('span').remove();
-							loginWidget.find('a.logout').remove();
-
-							loginWidget.addClass("clickable");
-							loginWidget.click(function() {
-								$.couch.browserid.login();
-							});
-						}
-					}
-				}
-			});
+			var Credentials = require("lib/views/credentials").Credentials;
 			var credentials = new Credentials();
 
-			var Logout = Backbone.View.extend({
-				el: '.page',
-				render: function () {
-					$.couch.browserid.logout();
-				}
-			});
+			var Logout = require("lib/views/logout").Logout;
 			var logout = new Logout();
 
-			var Help = Backbone.View.extend({
-				tagName: 'div',
-				render: function () {
-					var view = this;
-					var template = _.template($('#csv-help-template').html(), {});
-					this.$el.html(template);
-					$('#dialogContainer').append(this.el);
-					this.$el.dialog({
-						autoOpen: true,
-						width: 410,
-						position: {my:'top',at:'top',of:'.page'},
-						modal:true,
-						close: function (event, ui) {
-							$(this).dialog('destroy').remove();
-							view.remove();
-						}
-					});
-				}
-			});
+			var Help = require("lib/views/help").Help;
 
+			var list_objs = require("lib/views/list");
 
+			var List = list_objs.List;
 
-			var List = Backbone.View.extend({
-				el: '.page',
-				initialize: function () {
-					Items.fetch();
-					this.listenTo(Items, 'add', this.addOne);
-				},
-				render: function () {
-					if (!storedCredentials) {
-						router.navigate('login', {trigger:true});
-					} else {
-						var template = _.template($('#list-template').html(), {name:storedCredentials.name,data:Items.models});
-						this.$el.html(template);
-						Items.each(this.addOne, this);
-						var count = new Count();
-						count.render();
-					}
-				},
-				events: {
-					'click .selectall': 'selectall',
-					'click .selectnone': 'selectnone',
-					'submit .bulkactions': 'doInBulk',
-					'click .showAll': 'showAll',
-					'click .showPublished': 'showPublished',
-					'click .showModified': 'showModified',
-					'click .showUnpublished': 'showUnpublished',
-					'click .showErrors': 'showErrors',
-					'click .help': 'showHelp',
-					'click #bulkUpload': 'showUpload',
-					'click .export': 'exportData',
-					'click .import': 'importData'
-				},
-				addOne: function (item) {
-					var table = this.$("#item-list");
-					if (table.length > 0) {
-						var view = new ListItem({model: item});
-						table.append(view.render().el);
-					} else {
-						this.render();
-					}
-				},
-				selectall: function (event) {
-					event.preventDefault();
-					var button = $(event.target);
-					var fieldname = button.attr('data-checkboxes');
-					button.closest('form').find('[name="' + fieldname + '"]').prop('checked', true);
-				},
-				selectnone: function (event) {
-					event.preventDefault();
-					var button = $(event.target);
-					var fieldname = button.attr('data-checkboxes');
-					button.closest('form').find('[name="' + fieldname + '"]').prop('checked', false);
-				},
-				doInBulk: function (event) {
-					event.preventDefault();
-					var form = $(event.target);
-					var button = $(event.originalEvent.explicitOriginalTarget);
-					var selected = form.find('[name="items"]:checked');
-					if (button) {
-						var action =button.parents("div.control-row").find('[name="bulkmenu"]').val();
-					} else {
-						var action = form.find('[name="bulkmenu"]').val();
-					}
-					selected.each(function (index, el) {
-						$(el).closest('tr').find('.' + action).trigger('click');
-					});
-					window.scrollTo(0,0);
-				},
-				showAll: function (event) {
-					event.preventDefault();
-					this.$("#item-list").empty();
-					this.$(".filterButtons button").removeClass('selected');
-					$(event.target).addClass('selected');
-					Items.each(this.addOne, this);
-				},
-				showPublished: function (event) {
-					event.preventDefault();
-					this.$("#item-list").empty();
-					this.$(".filterButtons button").removeClass('selected');
-					$(event.target).addClass('selected');
-					var filtered = Items.where({status:'Published'});
-					for (var i=0,l=filtered.length; i<l; i++) {
-						this.addOne(filtered[i]);
-					}
-					var filtered = Items.where({status:'Modified'});
-					for (var i=0,l=filtered.length; i<l; i++) {
-						this.addOne(filtered[i]);
-					}
-				},
-				showModified: function (event) {
-					event.preventDefault();
-					this.$("#item-list").empty();
-					this.$(".filterButtons button").removeClass('selected');
-					$(event.target).addClass('selected');
-					var filtered = Items.where({status:'Modified'});
-					for (var i=0,l=filtered.length; i<l; i++) {
-						this.addOne(filtered[i]);
-					}
-				},
-				showUnpublished: function (event) {
-					event.preventDefault();
-					this.$("#item-list").empty();
-					this.$(".filterButtons button").removeClass('selected');
-					$(event.target).addClass('selected');
-					var filtered = Items.where({status:'Unpublished'});
-					for (var i=0,l=filtered.length; i<l; i++) {
-						this.addOne(filtered[i]);
-					}
-				},
-				showErrors: function (event) {
-					event.preventDefault();
-					this.$("#item-list").empty();
-					this.$(".filterButtons button").removeClass('selected');
-					$(event.target).addClass('selected');
-					var filtered = Items.where({status:'Error'});
-					for (var i=0,l=filtered.length; i<l; i++) {
-						this.addOne(filtered[i]);
-					}
-				},
-				showHelp: function (event) {
-					event.preventDefault();
-					var help = new Help();
-					help.render();
-				},
-				showUpload: function (event) {
-					event.preventDefault();
-					var upload = new Upload();
-					upload.render();
-				}, 
-				exportData: function(event) {
-					event.preventDefault();
-					var button = $(event.target);
-					var form = button.parents('form');
-					var what = button.attr('data-export');
+			var list = list_objs.list;
+
+			var ListItem = list_objs.ListItem;
+
+			// var Count = require("lib/views/count").Count;
+
+			var Notification = require("lib/views/notification").Notification;
 			
-					var format = form.find('[name="formatmenu"]').val();
-
-					var filtered = Items.filter(function(record){
-						if (what == "")
-							return true;
-						return what == record.get("status");
-					});
-
-					var exportItems = _.map(filtered, function(item) {
-						if ("ezjson" == format) {
-							return item.toJSON();
-						} else {
-							return item.get("data");
-						}
-					});
-
-					var eData = {
-						"format": format,
-						"description": (what == ""? "All" : what) + " Documents",
-						"documents": exportItems,
-					}
-
-
-					console.log(exportItems);
-					
-					var contentType;
-
-					if (/chrom(e|ium)/.test(navigator.userAgent.toLowerCase())) {
-						contentType = "application/octect-stream";
-					} else {
-						contentType = "application/json"
-					}
-
-					var b = new Blob([JSON.stringify(eData)], {type: contentType});
-
-					var url = window.URL.createObjectURL(b);
-					window.open(url, "blobwin");
-
-
-				},
-				importData: function(event) {
-					event.preventDefault();
-					var importView = new importer.Importer();
-					importView.render();
-				}
-			});
-			var list = new List();
-			var ListItem = Backbone.View.extend({
-				tagName: 'tr',
-				initialize: function () {
-					this.listenTo(this.model, 'change', this.render);
-					this.listenTo(this.model, 'destroy', this.remove);
-					this.listenTo(list, 'render', this.destroy);
-				},
-				render: function () {
-					var template = _.template($('#item-template').html(), {item:this.model});
-					this.$el.html(template);
-					return this;
-				},
-				events: {
-					'click .publish': 'publish',
-					'click .unpublish': 'unpublish',
-					'click .delete': 'delete',
-					'click .edit': 'edit'
-
-				},
-				publish: function (event) {
-					event.preventDefault();
-					this.model.publish(function () {
-					});
-				},
-				unpublish: function (event, cb) {
-					// TODO
-					event.preventDefault();
-					var success = true;
-					if (success && cb) {
-						cb(event);
-					}
-				},
-				delete: function (event) {
-					event.preventDefault();
-					var instance = this;
-					this.unpublish(event, function (event) {
-						instance.model.destroy();
-					});
-				},
-				edit: function(event) {
-					event.preventDefault();
-					var button = $(event.target);
-					router.navigate('edit/'+button.attr('data-item'), {trigger:true});
-				}
-
-			});
-			var Count = Backbone.View.extend({
-				el: '#count',
-				initialize: function () {
-					this.listenTo(Items, 'add', this.render);
-					this.listenTo(Items, 'destroy', this.render);
-					this.listenTo(list, 'render', this.destroy);
-				},
-				render: function () {
-					var template = _.template($('#count-template').html(), {total:Items.length});
-					this.$el.html(template);
-				}
-			});
-
-			var Notification = Backbone.View.extend({
-				el: '#notification-area',
-				initialize: function () {
-					this.listenTo(Items, 'add', this.destroy);
-					this.listenTo(Items, 'remove', this.destroy);
-					this.listenTo(list, 'render', this.destroy);
-				},
-				render: function (total, errors) {
-					var template = _.template($('#notification-template').html(), {total:total,errors:errors});
-					this.$el.html(template);
-				}
-			});
-			
-			var Create = Backbone.View.extend({
-				el: '.page',
-				action: 'create',
-				item: false,
-				render: function () {
-					if (!storedCredentials) {
-						router.navigate('login', {trigger:true});
-					} else {
-						var view = this;
-						var template = _.template($('#edit-template').html(), {action:this.action});
-						this.$el.html(template);
-						this.easyPub = new EasyPublish();
-
-						this.easyPub.buildForm("main", this.easyPub.fieldManager.mainFields);
-						this.easyPub.buildForm("alignment", this.easyPub.fieldManager.alignmentFields);
-						this.easyPub.buildForm("author", this.easyPub.fieldManager.authorFields);
-						this.easyPub.buildForm("publisher", this.easyPub.fieldManager.publisherFields);
-
-						if (this.item) {
-							this.easyPub.setEditData(this.item.get('data')[0]);
-						}
-
-						// Dynamic buttons and menus in the Import Data box
-						var dataSelect = this.$el.find('#dataSelect');
-						dataSelect.selectmenu({
-							style:'popup',
-							width: 300,
-						    change: function(e, object){
-						        view.easyPub.setImportIndex(dataSelect.selectmenu("index"), false, true);
-						    }
-						});
-						dataSelect.selectmenu('disable');
-						this.$el.find('#removeRow').button({
-							disabled: true
-						});
-						this.$el.find('#csvHelp').button({
-							icons: {
-								primary: 'ui-icon-help'
-							},
-							text: false
-						});
-						this.$el.find('#prevData').button({
-							icons: {
-								primary: 'ui-icon-arrowthick-1-w',
-							},
-							disabled: true 
-						});
-						this.$el.find('#nextData').button({
-							icons: {
-								secondary: 'ui-icon-arrowthick-1-e',
-							},
-							disabled: true 
-						});
-
-						// Author and alignment buttons
-						this.$el.find("#addAuthor").button({
-							icons: {
-								secondary: "ui-icon-plus",
-							}
-						});
-						this.$el.find("#addAlignment").button({
-							icons: {
-								secondary: "ui-icon-plus",
-							}
-						});
-					}
-				},
-				events: {
-					'click #Save': 'save',
-					'click #Submit': 'publish',
-					'click #csvHelp': 'help',
-					'click #prevData': 'prevImportData',
-					'click #nextData': 'nextImportData',
-					'click #removeRow': 'removeImportRow',
-					'click #addAuthor': 'addAuthor',
-					'click #addAlignment': 'addAlignment'
-				},
-				publish: function (event) {
-					event.preventDefault();
-					if(this.easyPub.validateAll()) {
-						var view = this;
-						var data = this.easyPub.dataManager.makeAllEnvelopes();
-						// publish all items all together
-						if (this.item) {
-							this.item.save({data:data});
-						} else {
-							this.item = Items.create({data:data, status:'Unpublished'});
-						}
-						this.item.publish(function () {
-							// then create new items if there is more than one imported item
-							var arr = view.item.get('data');
-							if (arr.length > 1) {
-								for (var i=1,l=arr.length; i<l; i++) {
-									Items.create({data:[arr[i]], status:'Published'});
-								}
-								view.item.save({'data':[arr[0]]});
-							}
-							router.navigate('', {trigger:true});
-						});
-					} else {
-						alert("Please correct the indicated problems");
-					}
-				},
-				save: function (event) {
-					event.preventDefault();
-					if (window.File && window.FileReader && window.FileList && window.Blob) {
-						if(this.easyPub.validateAll()) {
-							var data = this.easyPub.dataManager.makeAllEnvelopes();
-							if (this.item) {
-								var replacing = this.item.get('replacing'),
-									newStatus = this.item.get('status');
-
-								if (this.item.get('status') === 'Published') {
-									newStatus = 'Modified';
-									replacing = this.item.get('data');
-								}
-								this.item.save({data:data, status: newStatus, replacing:replacing});
-							} else {
-								for (var i=0,l=data.length; i<l; i++) {
-									Items.create({data:[data[i]], status:'Unpublished'});
-								}
-							}
-							router.navigate('', {trigger:true});
-						} else {
-							alert("Please correct the indicated problems");
-						}
-					} else {
-						alert('The File APIs are not fully supported in this browser. You will not be able to save locally before publishing.');
-					}
-				},
-				help: function (event) {
-					event.preventDefault();
-					new Help().render();
-				},
-				prevImportData: function (event) {
-					event.preventDefault();
-					if (this.easyPub.importIndex > 0) {
-						this.easyPub.setImportIndex(this.easyPub.importIndex - 1, true, true);
-					}
-				},
-				nextImportData: function (event) {
-					event.preventDefault();
-					if (this.easyPub.importIndex < (this.easyPub.importedData.numRows - 1)) {
-						this.easyPub.setImportIndex(this.easyPub.importIndex + 1, true, true);
-					}
-				},
-				removeImportRow: function (event) {
-					event.preventDefault();
-					// this didn't seem to do anything in old EasyPub.js, either
-				},
-				addAuthor: function (event) {
-					event.preventDefault();
-					this.easyPub.addAuthor();
-				},
-				addAlignment: function (event) {
-					event.preventDefault();
-					this.easyPub.addAlignment();
-				}
-			});
+			var Create = require("lib/views/create").Create;
 			var create = new Create();
 
-			var importer = require("lib/importer");
-
-			var Upload = Backbone.View.extend({
-				tagName: 'div',
-				render: function () {
-					var view = this;
-					var template = _.template($('#upload-template').html(), {});
-					this.$el.html(template);
-					$('#dialogContainer').append(this.el);
-					this.$el.dialog({
-						autoOpen: true,
-						title: $('#upload-template').attr('data-dialog-title'),
-						width: 410,
-						modal: true,
-						position: {my:'top',at:'top',of:'.page'},
-						close: function (event, ui) {
-							$(this).dialog('destroy').remove();
-							view.remove();
-						}
-					});
-					this.$el.find("#csvHelp").button({
-						icons: {
-							primary: "ui-icon-help"
-						},
-						text: false
-					});
-					this.easyPub = new EasyPublish();
-				},
-				events: {
-					'click #LoadCancel': 'cancel',
-					'click #LoadData': 'load',
-					'click #csvHelp': 'help'
-				},
-				cancel: function (event) {
-					event.preventDefault();
-					this.$el.dialog('close');
-				},
-				load: function(event) {
-					event.preventDefault();
-					var view = this;
-					if (this.easyPub.importedData.numRows > 0) {
-						var validation = this.easyPub.validateImportData();
-						var importIndex = 0;
-						// override getValue function to get data from import instead of form
-						this.easyPub.getValue = function (id) {
-							var field = view.easyPub.importedData[id];
-							if (field) {
-								return field[importIndex];
-							} else {
-								return '';
-							}
-						}
-						// save each row
-						for (importIndex=0; importIndex<this.easyPub.importedData.numRows; importIndex++) {
-							this.easyPub.setCurrentImportData(importIndex);
-                			var envelope = [this.easyPub.dataManager.makeEnvelope()];
-                			if (validation.messages[importIndex].valid) {
-                				var status = 'Unpublished';
-                			} else {
-                				var status = 'Error';
-                			}
-                			Items.create({data:envelope,status:status});
-						}
-						new Notification().render(this.easyPub.importedData.numRows, validation.totalErrorRows);
-						this.$el.dialog('close');
-					} else {
-						alert('Please provide data to import.');
-					}
-				},
-				help: function (event) {
-					event.preventDefault();
-					new Help().render();
-				}
-			});
+			var Upload = require("lib/views/upload").Upload;
 
 			var Settings = Backbone.View.extend({
 				el: '.page',
@@ -774,6 +151,11 @@
 				}
 			});
 			var settings = new Settings();
+
+
+			var Version = require("lib/views/version").Version;
+			var version = new Version();
+			version.render();
 
 			// Routes
 			router.on('route:login', function () {
@@ -1077,5 +459,27 @@
 		<script type="text/template" id="csv-help-template">
 			<p>If you wish to enter data more rapidly, you can submit a CSV file. First click "Download CSV Template" to get a template file. Then add rows of data to that file. Next, import the file by clicking "Select file..."</p>
 		</script>
+
+		<script type="text/template" id="version-info-template">
+			<% 
+				var git = kanso.git;
+
+				if (git) { %>
+			Git SHA: <a class="git-details" target="_blank" href="https://github.com/easypublish/EasyPublish/commit/<%= git.commit %>"><%= git.commit %></a>
+			<% } %>
+
+			<% if (git.uncommitted && git.uncommitted.length > 0) { %>
+				
+				<button class="button git-uncommitted">Git Uncommited</button>
+
+				<div class="git-uncommitted" style="display: none;">
+				<% for (var i=0; i<git.uncommitted.length; i++) { %>
+					<%= git.uncommitted[i] %><br>
+				<% } %>
+				</div>
+				
+			<%}%>
+		</script>
+
 	</body>
 </html>

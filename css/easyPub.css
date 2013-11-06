@@ -74,6 +74,15 @@ footer .copy {
 	font-size: .8em;
 }
 
+#version-info {
+	float: right;
+}
+
+div.git-uncommitted {
+	background-color: rgb(43, 43, 43);
+	/*width: 100%;*/
+	padding: 4px;
+}
 
 h1, h2, h3, h4, h5, h6 {
 	color: #3369af;
@@ -175,7 +184,7 @@ tbody td {
 textarea, input[type=text] {
 	font-family: Verdana,Arial,sans-serif;
 	font-size: 0.9em;
-	width: 335px;
+	width: 331px;
 }
 
 .ui-menu .ui-menu-item {
