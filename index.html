@@ -290,7 +290,8 @@
 					properties = envelope.resource_data.items[0].properties; 
 			%>
 			<td>
-				<% if (item.get('status') != 'Published') { %>
+				<% if (item.get('status') != 'Published' 
+					&& item.get('status') != 'Modified') { %>
 					<!-- for now, no modifying published items -->
 					<input name="items" type="checkbox" data-item="<%= item.get('id') %>" />
 				<% } %>
