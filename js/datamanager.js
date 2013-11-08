@@ -68,9 +68,9 @@ function DataManager(easyPub) {
                     dateCreated: [easyPub.getValue("dateCreated")],
                     dateModified: [easyPub.getValue("dateModified")],
                     language: [easyPub.getValue("language")],
-                    mediaType: [easyPub.getValue("mediaType")], //this is not an actual field in the CreativeWork schema
-            		learningResourceType: [easyPub.getValue("learningResourceType")],
-                    interactivityType: [easyPub.getValue("interactivityType")],
+                    mediaType: easyPub.getValue("mediaType"), //this is not an actual field in the CreativeWork schema
+            		learningResourceType: easyPub.getValue("learningResourceType"),
+                    interactivityType: easyPub.getValue("interactivityType"),
                     useRightsUrl: [easyPub.getValue("useRightsUrl")],
                     isBasedOnUrl: [easyPub.getValue("isBasedOnUrl")],
                     author: fullAuthorsArray,

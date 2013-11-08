@@ -22,9 +22,9 @@ function FieldManager() {
 		new Field("Date Created", Field.DATE,  {tip:"Date the resource was originally created, Format: YYYY_MM_DD", objectName:"dateCreated"}),
 		new Field("Date Modified", Field.DATE,  {tip:"Date the resource was most recently modified, Format: YYYY_MM_DD", objectName:"dateModified"}),
 		new Field("Language", Field.STRING, {objectName:"language"}),
-		new Field("Media Type", Field.CHOICE, {objectName:"mediaType", choices:mediaTypes}),
-		new Field("Learning Resource Type", Field.CHOICE, {objectName:"learningResourceType", choices:learningResourceTypes}),
-		new Field("Interactivity", Field.CHOICE, {objectName:"interactivityType", choices:interactivityTypes}),
+		new Field("Media Type", Field.MULTI_CHOICE, {objectName:"mediaType", choices:mediaTypes}),
+		new Field("Learning Resource Type", Field.MULTI_CHOICE, {objectName:"learningResourceType", choices:learningResourceTypes}),
+		new Field("Interactivity", Field.MULTI_CHOICE, {objectName:"interactivityType", choices:interactivityTypes}),
 		new Field("Use Rights URL", Field.URL, {objectName:"useRightsUrl"}),
 		new Field("Is based on URL", Field.URL, {objectName:"isBasedOnUrl"}),
 	];
