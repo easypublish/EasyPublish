@@ -81,7 +81,7 @@ function EasyPublish() {
 			}
 		}
         // enable multi-choice ui
-        $(".multi-choice").chosen();
+        $(".multi-choice").chosen({width:"330px"});
 		$("#ELA-StandardRow").hide();
 		$("#Math-StandardRow").hide();
 	}
