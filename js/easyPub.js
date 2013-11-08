@@ -74,7 +74,7 @@ function EasyPublish() {
 				} else {
 					$("#"+nextField.id).autocombobox();
 				}
-            }else if (nextField.type==Field.MULTI_CHOICE){
+            }else if (nextField.type==Field.MULTI_CHOICE || nextField.type==Field.GROUPED_MULTI_CHOICE){
                 
 			}else if (nextField.type==Field.TREE_CHOICE || nextField.type==Field.STANDARDS_TREE_CHOICE) {
 				nextField.treeMenu.initGUI();

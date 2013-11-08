@@ -17,7 +17,7 @@ function FieldManager() {
 		new Field("Resource Title", Field.STRING, {required:true, objectName:"title"}),
 		new Field("Resource URL", Field.URL, {required:true, objectName:"url"}),
 		new Field("Description", Field.LONG_STRING, {objectName:"description"}),
-		new Field("Subject", Field.TREE_CHOICE, {objectName:"keywords", choices:subjectsData}),
+		new Field("Subject", Field.GROUPED_MULTI_CHOICE, {objectName:"keywords", choices:subjectsData}),
 		new Field("Grade", Field.MULTI_CHOICE, {objectName:"grade", choices:gradeChoices}),
 		new Field("Date Created", Field.DATE,  {tip:"Date the resource was originally created, Format: YYYY_MM_DD", objectName:"dateCreated"}),
 		new Field("Date Modified", Field.DATE,  {tip:"Date the resource was most recently modified, Format: YYYY_MM_DD", objectName:"dateModified"}),
@@ -193,6 +193,48 @@ Field = function(name, type, options, index) {
 	        	this.input.append("<option>"+choice+"</option>");
 	        }
 	    }
+	} else if(type==Field.GROUPED_MULTI_CHOICE) {
+		this.input = $('<select>', {
+			class: "multi-choice",
+			multiple:true,
+			id: this.id,
+			name: this.id,
+			title : this.tip
+		});
+		this.input.append("<option></option>");
+		var me = this;
+
+		function buildOutChoices(currentNode) {
+
+			if (currentNode.children.length==0) {
+				var newopt = $("<option>", {
+					text: currentNode.name,
+					class: "depth-"+this.depth
+				});
+				return newopt;
+			} else if (this.depth <= 1){
+				var newoptgroup = $("<optgroup>", {
+					label: currentNode.name 
+				});
+				var subopts = _.map(currentNode.children, buildOutChoices, {depth:this.depth+1});
+				newoptgroup.append(subopts);
+				return newoptgroup;
+			} else {
+				var div = $("<div>");
+				var newopt = $("<option>", {
+					text: currentNode.name,
+					class: "optgroup depth-"+this.depth
+				});
+				div.append(newopt);
+				var subopts = _.map(currentNode.children, buildOutChoices, {depth:this.depth+1});
+				//subopts.splice(0,0,newopt);
+				div.append(subopts);
+				//console.log(div.html())
+				return $(div.html());
+			}
+		}
+		var root = _.map([this.choices], buildOutChoices, {depth:0});
+		this.input.append(root[0].children());
 	} else if(type==Field.TREE_CHOICE) {
 		this.treeMenu = new TreeMenu(this.id);
 		this.treeMenu.setChoices(this.choices);
@@ -258,6 +300,7 @@ Field.STRING = "string";
 Field.LONG_STRING = "long_string";
 Field.CHOICE = "choice";
 Field.MULTI_CHOICE = "multi_choice";
+Field.GROUPED_MULTI_CHOICE = "grouped_multi_choice";
 Field.TREE_CHOICE = "tree_choice";
 Field.STANDARDS_TREE_CHOICE = "standards_tree_choice";
 Field.NUMBER = "number";

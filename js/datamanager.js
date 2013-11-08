@@ -63,7 +63,7 @@ function DataManager(easyPub) {
                     name: [easyPub.getValue("title")],
                     url: [easyPub.getValue("url")],
                     description: [easyPub.getValue("description")],
-                    keywords: [easyPub.getValue("keywords")],
+                    keywords: easyPub.getValue("keywords"),
             		educationalAlignment:fullAlignmentsArray,
                     dateCreated: [easyPub.getValue("dateCreated")],
                     dateModified: [easyPub.getValue("dateModified")],

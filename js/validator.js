@@ -93,7 +93,7 @@ function Validator() {
 		}
 
         if (value == undefined) {
-            if (field.type==Field.MULTI_CHOICE) {
+            if (field.type==Field.MULTI_CHOICE || field.type==Field.GROUPED_MULTI_CHOICE) {
                 var valset = input.val();
                 if (valset.length == 0)  {
                     value = "";

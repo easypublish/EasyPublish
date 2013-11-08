@@ -12,6 +12,31 @@ body {
 	width: 60em;
 }
 
+.optgroup {
+	font-weight: bold;
+	font-style: oblique;
+}
+
+.chosen-container .chosen-results li.group-option .depth-1 {
+
+}
+
+.chosen-container .chosen-results li.group-option.depth-2 {
+
+}
+
+.chosen-container .chosen-results li.group-option.depth-3 {
+	padding-left: 30px;
+}
+
+.chosen-container .chosen-results li.group-option.depth-4 {
+	padding-left: 45px;
+}
+
+.chosen-container .chosen-results li.group-option.depth-5 {
+	padding-left: 60px;
+}
+
 #ez-publish-banner {
 	font-size: 2em;
 	float: left;
