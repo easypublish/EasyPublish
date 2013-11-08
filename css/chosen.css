@@ -3,7 +3,7 @@
   position: relative;
   display: inline-block;
   vertical-align: middle;
-  font-size: 13px;
+  font-size: 0.9em;
   zoom: 1;
   *display: inline;
   -webkit-user-select: none;
@@ -120,7 +120,7 @@
   background: url('chosen-sprite.png') no-repeat 100% -20px, -moz-linear-gradient(#eeeeee 1%, #ffffff 15%);
   background: url('chosen-sprite.png') no-repeat 100% -20px, -o-linear-gradient(#eeeeee 1%, #ffffff 15%);
   background: url('chosen-sprite.png') no-repeat 100% -20px, linear-gradient(#eeeeee 1%, #ffffff 15%);
-  font-size: 1em;
+  font-size: .09em;
   font-family: sans-serif;
   line-height: normal;
   border-radius: 0;
@@ -198,10 +198,11 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  width: 100%;
+  width: 331px;
   height: auto !important;
   height: 1%;
   border: 1px solid #aaa;
+  border-radius: 4px;
   background-color: #fff;
   background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(1%, #eeeeee), color-stop(15%, #ffffff));
   background-image: -webkit-linear-gradient(#eeeeee 1%, #ffffff 15%);
@@ -222,7 +223,7 @@
 .chosen-container-multi .chosen-choices li.search-field input[type="text"] {
   margin: 1px 0;
   padding: 5px;
-  height: 15px;
+  height: 25px;
   outline: 0;
   border: 0 !important;
   background: transparent !important;

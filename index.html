@@ -5,6 +5,7 @@
 		<link href="css/smoothness/jquery-ui-1.10.2.custom.css" rel="stylesheet" />
 		<link href="css/jquery.fileupload-ui.css" rel="stylesheet" />
 		<link href="css/jquery.ui.selectmenu.css" rel="stylesheet" />
+		<link href="css/chosen.css" rel="stylesheet">
 		<link href="css/easyPub.css" rel="stylesheet" />
 		<link href="/_browserid/style.css" rel="stylesheet">
 	</head>
@@ -44,7 +45,9 @@
 		</script>
 		<script type="text/javascript" src="js/jquery/jquery-ui-1.10.2.custom.min.js"></script>
 		<script type="text/javascript" src="js/jquery/jquery.fileupload.js"></script>
-		<script type="text/javascript" src="js/jquery/ui/jquery.fileupload-ui.js"></script><!-- both are needed for file upload for some reason -->
+		<script type="text/javascript" src="js/jquery/ui/jquery.fileupload-ui.js"></script>
+		<script type="text/javascript" src="js/jquery/chosen.jquery.js"></script>
+		<!-- both are needed for file upload for some reason -->
 		<script type="text/javascript" src="js/lib/oauth.js"></script>
 		<script type="text/javascript" src="js/datamanager.js"></script>
 		<script type="text/javascript" src="/_browserid/include.js"></script>
@@ -83,8 +86,33 @@
 				'edit/:id': 'edit',
 				'settings': 'settings'
 				// not doing bulk edit
+			},
+			current : function() {
+			    var Router = this,
+			        fragment = Backbone.history.fragment,
+			        routes = _.map(Router.routes, function(val, key) {return [key,val];}),
+			        route = null, params = null, matched;
+
+			    matched = _.find(routes, function(handler) {
+			        route = _.isRegExp(handler[0]) ? handler[0] : Router._routeToRegExp(handler[0]);
+			        return route.test(fragment);
+			    });
+
+			    if(matched) {
+			        // NEW: Extracts the params using the internal
+			        // function _extractParameters 
+			        params = Router._extractParameters(route, fragment);
+			        route = matched[1];
+			    }
+
+			    return {
+			        route : route,
+			        fragment : fragment,
+			        params : params
+			    };
 			}
 		});
+
 		var router = new Router();
 
 		// Models
@@ -100,6 +128,7 @@
 				storedCredentials = user;
 				$('#main-nav .signed-in').show();
 				console.log("Logged In!");
+				console.log(router.current());
 				router.navigate('', {trigger:true});
 			});
 			$.couch.browserid.logout(function (event, error, user) {

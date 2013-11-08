@@ -74,10 +74,14 @@ function EasyPublish() {
 				} else {
 					$("#"+nextField.id).autocombobox();
 				}
+            }else if (nextField.type==Field.MULTI_CHOICE){
+                
 			}else if (nextField.type==Field.TREE_CHOICE || nextField.type==Field.STANDARDS_TREE_CHOICE) {
 				nextField.treeMenu.initGUI();
 			}
 		}
+        // enable multi-choice ui
+        $(".multi-choice").chosen();
 		$("#ELA-StandardRow").hide();
 		$("#Math-StandardRow").hide();
 	}

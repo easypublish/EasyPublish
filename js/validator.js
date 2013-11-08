@@ -93,7 +93,20 @@ function Validator() {
 		}
 
         if (value == undefined) {
-		    var value = input.val().trim();
+            if (field.type==Field.MULTI_CHOICE) {
+                var valset = input.val();
+                if (valset.length == 0)  {
+                    value = "";
+                } else {
+                    for (var i=0; i<valset.length; i++) {
+                        var msg = this.validateField(field, valset[i]);
+                        if (msg !== "")
+                            return msg;
+                    }
+                }
+            } else {
+		      var value = input.val().trim();
+            }
         }
 
         if(value=="") {

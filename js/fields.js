@@ -18,7 +18,7 @@ function FieldManager() {
 		new Field("Resource URL", Field.URL, {required:true, objectName:"url"}),
 		new Field("Description", Field.LONG_STRING, {objectName:"description"}),
 		new Field("Subject", Field.TREE_CHOICE, {objectName:"keywords", choices:subjectsData}),
-		new Field("Grade", Field.CHOICE, {objectName:"grade", choices:gradeChoices}),
+		new Field("Grade", Field.MULTI_CHOICE, {objectName:"grade", choices:gradeChoices}),
 		new Field("Date Created", Field.DATE,  {tip:"Date the resource was originally created, Format: YYYY_MM_DD", objectName:"dateCreated"}),
 		new Field("Date Modified", Field.DATE,  {tip:"Date the resource was most recently modified, Format: YYYY_MM_DD", objectName:"dateModified"}),
 		new Field("Language", Field.STRING, {objectName:"language"}),
@@ -175,6 +175,24 @@ Field = function(name, type, options, index) {
 	        	this.input.append("<option>"+choice+"</option>");
 	        }
 	    }
+	}else if(type==Field.MULTI_CHOICE) {
+		this.input = $('<select>', {
+			class: "multi-choice",
+			multiple:true,
+			id: this.id,
+			name: this.id,
+			title : this.tip
+		});
+		this.input.append("<option></option>");
+		for(key in this.choices) {
+	        var choice = this.choices[key];
+	        if(this.values) {
+	        	var value = this.values[key];
+	        	this.input.append("<option value='"+value+"'>"+choice+"</option>");
+	        } else {
+	        	this.input.append("<option>"+choice+"</option>");
+	        }
+	    }
 	} else if(type==Field.TREE_CHOICE) {
 		this.treeMenu = new TreeMenu(this.id);
 		this.treeMenu.setChoices(this.choices);
@@ -239,6 +257,7 @@ Field = function(name, type, options, index) {
 Field.STRING = "string";
 Field.LONG_STRING = "long_string";
 Field.CHOICE = "choice";
+Field.MULTI_CHOICE = "multi_choice";
 Field.TREE_CHOICE = "tree_choice";
 Field.STANDARDS_TREE_CHOICE = "standards_tree_choice";
 Field.NUMBER = "number";

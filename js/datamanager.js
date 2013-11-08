@@ -103,22 +103,19 @@ function DataManager(easyPub) {
         for(var key in data) {
             var val = data[key];
             if (key == 'educationalAlignment' || key == 'author' || key == 'publisher') {
-                // pull grade out of educationalAlignments array
-                if (key == 'educationalAlignment') {
-                    for (var i=0,l=val.length; i<l; i++) {
-                        var properties = val[i].properties;
-                        if (properties.alignmentType && properties.alignmentType[0] == 'educationLevel') {
-                            fieldData['grade'] = properties.targetName;
-                            val.splice(i, 1);
-                            break;
-                        }
-                    }
-                }
+
+
                 // run through things with mutliple values recursively, making sure the names map correctly
                 for (var i=0,l=val.length; i<l; i++) {
                     var properties = val[i].properties;
                     // rename property names
                     if (key == 'educationalAlignment') {
+                        // Special case if grade level.
+                        if (properties.alignmentType && properties.alignmentType[0]=='educationLevel') {
+                            fieldData['grade'] = fieldData['grade'] || [];
+                            fieldData['grade'] = fieldData['grade'].concat(properties.targetName);
+                            continue;
+                        }
                         properties = {
                             'alignmentType':properties.alignmentType,
                             'educationalFramework':properties.educationalFramework,
@@ -158,21 +155,24 @@ function DataManager(easyPub) {
 
         var alignmentsArray = easyPub.getAlignments();
         var fullAlignmentsArray = [];
+        _.each(easyPub.getValue("grade"), function(gradeLevel, idx, list){
 
-        var educationLevelAlignment = 
-            {
-                type: ["http://schema.org/AlignmentObject"],
-                // id: "xxx",
-                properties: {
-                    alignmentType: ["educationLevel"],
-                    educationalFramework: ["US K-12 Grade Levels"],
-                    targetName: [easyPub.getValue("grade")],
-                    targetDescription: [easyPub.getValue("k12Grade")],
-                }
-            };
-        if(easyPub.getValue("grade")!=="" || easyPub.getValue("k12Grade")!=="") {
-            fullAlignmentsArray.push(educationLevelAlignment);
-        }
+            if(gradeLevel!="") {
+                var educationLevelAlignment = 
+                {
+                    type: ["http://schema.org/AlignmentObject"],
+                    properties: {
+                        alignmentType: ["educationLevel"],
+                        educationalFramework: ["US K-12 Grade Levels"],
+                        targetName: [gradeLevel]
+                    }
+                };
+            
+                fullAlignmentsArray.push(educationLevelAlignment);
+            }
+
+        });
+        
 
         for(var i=0; i<alignmentsArray.length; i++) {
             var nextFullAlignment = {
