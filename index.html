@@ -47,6 +47,7 @@
 		<script type="text/javascript" src="js/jquery/jquery.fileupload.js"></script>
 		<script type="text/javascript" src="js/jquery/ui/jquery.fileupload-ui.js"></script>
 		<script type="text/javascript" src="js/jquery/chosen.jquery.js"></script>
+		<script type="text/javascript" src="js/jquery/jquery.dotdotdot.min.js"></script>
 		<!-- both are needed for file upload for some reason -->
 		<script type="text/javascript" src="js/lib/oauth.js"></script>
 		<script type="text/javascript" src="js/datamanager.js"></script>
@@ -283,8 +284,7 @@
 						<tr>
 							<th></th>
 							<th>Title</th>
-							<th>Link</th>
-							<th>Description</th>
+							<th>Link/Description</th>
 							<th>Status</th>
 							<th></th>
 						</tr>
@@ -353,12 +353,10 @@
 			</td>
 			<td>
 				<% if (properties.url != undefined) { %>
-					<a href="<%= properties.url %>" target="_blank"><%= properties.url %></a>
+					<a class="resource-url" href="<%= properties.url %>" target="_blank"><%= properties.url %></a>
 				<% } %>
-			</td>
-			<td>
 				<% if (properties.description != undefined) { %>
-					<%= properties.description %>
+					<div class="description"><%= properties.description %></div>
 				<% } %>
 			</td>
 			<td class="status">
