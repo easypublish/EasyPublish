@@ -164,7 +164,7 @@
 			var Create = require("lib/views/create").Create;
 			var create = new Create();
 
-			
+			var Confirm = require("lib/views/confirm").Confirm;
 
 			var Settings = Backbone.View.extend({
 				el: '.page',
@@ -175,6 +175,21 @@
 						var template = _.template($('#settings-template').html(), {});
 						this.$el.html(template);
 					}
+				},
+				events: {
+					'click .purgeAll': 'purgeAll'
+				},
+				purgeAll: function(event) {
+					event.preventDefault();
+					console.log("purgeAll");
+					var confirm = new Confirm();
+					confirm.render(function(conf_yes) {
+						if (conf_yes == "yes") {
+							Items.reset();
+							router.navigate('', {trigger: true});
+						}
+					}, "<p>Are you sure you want to purge all published items from your browser?</p> <p>This does not remove anything already published on the node. You should export your data before doing this.</p>", "Confirm Purge");
+
 				}
 			});
 			var settings = new Settings();
@@ -451,8 +466,17 @@
 				<div class="control-row">
 					<button id="Save" class="button">Save Data</button>
 					<button id="Submit" class="button">Submit Data To Learning Registry</button>
-					<a href="#" id="Back">Back to item list</button>
+					<a href="#" id="Back">Back to item list</a>
 				</div>
+			</div>
+		</script>
+
+
+		<script type="text/template" id="confirm-template" data-dialog-title="Confirm">
+			<div class="confirm-msg"><%= message %></div>
+			<div class="control-row">
+				<button class="button confirm-answer" data-value="yes"><%= (yes!=undefined) ? yes : "Yes" %></button>
+				<button class="button confirm-answer" data-value="no"><%= (no!=undefined) ? no : "No" %></button>
 			</div>
 		</script>
 
@@ -490,7 +514,10 @@
 
 
 		<script type="text/template" id="settings-template">
-			<p>TODO: settings template</p>
+			<button class="button purgeAll">Purge Everything</button>
+			<div class="control-row">
+				<a href="#" id="Back">Back to item list</a>
+			</div>
 		</script>
 
 		<script type="text/template" id="csv-help-template">
