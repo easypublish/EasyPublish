@@ -2,3 +2,6 @@
 /sftp-config.json
 
 /.kansorc
+
+/EasyPublish.sublime-project
+/EasyPublish.sublime-workspace
