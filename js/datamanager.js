@@ -294,15 +294,19 @@ function DataManager(easyPub) {
         return csv;
     }
 
-    this.twoDArrayToObjectArray = function(arrData, remapDictionary) {
+    this.twoDArrayToObjectArray = function(arrData, fieldManager) {
+
         //console.log("remapDictionary:");
         //console.log(remapDictionary);
-        var objArray = {};
+        var objArray = {},
+            remapDictionary = fieldManager.englishNameDictionary, 
+            fieldDictionary = fieldManager.fieldDictionary;
         var indexTest = /(.*...+) (\d+)$/;
         objArray.numRows = arrData.length-1;
         for(var colIndex=0; colIndex<arrData[0].length; colIndex++) {
             var fieldName = arrData[0][colIndex];
-            var fieldKey = remapDictionary[fieldName];
+            var fieldKey = remapDictionary[fieldName],
+                fieldBaseKey = fieldKey;
             //if we haven't found a field key, it might be an indexed name
             if(!fieldKey) {
                 var match = indexTest.exec(fieldName);
@@ -311,6 +315,7 @@ function DataManager(easyPub) {
                     var index = match[2];
                     if(base && index && remapDictionary[base]) {
                         fieldKey = remapDictionary[base] + "_" + index;
+                        fieldBaseKey = remapDictionary[base];
                     } else {
                         console.log("can't remap, got base: " + base + ", index: " + index);
                         continue;
@@ -323,6 +328,10 @@ function DataManager(easyPub) {
             var colData = [];
             for(var rowIndex=1; rowIndex<arrData.length; rowIndex++) {
                 colData[rowIndex-1] = arrData[rowIndex][colIndex];
+                // handle wonky cells that could contain another dimension.
+                if (fieldDictionary[fieldBaseKey].csvParser) {
+                    colData[rowIndex-1] = fieldDictionary[fieldBaseKey].csvParser(colData[rowIndex-1]);
+                }
             }
             objArray[fieldKey] = colData;
         }

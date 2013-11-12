@@ -1,3 +1,7 @@
+function split_cell_comma(celldata) {
+	return celldata.split(/\s*,\s*/)
+}
+
 function FieldManager() {
 	
 	var mediaTypes = ["Audio", "Document", "Image", "Video", "Other"]; 
@@ -17,14 +21,14 @@ function FieldManager() {
 		new Field("Resource Title", Field.STRING, {required:true, objectName:"title"}),
 		new Field("Resource URL", Field.URL, {required:true, objectName:"url"}),
 		new Field("Description", Field.LONG_STRING, {objectName:"description"}),
-		new Field("Subject", Field.GROUPED_MULTI_CHOICE, {objectName:"keywords", choices:subjectsData}),
-		new Field("Grade", Field.MULTI_CHOICE, {objectName:"grade", choices:gradeChoices}),
+		new Field("Subject", Field.GROUPED_MULTI_CHOICE, {objectName:"keywords", choices:subjectsData, csvParser:split_cell_comma}),
+		new Field("Grade", Field.MULTI_CHOICE, {objectName:"grade", choices:gradeChoices, csvParser:split_cell_comma}),
 		new Field("Date Created", Field.DATE,  {tip:"Date the resource was originally created, Format: YYYY_MM_DD", objectName:"dateCreated"}),
 		new Field("Date Modified", Field.DATE,  {tip:"Date the resource was most recently modified, Format: YYYY_MM_DD", objectName:"dateModified"}),
 		new Field("Language", Field.STRING, {objectName:"language"}),
-		new Field("Media Type", Field.MULTI_CHOICE, {objectName:"mediaType", choices:mediaTypes}),
-		new Field("Learning Resource Type", Field.MULTI_CHOICE, {objectName:"learningResourceType", choices:learningResourceTypes}),
-		new Field("Interactivity", Field.MULTI_CHOICE, {objectName:"interactivityType", choices:interactivityTypes}),
+		new Field("Media Type", Field.MULTI_CHOICE, {objectName:"mediaType", choices:mediaTypes, csvParser:split_cell_comma}),
+		new Field("Learning Resource Type", Field.MULTI_CHOICE, {objectName:"learningResourceType", choices:learningResourceTypes, csvParser:split_cell_comma}),
+		new Field("Interactivity", Field.MULTI_CHOICE, {objectName:"interactivityType", choices:interactivityTypes, csvParser:split_cell_comma}),
 		new Field("Use Rights URL", Field.URL, {objectName:"useRightsUrl"}),
 		new Field("Is based on URL", Field.URL, {objectName:"isBasedOnUrl"}),
 	];
@@ -108,6 +112,12 @@ Field = function(name, type, options, index) {
 
 		if(options.objectName!=null) {
 			this.objectName = options.objectName;
+		}
+
+		if(options.csvParser!=null) {
+			this.csvParser = options.csvParser;
+		} else {
+			this.csvParser = false;
 		}
 	}
 	this.id = this.objectName.replace(/ /g, "-");
@@ -252,10 +262,18 @@ Field = function(name, type, options, index) {
 		if(this.type==Field.CHOICE && this.id.lastIndexOf("educationalFramework")==-1) {
 			this.input = this.input.next();
 		}
-		if(this.type==Field.TREE_CHOICE || this.type==Field.STANDARDS_TREE_CHOICE) {
+		else if(this.type==Field.TREE_CHOICE || this.type==Field.STANDARDS_TREE_CHOICE) {
 			this.input = this.treeMenu.input;
 			this.treeMenu.setSelected(val);
+		} else if(this.type==Field.GROUPED_MULTI_CHOICE || this.type==Field.MULTI_CHOICE) {
+			_.each(val, function(item) {
+				var $sel = $(this.input);
+				if ($sel.find("option[value='"+item+"']").length == 0) {
+					$sel.append($("<option>", { text: item }));
+				}
+			}, {input:this.input});
 		}
+
 		if(val || val=="") {
 			this.input.val(val);
 		} else {
