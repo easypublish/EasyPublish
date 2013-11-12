@@ -47,7 +47,7 @@
 		<script type="text/javascript" src="js/jquery/jquery.fileupload.js"></script>
 		<script type="text/javascript" src="js/jquery/ui/jquery.fileupload-ui.js"></script>
 		<script type="text/javascript" src="js/jquery/chosen.jquery.js"></script>
-		<script type="text/javascript" src="js/jquery/jquery.dotdotdot.min.js"></script>
+		<script type="text/javascript" src="js/jquery/jquery.ellipsis.min.js"></script>
 		<!-- both are needed for file upload for some reason -->
 		<script type="text/javascript" src="js/lib/oauth.js"></script>
 		<script type="text/javascript" src="js/datamanager.js"></script>
@@ -182,13 +182,22 @@
 				},
 				purgeAll: function(event) {
 					event.preventDefault();
-					var confirm = new Confirm();
-					confirm.render(function(conf_yes) {
-						if (conf_yes == "yes") {
-							Items.reset();
-							router.navigate('', {trigger: true});
-						}
-					}, "<p>Are you sure you want to purge all published items from your browser?</p> <p>This does not remove anything already published on the node. You should export your data before doing this.</p>", "Confirm Purge");
+					var confirm = new Confirm({ 
+						confirm_cb: function(conf_yes) {
+							if (conf_yes == "yes") {
+								var model;
+								while (model = Items.first()) {
+								  model.destroy();
+								}
+								Items.reset();
+
+								router.navigate('', {trigger: true});
+							}
+						}, 
+						msg: "<p>Are you sure you want to purge all published items from your browser?</p> <p>This does not remove anything already published on the node. You should export your data before doing this.</p>", 
+						title: "Confirm Purge"
+					});
+					confirm.render();
 
 				}
 			});
