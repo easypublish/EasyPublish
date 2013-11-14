@@ -5,6 +5,7 @@
 		<link href="css/smoothness/jquery-ui-1.10.2.custom.css" rel="stylesheet" />
 		<link href="css/jquery.fileupload-ui.css" rel="stylesheet" />
 		<link href="css/jquery.ui.selectmenu.css" rel="stylesheet" />
+		<link href="css/skin-lion/ui.fancytree.css" rel="stylesheet" />
 		<link href="css/chosen.css" rel="stylesheet">
 		<link href="css/easyPub.css" rel="stylesheet" />
 		<link href="/_browserid/style.css" rel="stylesheet">
@@ -48,6 +49,8 @@
 		<script type="text/javascript" src="js/jquery/ui/jquery.fileupload-ui.js"></script>
 		<script type="text/javascript" src="js/jquery/chosen.jquery.js"></script>
 		<script type="text/javascript" src="js/jquery/jquery.ellipsis.min.js"></script>
+		<script type="text/javascript" src="js/jquery/jquery.fancytree.js"></script>
+
 		<!-- both are needed for file upload for some reason -->
 		<script type="text/javascript" src="js/lib/oauth.js"></script>
 		<script type="text/javascript" src="js/datamanager.js"></script>
@@ -421,15 +424,32 @@
 			</p>
 		</script>
 
+		<script id="standards-template" type="text/template">
+			<legend>Standards Alignment</legend>
+			<select class="collections"></select>
+			<div class="std-tree"></div>
+			<select class="alignmentType"></select>
+			<button class="std-add">Add Alignment</button>
+			<div class="selected-alignments"></div>
+		</script>
+
+
+		<script id="alignment-template" type="text/template">
+		<label for="<%=name%>">This Resource <%=title%></label>
+		<select name="<%=name%>" id="<%=name%>" class="multi-choice" multiple></select>
+		</script>
+
+
 		<script type="text/template" id="edit-template">
 			<div id="<%= action %>">
 				<div id="middleCol">
 					<form>
-						<fieldset id="alignmentForm">
+						<!-- <fieldset id="alignmentForm">
 							<legend>Standards Alignment</legend>
 							<div class="sublegend">Alignment 1</div>
 							<button id="addAlignment">Add Alignment</button>
-						</fieldset>
+						</fieldset> -->
+						<fieldset id="alignmentForm"></fieldset>
 						<fieldset id="authorForm">
 							<legend>Authors</legend>
 							<div class="sublegend">Author 1</div>

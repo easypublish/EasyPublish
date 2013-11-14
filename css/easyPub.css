@@ -209,7 +209,8 @@ tbody td {
 textarea, input[type=text] {
 	font-family: Verdana,Arial,sans-serif;
 	font-size: 0.9em;
-	width: 331px;
+	/*width: 331px;*/
+	width: 375px;
 }
 
 .ui-menu .ui-menu-item {
@@ -247,6 +248,28 @@ textarea, input[type=text] {
 	min-height: 30px;
 }
 
+
+/* === Specific styling for tree control === */
+.std-tree {
+	max-width: 375px;
+}
+
+.std-tree .fancytree-container {
+  height: 375px;
+  overflow: auto;
+  position: relative;
+}
+
+
+
+div.ccss.dotnotation {
+	font-weight: bold;
+}
+
+div.ccss.text, div.ccss.title {
+	white-space: normal;
+	padding-right: 40px;
+}
 
 
 

@@ -81,11 +81,10 @@ function EasyPublish() {
 			}
 		}
         // enable multi-choice ui
-        $(".multi-choice").chosen({width:"330px"});
+        $(".multi-choice").chosen({width:"375px"});
 		$("#ELA-StandardRow").hide();
 		$("#Math-StandardRow").hide();
 	}
-
 
 	this.addAuthor = function () {
 		authorCount++;
