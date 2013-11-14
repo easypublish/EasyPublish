@@ -1,0 +1,14 @@
+{
+  "name": "commoncore",
+  "version": "0.0.0",
+  "description": "Builds source data for Common Core Tree Selector",
+  "main": "make_tree_control_data.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jim Klo",
+  "license": "Apache 2.0",
+  "dependencies": {
+    "underscore": "1.5.2"
+  }
+}
