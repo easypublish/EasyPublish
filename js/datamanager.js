@@ -116,12 +116,15 @@ function DataManager(easyPub) {
                             fieldData['grade'] = fieldData['grade'].concat(properties.targetName);
                             continue;
                         }
-                        properties = {
-                            'alignmentType':properties.alignmentType,
-                            'educationalFramework':properties.educationalFramework,
-                            'ELA-Standard':(properties.educationalFramework[0][0].lastIndexOf("Language")>=0)?properties.targetName:'',
-                            'Math-Standard':(properties.educationalFramework[0][0].lastIndexOf("Math")>=0)?properties.targetName:''
+                        fieldData['alignmentType_'+properties.alignmentType] = fieldData['alignmentType_'+properties.alignmentType] || [];
+                        if (properties.targetName && properties.targetName.length > 0) {
+                            fieldData['alignmentType_'+properties.alignmentType]=
+                                fieldData['alignmentType_'+properties.alignmentType].concat(properties.targetName);
+                        } else if (properties.targetUrl && properties.targetUrl.length > 0) {
+                            fieldData['alignmentType_'+properties.alignmentType] = fieldData['alignmentType_'+properties.alignmentType].concat(properties.targetUrl);
                         }
+                        
+                        continue;
                     } else if (key == 'author') {
                         properties = {
                             'author_name':properties.name,

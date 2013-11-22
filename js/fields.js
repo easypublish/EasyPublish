@@ -1,5 +1,14 @@
+var gen_standards = require("lib/gen/standards");
+
 function split_cell_comma(celldata) {
 	return celldata.split(/\s*,\s*/)
+}
+
+function std_lookup(key) {
+	var found = gen_standards.find(key);
+	if (found)
+		return { text: found.dotnotation, value: found.uri };
+	return null;
 }
 
 function FieldManager() {
@@ -42,19 +51,26 @@ function FieldManager() {
 	var standardFrameworks = ["Common Core Math", "Common Core Language Arts"];//, "State Standard"];
 
 	this.alignmentFields = [
-		new Field("This resource...", Field.CHOICE, {objectName:"alignmentType", choices:alignmentTypes}),
-		new Field("Standard Framework", Field.CHOICE, {objectName:"educationalFramework",
-					tip:"The framework to which the resource being described is aligned", choices:standardFrameworks}),
+		new Field("This Resource Assesses", Field.MULTI_CHOICE, 
+			{cat_name:"alignmentType", cat_val:"assesses", choices:[], option_lookup:std_lookup}),
+		new Field("This Resource Teaches", Field.MULTI_CHOICE, 
+			{cat_name:"alignmentType", cat_val:"teaches", choices:[], option_lookup:std_lookup}),
+		new Field("This Resource Requires", Field.MULTI_CHOICE, 
+			{cat_name:"alignmentType", cat_val:"requires", choices:[], option_lookup:std_lookup})
 
-		//Giving up altogether on trying to make the standards menu a general type, it need to be handled as its own special case.
-		new Field("ELA Standard", Field.STANDARDS_TREE_CHOICE, {choices:standardsTree.CCSS["ELA-Literacy"]}),
-		new Field("Math Standard", Field.STANDARDS_TREE_CHOICE, {choices:standardsTree.CCSS.Math}),
+		// new Field("This resource...", Field.CHOICE, {objectName:"alignmentType", choices:alignmentTypes}),
+		// new Field("Standard Framework", Field.CHOICE, {objectName:"educationalFramework",
+		// 			tip:"The framework to which the resource being described is aligned", choices:standardFrameworks}),
+
+		// //Giving up altogether on trying to make the standards menu a general type, it need to be handled as its own special case.
+		// new Field("ELA Standard", Field.STANDARDS_TREE_CHOICE, {choices:standardsTree.CCSS["ELA-Literacy"]}),
+		// new Field("Math Standard", Field.STANDARDS_TREE_CHOICE, {choices:standardsTree.CCSS.Math}),
 
 	];
 	for(key in this.alignmentFields) {
 		var field = this.alignmentFields[key];
 		this.fieldDictionary[field.id] = field;
-		this.englishNameDictionary[field.name] = field.id;
+		// this.englishNameDictionary[field.name] = field.id;
 	}
 
 	this.authorFields = [
@@ -86,7 +102,7 @@ function FieldManager() {
 	}
 }
 
-Field = function(name, type, options, index) {
+function Field(name, type, options, index) {
 	this.name = name;
 	if(index) {
 		this.name += " " + index;
@@ -105,10 +121,18 @@ Field = function(name, type, options, index) {
 		this.validation = options.validation;
 		this.choices = options.choices;
 		this.values = options.values;
+		this.cat_name  = options.cat_name || "";
+		this.cat_val  = options.cat_val || "";
+		this.option_lookup = options.option_lookup || false;
+
 
 		if(options.required!=null) {
 			this.required = options.required;
 		}
+
+		if (this.cat_name!="" && this.cat_val!="")
+			this.objectName = this.cat_name+"_"+this.cat_val;
+
 
 		if(options.objectName!=null) {
 			this.objectName = options.objectName;
@@ -258,20 +282,34 @@ Field = function(name, type, options, index) {
 	}
 
 	this.value = function(val) {
-		this.input = $("#"+this.id);
+		var that = this;
+		this.input = this.input || $("#"+this.id);
 		if(this.type==Field.CHOICE && this.id.lastIndexOf("educationalFramework")==-1) {
 			this.input = this.input.next();
 		}
 		else if(this.type==Field.TREE_CHOICE || this.type==Field.STANDARDS_TREE_CHOICE) {
 			this.input = this.treeMenu.input;
 			this.treeMenu.setSelected(val);
-		} else if(this.type==Field.GROUPED_MULTI_CHOICE || this.type==Field.MULTI_CHOICE) {
+		} else if(val !== undefined && (this.type==Field.GROUPED_MULTI_CHOICE || this.type==Field.MULTI_CHOICE)) {
+			var remaped_val = [];
 			_.each(val, function(item) {
-				var $sel = $(this.input);
-				if ($sel.find("option[value='"+item+"']").length == 0) {
-					$sel.append($("<option>", { text: item }));
+				var $sel = $(this.input),
+					the_val = item;
+
+				if (that.option_lookup) {
+					var found = that.option_lookup(item);
+					if (found) {
+						item = found.text;
+						the_val = found.value;
+					}
+				}
+				remaped_val.push(the_val);
+				var $exiting_opts = $sel.find("option[value='"+the_val+"']");
+				if ($exiting_opts.length == 0) {
+					$sel.append($("<option>", { text: item, value: the_val }));
 				}
 			}, {input:this.input});
+			val = remaped_val;
 		}
 
 		if(val || val=="") {
@@ -331,7 +369,7 @@ Field.BOOLEAN = "boolean";
 Field.EMAIL = "email";
 Field.RANGE = "range";
 
-Field.rangeMinMaxValidation = function(value) {
+Field.prototype.rangeMinMaxValidation = function(value) {
 	var rangeRegex = new RegExp('^([\\d]+)-([\\d]+)$');
 	var m = rangeRegex.exec(value);
 	if(!m) return true;
@@ -343,7 +381,7 @@ Field.rangeMinMaxValidation = function(value) {
 	}
 }
 
-Field.uriValidation = function(value) {
+Field.prototype.uriValidation = function(value) {
 	var components = URI.parse(value);
 	if(components.errors.length!=0) {
 		console.log("errors parsing URI: " + value);
@@ -353,7 +391,7 @@ Field.uriValidation = function(value) {
 	}
 	return components.errors.length==0;
 }
-Field.uriTest = function() {
+Field.prototype.uriTest = function() {
 	var uris = ["cnn.com", "https://www.sri.com", "https://www.sri.com/", "uri://user:pass@example.com:123/one/two.three?q1=a1&q2=a2#body",
 			"htt://www.s*&^%$ri.com/", "htt://www.sri.com/"];
 	for(key in uris) {

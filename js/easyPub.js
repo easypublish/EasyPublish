@@ -2,6 +2,8 @@ $(function() {
 	// var easyPub = new EasyPublish();
 });
 
+var gen_standards = require("lib/gen/standards");
+
 EasyPublish.prototype.constructor = EasyPublish;
 function EasyPublish() {
 
@@ -82,8 +84,8 @@ function EasyPublish() {
 		}
         // enable multi-choice ui
         $(".multi-choice").chosen({width:"375px"});
-		$("#ELA-StandardRow").hide();
-		$("#Math-StandardRow").hide();
+		// $("#ELA-StandardRow").hide();
+		// $("#Math-StandardRow").hide();
 	}
 
 	this.addAuthor = function () {
@@ -101,35 +103,6 @@ function EasyPublish() {
 				$("#"+clone.id).autocombobox();
 			}
 		}
-	}
-
-	this.addAlignment = function () {
-		alignmentCount++;
-		$("#addAlignment").before('<div class="sublegend">Alignment '+alignmentCount+'</div>');
-		for(var i=0; i<4; i++) {
-			var nextField = that.fieldManager.alignmentFields[i];
-			var clone = nextField.clone(alignmentCount);
-			that.fieldManager.fieldDictionary[clone.id] = clone;
-			that.fieldManager.alignmentFields.push(clone);
-			var nextRow = new FieldEditorRow(clone, alignmentCount);
-			$("#addAlignment").before(nextRow.elem);
-
-			//have to construct combo boxes after they've been added to DOM
-			if(clone.type==Field.CHOICE) {
-				if(clone.id=="educationalFramework_"+alignmentCount) {
-					//for educationalFramework specifically, we don't make it an autocombobox,
-					//just leave it as a <select>. on the other hand, and a change listener so
-					//we can show/hide the Math vs. ELA subject menus accordingly
-					$("#"+clone.id).change(edFrameworkSelected);
-				} else {
-					$("#"+clone.id).autocombobox();
-				}
-			}else if (clone.type==Field.TREE_CHOICE || clone.type==Field.STANDARDS_TREE_CHOICE) {
-				clone.treeMenu.initGUI();
-			}
-		}
-		$("#Math-Standard_" + alignmentCount+ "Row").hide();
-		$("#ELA-Standard_"+ alignmentCount + "Row").hide();
 	}
 
 	this.setImportIndex = function(newIndex, updateDataSelect, storeCurrent) {
@@ -241,11 +214,12 @@ function EasyPublish() {
         			if(key_index>authorCount) {
         				that.addAuthor();
         			}
-        		} else if (key.match(alignmentTest)) {
-        			if(key_index>alignmentCount) {
-        				that.addAlignment();
-        			}
-        		}
+        		} 
+                // else if (key.match(alignmentTest)) {
+                //     if(key_index>alignmentCount) {
+                //     	that.addAlignment();
+                //     }
+                // }
         	}
             var field = that.fieldManager.fieldDictionary[key];
             if (field) {
@@ -278,11 +252,12 @@ function EasyPublish() {
         			if(key_index>authorCount) {
         				that.addAuthor();
         			}
-        		} else if (key.match(alignmentTest)) {
-        			if(key_index>alignmentCount) {
-        				that.addAlignment();
-        			}
-        		}
+        		} 
+                // else if (key.match(alignmentTest)) {
+        		// 	if(key_index>alignmentCount) {
+        		// 		that.addAlignment();
+        		// 	}
+        		// }
         	}
             var field = that.fieldManager.fieldDictionary[key];
             if (field) {
@@ -362,55 +337,80 @@ function EasyPublish() {
 
 	this.getAlignments = function() {
 
-		var keys = _.keys(this.fieldManager.fieldDictionary);
+        var fieldWrappers = this.fieldManager.alignmentFields;
+        var alignments = [];
 
-		var alignments = [];
+        _.each(fieldWrappers, function(fieldWrapper) {
+            var fieldValues = fieldWrapper.value();    
+            
 
-		var edFramework = this.getValue("educationalFramework");
-		var alignment0 = {
-		    alignmentType: [this.getValue("alignmentType")],
-            educationalFramework:  [edFramework]
-		}
-		if(edFramework && edFramework.trim().length>0) {
-			var standardField;
-			if(edFramework.lastIndexOf("Math")>=0) {
-				standardField = this.fieldManager.fieldDictionary["Math-Standard"];
-			} else if(edFramework.lastIndexOf("Language")>=0) {
-				standardField = this.fieldManager.fieldDictionary["ELA-Standard"];
-			}
-			if(standardField) {
-				alignment0.targetUrl = [standardField.treeMenu.getCurrentSelectionData()];
-				alignment0.targetName = [standardField.treeMenu.getCurrentSelectionText()];
-			}
-		}
-		alignments[0] = alignment0;
+            _.each(fieldValues, function(fieldVal) {
+                var align_info = gen_standards.find(fieldVal);
+                if (align_info) {
+                    var newalign = {
+                        educationalFramework: align_info.fw,
+                        alignmentType: fieldWrapper.cat_val,
+                        targetUrl: align_info.uri,
+                        targetName: align_info.dotnotation
+                    };
+                    alignments.push(newalign);
 
-		if(alignmentCount>1) {
-			for(var i=2; i<=alignmentCount; i++) {
-				var edFramework = this.getValue("educationalFramework_"+i);
+                }
+            });
 
-				var alignment = {
-				    alignmentType: [this.getValue("alignmentType_"+i)],
-		            educationalFramework:  [edFramework]
-				}
-				if(edFramework && edFramework.trim().length>0) {
-					var standardField;
-					if(edFramework.lastIndexOf("Math")>=0) {
-						standardField = this.fieldManager.fieldDictionary["Math-Standard_"+i];
-					} else if(edFramework.lastIndexOf("ELA")>=0) {
-						standardField = this.fieldManager.fieldDictionary["ELA-Standard_"+i];
-					}
-					if(standardField) {
-						alignment.targetUrl = [standardField.treeMenu.getCurrentSelectionData()];
-						alignment.targetName = [standardField.treeMenu.getCurrentSelectionText()];
+        }, this);
 
-					}
-				}
+        return alignments;
 
-				alignments[i-1] = alignment;
-			}
-		}
-		return alignments;
+		// var keys = _.keys(this.fieldManager.fieldDictionary);
+
+		
+
+		// var edFramework = this.getValue("educationalFramework");
+		// var alignment0 = {
+		//     alignmentType: [this.getValue("alignmentType")],
+  //           educationalFramework:  [edFramework]
+		// }
+		// if(edFramework && edFramework.trim().length>0) {
+		// 	var standardField;
+		// 	if(edFramework.lastIndexOf("Math")>=0) {
+		// 		standardField = this.fieldManager.fieldDictionary["Math-Standard"];
+		// 	} else if(edFramework.lastIndexOf("Language")>=0) {
+		// 		standardField = this.fieldManager.fieldDictionary["ELA-Standard"];
+		// 	}
+		// 	if(standardField) {
+		// 		alignment0.targetUrl = [standardField.treeMenu.getCurrentSelectionData()];
+		// 		alignment0.targetName = [standardField.treeMenu.getCurrentSelectionText()];
+		// 	}
+		// }
+		// alignments[0] = alignment0;
+
+		// if(alignmentCount>1) {
+		// 	for(var i=2; i<=alignmentCount; i++) {
+		// 		var edFramework = this.getValue("educationalFramework_"+i);
+
+		// 		var alignment = {
+		// 		    alignmentType: [this.getValue("alignmentType_"+i)],
+		//             educationalFramework:  [edFramework]
+		// 		}
+		// 		if(edFramework && edFramework.trim().length>0) {
+		// 			var standardField;
+		// 			if(edFramework.lastIndexOf("Math")>=0) {
+		// 				standardField = this.fieldManager.fieldDictionary["Math-Standard_"+i];
+		// 			} else if(edFramework.lastIndexOf("ELA")>=0) {
+		// 				standardField = this.fieldManager.fieldDictionary["ELA-Standard_"+i];
+		// 			}
+		// 			if(standardField) {
+		// 				alignment.targetUrl = [standardField.treeMenu.getCurrentSelectionData()];
+		// 				alignment.targetName = [standardField.treeMenu.getCurrentSelectionText()];
+
+		// 			}
+		// 		}
+
+		// 		alignments[i-1] = alignment;
+		// 	}
+		// }
+		// return alignments;
 	}
 
 	this.getData = function(byEnglishName) {
