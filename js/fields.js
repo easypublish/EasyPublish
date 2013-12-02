@@ -47,9 +47,6 @@ function FieldManager() {
 		this.englishNameDictionary[field.name] = field.id;
 	}
 
-	var alignmentTypes = ["assesses", "teaches", "requires"];
-	var standardFrameworks = ["Common Core Math", "Common Core Language Arts"];//, "State Standard"];
-
 	this.alignmentFields = [
 		new Field("This Resource Assesses", Field.MULTI_CHOICE, 
 			{cat_name:"alignmentType", cat_val:"assesses", choices:[], option_lookup:std_lookup}),
@@ -57,20 +54,11 @@ function FieldManager() {
 			{cat_name:"alignmentType", cat_val:"teaches", choices:[], option_lookup:std_lookup}),
 		new Field("This Resource Requires", Field.MULTI_CHOICE, 
 			{cat_name:"alignmentType", cat_val:"requires", choices:[], option_lookup:std_lookup})
-
-		// new Field("This resource...", Field.CHOICE, {objectName:"alignmentType", choices:alignmentTypes}),
-		// new Field("Standard Framework", Field.CHOICE, {objectName:"educationalFramework",
-		// 			tip:"The framework to which the resource being described is aligned", choices:standardFrameworks}),
-
-		// //Giving up altogether on trying to make the standards menu a general type, it need to be handled as its own special case.
-		// new Field("ELA Standard", Field.STANDARDS_TREE_CHOICE, {choices:standardsTree.CCSS["ELA-Literacy"]}),
-		// new Field("Math Standard", Field.STANDARDS_TREE_CHOICE, {choices:standardsTree.CCSS.Math}),
-
 	];
 	for(key in this.alignmentFields) {
 		var field = this.alignmentFields[key];
 		this.fieldDictionary[field.id] = field;
-		// this.englishNameDictionary[field.name] = field.id;
+		this.englishNameDictionary[field.name] = field.id;
 	}
 
 	this.authorFields = [

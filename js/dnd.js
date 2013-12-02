@@ -25,7 +25,8 @@ function DragAndDrop(easyPub) {
 
       function bind(id) {
         var fileButton = document.getElementById(id);
-        fileButton.addEventListener('change', handleFileSelect, false);            
+        if (fileButton)
+          fileButton.addEventListener('change', handleFileSelect, false);            
       }
 
       return {

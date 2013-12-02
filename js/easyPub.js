@@ -26,32 +26,8 @@ function EasyPublish() {
 	var authorCount = 1;
 
 	var dialogPosition  = {my: "top", at: "top", of: $("#middleCol")};
-	
-	function updateEdFramework(id) {
-		var selection = $("#"+id).val();
-		var indexLoc = id.lastIndexOf("_");
-		var index = "";
-		if(indexLoc>=0) {
-			index = id.slice(indexLoc);
-		};
-		var mathRow = "#Math-Standard" + index + "Row";
-		var elaRow = "#ELA-Standard" + index + "Row";
-		if(selection && selection.indexOf("Math")>=0) {
-			$(mathRow).show();
-			$(elaRow).hide();
-		} else if(selection && selection.indexOf("Language")>=0) {
-			$(mathRow).hide();
-			$(elaRow).show();
-		}else {
-			$(mathRow).hide();
-			$(elaRow).hide();
-		}
-	}
 
-	function edFrameworkSelected(event) {
-		var id = $(event.currentTarget).attr("id");
-		updateEdFramework(id);
-	}
+
 
 	this.buildForm = function(name, fields) {
 		var formSection = $("#"+name+"Form");
@@ -68,12 +44,7 @@ function EasyPublish() {
 			}
 			//have to construct combo boxes after they've been added to DOM
 			if(nextField.type==Field.CHOICE) {
-				if(nextField.id=="educationalFramework") {
-					//for educationalFramework specifically, we don't make it an autocombobox,
-					//just leave it as a <select>. on the other hand, and a change listener so
-					//we can show/hide the Math vs. ELA subject menus accordingly
-					$("#"+nextField.id).change(edFrameworkSelected);
-				} else {
+				if(nextField.id!=="educationalFramework") {
 					$("#"+nextField.id).autocombobox();
 				}
             }else if (nextField.type==Field.MULTI_CHOICE || nextField.type==Field.GROUPED_MULTI_CHOICE){
@@ -227,14 +198,11 @@ function EasyPublish() {
             } else {
             	console.log("no field found for key: " + key + ", val: " +  val);
             }
-        	if(key.lastIndexOf("educationalFramework")>=0) {
-        		updateEdFramework(key);
-        	}
     	}
     }
 
-    this.setEditData = function(data) {
-    	data = this.dataManager.mapPayloadToFields(data.resource_data.items[0].properties);
+    this.setEditData = function(lrmidata) {
+    	data = this.dataManager.mapPayloadToFields(lrmidata.resource_data.items[0].properties);
 
         var mathTest = /[\w]*Math[\w]*/;
         var elaTest = /[\w]*Language[\w]*/;
@@ -242,8 +210,8 @@ function EasyPublish() {
     	var authorTest = /[\w]*author[\w]*/;
     	var alignmentTest = /[\w]*(alignmentType|educationalFramework|Standard)[\w]*/;
 
-    	for(var key in data) {
-            var val = data[key];
+    	for(var key in that.fieldManager.fieldDictionary) {
+            var val = data[key] || "";
         	if(key.match(indexTest)) {
         		match = indexTest.exec(key);
         		var base = match[1];
@@ -265,9 +233,6 @@ function EasyPublish() {
             } else {
             	console.log("no field found for key: " + key + ", val: " +  val);
             }
-        	if(key.lastIndexOf("educationalFramework")>=0) {
-        		updateEdFramework(key);
-        	}
     	}
     }
 
@@ -361,56 +326,6 @@ function EasyPublish() {
         }, this);
 
         return alignments;
-
-		// var keys = _.keys(this.fieldManager.fieldDictionary);
-
-		
-
-		// var edFramework = this.getValue("educationalFramework");
-		// var alignment0 = {
-		//     alignmentType: [this.getValue("alignmentType")],
-  //           educationalFramework:  [edFramework]
-		// }
-		// if(edFramework && edFramework.trim().length>0) {
-		// 	var standardField;
-		// 	if(edFramework.lastIndexOf("Math")>=0) {
-		// 		standardField = this.fieldManager.fieldDictionary["Math-Standard"];
-		// 	} else if(edFramework.lastIndexOf("Language")>=0) {
-		// 		standardField = this.fieldManager.fieldDictionary["ELA-Standard"];
-		// 	}
-		// 	if(standardField) {
-		// 		alignment0.targetUrl = [standardField.treeMenu.getCurrentSelectionData()];
-		// 		alignment0.targetName = [standardField.treeMenu.getCurrentSelectionText()];
-		// 	}
-		// }
-		// alignments[0] = alignment0;
-
-		// if(alignmentCount>1) {
-		// 	for(var i=2; i<=alignmentCount; i++) {
-		// 		var edFramework = this.getValue("educationalFramework_"+i);
-
-		// 		var alignment = {
-		// 		    alignmentType: [this.getValue("alignmentType_"+i)],
-		//             educationalFramework:  [edFramework]
-		// 		}
-		// 		if(edFramework && edFramework.trim().length>0) {
-		// 			var standardField;
-		// 			if(edFramework.lastIndexOf("Math")>=0) {
-		// 				standardField = this.fieldManager.fieldDictionary["Math-Standard_"+i];
-		// 			} else if(edFramework.lastIndexOf("ELA")>=0) {
-		// 				standardField = this.fieldManager.fieldDictionary["ELA-Standard_"+i];
-		// 			}
-		// 			if(standardField) {
-		// 				alignment.targetUrl = [standardField.treeMenu.getCurrentSelectionData()];
-		// 				alignment.targetName = [standardField.treeMenu.getCurrentSelectionText()];
-
-		// 			}
-		// 		}
-
-		// 		alignments[i-1] = alignment;
-		// 	}
-		// }
-		// return alignments;
 	}
 
 	this.getData = function(byEnglishName) {
