@@ -119,9 +119,10 @@ function DataManager(easyPub) {
                         fieldData['alignmentType_'+properties.alignmentType] = fieldData['alignmentType_'+properties.alignmentType] || [];
                         if (properties.targetName && properties.targetName.length > 0) {
                             fieldData['alignmentType_'+properties.alignmentType]=
-                                fieldData['alignmentType_'+properties.alignmentType].concat(properties.targetName);
+                                _.union(fieldData['alignmentType_'+properties.alignmentType], properties.targetName);
                         } else if (properties.targetUrl && properties.targetUrl.length > 0) {
-                            fieldData['alignmentType_'+properties.alignmentType] = fieldData['alignmentType_'+properties.alignmentType].concat(properties.targetUrl);
+                            fieldData['alignmentType_'+properties.alignmentType] = 
+                                _.union(fieldData['alignmentType_'+properties.alignmentType], properties.targetUrl);
                         }
                         
                         continue;

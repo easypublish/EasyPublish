@@ -292,7 +292,8 @@ function Field(name, type, options, index) {
 					}
 				}
 				remaped_val.push(the_val);
-				var $exiting_opts = $sel.find("option[value='"+the_val+"']");
+				// var $exiting_opts = $sel.find("option[value='"+the_val+"']");
+				var $exiting_opts = $sel.find("option").filter(function(idx){ return this.value == the_val; });
 				if ($exiting_opts.length == 0) {
 					$sel.append($("<option>", { text: item, value: the_val }));
 				}
