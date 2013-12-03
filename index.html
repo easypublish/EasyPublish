@@ -123,8 +123,27 @@
 		var Item = models.Item;
 		var ItemList = models.ItemList;
 		var Items = new ItemList();
-
+		
 		$(function () {
+			var users = require("users");
+
+			
+
+			function checkSession(event){
+				if (storedCredentials) {
+					users.get(storedCredentials.name, function(err, userObj, info){
+			            if (err) {
+			            	router.navigate('#logout', {trigger:true});
+			            	if (typeof(w)!=="undefined") {
+								w.terminate();
+							}
+			            }
+			        });
+				}
+			}
+
+			var w = undefined;
+
 
 			// login and logout event handlers
 			$.couch.browserid.login(function (event, error, user) {
@@ -133,6 +152,11 @@
 				console.log("Logged In!");
 				console.log(router.current());
 				router.navigate('', {trigger:true});
+				if (typeof(w)==="undefined") {
+					w = new Worker("js/worker.js?millis=20000");
+					w.onmessage = checkSession;
+					w.postMessage({millis:180000});
+				}
 			});
 			$.couch.browserid.logout(function (event, error, user) {
 				if (error) {
@@ -143,6 +167,7 @@
 					console.log("Logged Out!")
 					$('#main-nav .signed-in').hide();
 				}
+
 			});
 
 			// Views
@@ -150,6 +175,7 @@
 			var credentials = new Credentials();
 
 			var Logout = require("lib/views/logout").Logout;
+
 			var logout = new Logout();
 
 			var Help = require("lib/views/help").Help;
