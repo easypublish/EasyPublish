@@ -293,7 +293,7 @@ function DataManager(easyPub) {
             row2 += data[key] + ", ";
             console.log(key, data[key])
         }
-        csv += "\n" + row2;
+        csv += "\r\n" + row2;
         return csv;
     }
 
