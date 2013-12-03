@@ -1,7 +1,7 @@
 var gen_standards = require("lib/gen/standards");
 
 function split_cell_comma(celldata) {
-	return celldata.split(/\s*,\s*/)
+	return [].concat(celldata.split(/\s*,\r?\n\s*/));
 }
 
 function std_lookup(key) {
@@ -49,11 +49,11 @@ function FieldManager() {
 
 	this.alignmentFields = [
 		new Field("This Resource Assesses", Field.MULTI_CHOICE, 
-			{cat_name:"alignmentType", cat_val:"assesses", choices:[], option_lookup:std_lookup}),
+			{cat_name:"alignmentType", cat_val:"assesses", choices:[], option_lookup:std_lookup, csvParser:split_cell_comma}),
 		new Field("This Resource Teaches", Field.MULTI_CHOICE, 
-			{cat_name:"alignmentType", cat_val:"teaches", choices:[], option_lookup:std_lookup}),
+			{cat_name:"alignmentType", cat_val:"teaches", choices:[], option_lookup:std_lookup, csvParser:split_cell_comma}),
 		new Field("This Resource Requires", Field.MULTI_CHOICE, 
-			{cat_name:"alignmentType", cat_val:"requires", choices:[], option_lookup:std_lookup})
+			{cat_name:"alignmentType", cat_val:"requires", choices:[], option_lookup:std_lookup, csvParser:split_cell_comma})
 	];
 	for(key in this.alignmentFields) {
 		var field = this.alignmentFields[key];
