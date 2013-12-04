@@ -233,7 +233,8 @@ function DataManager(easyPub) {
             },
             "payload_schema": ["schema.org", "lrmi"],
             "payload_placement": "inline",
-            "resource_locator": easyPub.getValue("url")
+            "resource_locator": easyPub.getValue("url"),
+            "keys": ["EZPublish-1.0"]
         }
         stripEmptyValues(envelope);
         return envelope;
