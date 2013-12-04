@@ -95,7 +95,7 @@ function EasyPublish() {
 
 	this.fileDropped = function(fileData) {
         // var arrData = this.dataManager.CSVToArray(fileData);
-        var arrData = fileData.csvToArray();
+        var arrData = fileData.csvToArray({rSep:'\n'});
         var objData = this.dataManager.twoDArrayToObjectArray(arrData, this.fieldManager);
 		var rowCount = objData.numRows;
         $("#dropStatus2").append("Found " + rowCount + " row(s) of data");
