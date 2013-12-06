@@ -212,8 +212,8 @@ function EasyPublish() {
     	var indexTest = /([\w]*)_(\d+)$/;
     	var authorTest = /[\w]*author[\w]*/;
     	var alignmentTest = /[\w]*(alignmentType|educationalFramework|Standard)[\w]*/;
-
-    	for(var key in that.fieldManager.fieldDictionary) {
+        
+    	_.each(_.union(_.keys(that.fieldManager.fieldDictionary), _.keys(data)), function (key) {
             var val = data[key] || "";
         	if(key.match(indexTest)) {
         		match = indexTest.exec(key);
@@ -236,7 +236,7 @@ function EasyPublish() {
             } else {
             	console.log("no field found for key: " + key + ", val: " +  val);
             }
-    	}
+    	});
     }
 
     function clearFields() {
