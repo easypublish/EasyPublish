@@ -24,12 +24,20 @@ function EasyPublish() {
 		numRows:0
 	};
 
+    this.bindings = {};
 	var alignmentCount = 1;
 	var authorCount = 1;
 
 	var dialogPosition  = {my: "top", at: "top", of: $("#middleCol")};
 
+    this.bind = function(event, callback){
+        this.bindings[event] = this.bindings[event] || [];
+        this.bindings[event].push(callback);
+    }
 
+    this.fireEvent = function(event, data) {
+        _.each(this.bindings[event], function(cb){ cb(this.data) }, {data: data})
+    }
 
 	this.buildForm = function(name, fields) {
 		var formSection = $("#"+name+"Form");
@@ -108,6 +116,7 @@ function EasyPublish() {
     	}
     	buildDataSelections();
     	that.setCurrentImportData(that.importIndex);
+        that.fireEvent("fileDropped");
     }
 
     function buildDataSelections() {
