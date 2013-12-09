@@ -193,42 +193,8 @@
 			var Create = require("lib/views/create").Create;
 			var create = new Create();
 
-			var Confirm = require("lib/views/confirm").Confirm;
 
-			var Settings = Backbone.View.extend({
-				el: '.page',
-				render: function () {
-					if (!storedCredentials) {
-						router.navigate('login', {trigger:true});
-					} else {
-						var template = _.template($('#settings-template').html(), {});
-						this.$el.html(template);
-					}
-				},
-				events: {
-					'click .purgeAll': 'purgeAll'
-				},
-				purgeAll: function(event) {
-					event.preventDefault();
-					var confirm = new Confirm({ 
-						confirm_cb: function(conf_yes) {
-							if (conf_yes == "yes") {
-								var model;
-								while (model = Items.first()) {
-								  model.destroy();
-								}
-								Items.reset();
-
-								router.navigate('', {trigger: true});
-							}
-						}, 
-						msg: "<p>Are you sure you want to purge all published items from your browser?</p> <p>This does not remove anything already published on the node. You should export your data before doing this.</p>", 
-						title: "Confirm Purge"
-					});
-					confirm.render();
-
-				}
-			});
+			var Settings = require("lib/views/settings").Settings;
 			var settings = new Settings();
 
 
@@ -564,9 +530,39 @@
 			</div>
 		</script>
 
-
+		<script id="submitter-template" type="text/template">
+		<% if (username && vanityname) { %>
+			&quot;<%= vanityname %> &lt;<%= username %>&gt;&quot;
+		<% } else if (username) { %>
+			&quot;<%= username %>&quot;
+		<% } else { %>
+			<span class="error">Error: Username not set</span>
+		<% } %>
+		</script>
 		<script type="text/template" id="settings-template">
-			<button class="button purgeAll">Purge Everything</button>
+			<fieldset>
+				<legend>Full Name for Submitter field</legend>
+				
+				<div class="fieldRow">
+					<label class="preview">Preview</label>
+					<br/>
+					<div class="submitter-display"></div>
+					<br/>
+				</div>
+				<div class="fieldRow">
+					<label for="submitter">Full Name</label>
+					<br/>
+					<input type="text" class="submitter" name="submitter">
+					<br/>
+				</div>
+
+				<button class="update-submitter button" type="button">Save</button>
+			</fieldset>
+			<fieldset>
+				<legend>Other Options</legend>
+				<button class="button purgeAll">Purge All Local Records</button>
+				<p>This deletes all resources from EZ Publish local storage.  It does not remove anything that has been published into the Learning Registry itself. This should be used when you wish to remove previous work and need to start over from scratch.</p>
+			</fieldset>
 			<div class="control-row">
 				<a href="#" id="Back">Back to item list</a>
 			</div>
