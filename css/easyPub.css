@@ -337,6 +337,10 @@ div.ccss.text, div.ccss.title {
 	display: none;
 }
 
+#edit select {
+	width: 375px;
+}
+
 fieldset {
   padding: 1em;
 }
