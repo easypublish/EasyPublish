@@ -128,6 +128,7 @@ function DataManager(easyPub) {
                         continue;
                     } else if (key == 'author') {
                         properties = {
+                            'author_type':val[i].type[0],
                             'author_name':properties.name,
                             'author_url':properties.url,
                             'author_email':properties.email
@@ -202,7 +203,7 @@ function DataManager(easyPub) {
         var fullAuthorsArray = [];
         for(var i=0; i<authorsArray.length; i++) {
             var nextFullAuthor = {
-                type: ["http://schema.org/Person"],
+                type: [authorsArray[i]["@type"]],
                 properties: {
                     name: [authorsArray[i].name],
                     url:  [authorsArray[i].url],
