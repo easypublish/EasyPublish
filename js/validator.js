@@ -89,7 +89,7 @@ function Validator() {
     this.validateField = function(field, value) {
 		var input = $("#"+field.id);
 		if(field.type==Field.CHOICE) {
-			input = input.next();
+			// input = input.next();
 		}
 
         if (value == undefined) {
