@@ -263,7 +263,7 @@
 					<button class="button" id="sync">Sync from registry</button>
 					<a href="#help" class="help round-btn">Help</a>
 				</div>
-
+				
 				<% if (data.length > 0) { %>
 
 				<div class="filterButtons control-row">
@@ -275,7 +275,6 @@
 					--><button type="button" class="showErrors">Errors</button>
 				</div>
 				<div class="localStorageUsage"></div>
-				
 				<div class="clear"></div>
 				<div class="control-row">
 					Select <button type="button" class="selectall button-link" data-checkboxes="items">All</button> |
@@ -547,6 +546,15 @@
 		</script>
 
 		<script type="text/template" id="settings-template">
+			<fieldset>
+				<legend>Browser Local Storage</legend>
+				<p>EZ Publish stores all of the content you edit into your browsers local storage. Many browsers limit this capacity to 5MB. Firefox permits you to modify the default value by going to <a href="about:config" target="">about:config</a> and search for "dom.storage.default_quota" option. This value is in kilobytes.</p>
+				<div class="localStorageUsed">Unknown KB Used</div>
+				<div class="localStorageRemain">Unknown KB Remaining</div>
+				<div class="control-row">
+					<button class="calc-ls button">Calculate Remaining</button>
+				</div>
+			</fieldset>
 			<fieldset>
 				<legend>Full Name for Submitter field</legend>
 				
