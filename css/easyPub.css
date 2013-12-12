@@ -133,6 +133,7 @@ a, .ui-widget-content a {
 .button {
 	color: white;
 	background-color: #7cbe4c;
+	background-image: none;
 	font-weight: bold;
 	border: 1px solid #5b8b38;
 	border-radius: 3px;
@@ -206,7 +207,7 @@ tbody td {
 }
 
 
-textarea, input[type=text] {
+textarea, input[type=text], input[type=password] {
 	font-family: Verdana,Arial,sans-serif;
 	font-size: 0.9em;
 	/*width: 331px;*/
@@ -237,6 +238,59 @@ textarea, input[type=text] {
 	box-shadow: 0 0 3px rgba(0,0,0,.9) inset;
 }
 
+
+div.oauth-info {
+	border: 1px solid #000;
+	cursor: text;
+	padding: 4px;
+}
+
+input.password {
+	float:left;
+}
+
+label.passwordSet {
+	float:left;
+}
+
+div.passwordSet {
+	float:left; 
+	margin-left:5px; 
+	margin-top:-4px;
+}
+
+.clear {
+	clear: both;
+}
+
+.success {
+	color: #7cbe4c;
+}
+
+.field-icon {
+	float: left;
+	padding-left: 5px;
+	margin-top: -6px;
+}
+
+.success-icon {
+	background-image: url('../img/check.png');
+	min-height: 30px;
+	min-width: 30px;
+	max-height: 30px;
+	max-width: 30px;
+	display: block;
+
+}
+
+.error-icon {
+	background-image: url('../img/error.png');
+	min-height: 30px;
+	min-width: 30px;
+	max-height: 30px;
+	max-width: 30px;
+	display: block;
+}
 
 #notification-area .success {
 	color: #7cbe4c;
@@ -370,6 +424,7 @@ legend {
 	text-align:left;
 	font-weight:bold;
 }
+
 .round-btn {
     width: 20px !important;
     height: 20px !important;
@@ -425,3 +480,13 @@ legend {
 	-moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2),0 1px 2px rgba(0, 0, 0, 0.05);
 	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2),0 1px 2px rgba(0, 0, 0, 0.05);
 }
+
+
+/*
+ *	jQuery UI overrides
+ */
+
+.control-row .ui-button-text-only .ui-button-text {
+	padding: 0;
+}
+
