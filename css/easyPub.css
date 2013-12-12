@@ -219,6 +219,10 @@ textarea, input[type=text], input[type=password] {
 	white-space: nowrap;
 }
 
+.filterButtons {
+	float:left;
+}
+
 .filterButtons button {
 	background: #EBEBEB;
 	border: 1px solid #CFCFCF;
@@ -238,6 +242,10 @@ textarea, input[type=text], input[type=password] {
 	box-shadow: 0 0 3px rgba(0,0,0,.9) inset;
 }
 
+div.localStorageUsage {
+	float:right;
+	margin: 1.5em 0;
+}
 
 div.oauth-info {
 	border: 1px solid #000;
