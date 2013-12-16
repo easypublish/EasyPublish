@@ -11,8 +11,29 @@ function std_lookup(key) {
 	return null;
 }
 
+var author_objs = [
+	{ text: "Person", value: "http://schema.org/Person" },
+	{ text: "Organization", value: "http://schema.org/Organization" }
+];
+var author_map = {},
+	author_types = {};
+for (var idx in author_objs) {
+	author_types[author_objs[idx].text] = author_objs[idx];
+	author_map[author_objs[idx].text] = author_objs[idx];
+	author_map[author_objs[idx].value] = author_objs[idx];
+}
+
+function author_lookup(key) {
+	var found = author_map[key];
+	if (found) {
+		return found;
+	}
+	return null;
+}
+
+
 function FieldManager() {
-	
+
 	var mediaTypes = ["Audio", "Document", "Image", "Video", "Other"]; 
 	var edRoles = ["Administrator", "Mentor", "Parent", "Peer Tutor", "Specialist", "Student", "Teacher", "Team"];
 	var edUses = ["Activity", "Analogies", "Assessment", "Auditory", "Brainstorming", "Classifying", "Comparing", "Cooperative Learning", "Creative Response", "Demonstration", "Differentiation ", "Discovery Learning", "Discussion/Debate", "Drill & Practice", "Experiential", "Field Trip", "Game", "Generating hypotheses", "Guided questions ", "Hands-on", "Homework", "Identify similarities & differences", "Inquiry", "Interactive", "Interview/Survey", "Interviews", "Introduction", "Journaling ", "Kinesthetic", "Laboratory", "Lecture", "Metaphors", "Model & Simulation", "Musical", "Nonlinguistic ", "Note taking ", "Peer Coaching", "Peer Response", "Play", "Presentation", "Problem Solving", "Problem-based", "Project", "Questioning ", "Reading", "Reciprocal teaching ", "Reflection", "Reinforcement", "Research", "Review", "Role Playing", "Service learning ", "Simulations", "Summarizing ", "Technology ", "Testing hypotheses", "Thematic instruction ", "Visual/Spatial", "Word association", "Writing"];
@@ -62,6 +83,7 @@ function FieldManager() {
 	}
 
 	this.authorFields = [
+		new Field("Author Type", Field.CHOICE, {objectName:"author_type", choices:_.keys(author_types), option_lookup:author_lookup, option_default:"Person" }),
 		new Field("Author Name", Field.STRING, {objectName:"author_name"}),
 		new Field("Author URL", Field.URL, {objectName:"author_url"}),
 		new Field("Author Email Address", Field.EMAIL, {objectName:"author_email"})
@@ -112,6 +134,7 @@ function Field(name, type, options, index) {
 		this.cat_name  = options.cat_name || "";
 		this.cat_val  = options.cat_val || "";
 		this.option_lookup = options.option_lookup || false;
+		this.option_default = options.option_default || false;
 
 
 		if(options.required!=null) {
@@ -187,16 +210,30 @@ function Field(name, type, options, index) {
 			name: this.id,
 			title : this.tip
 		});
-		this.input.append("<option></option>");
+		if (!this.option_default)
+			this.input.append("<option></option>");
 		for(key in this.choices) {
 	        var choice = this.choices[key];
+	        var value = undefined;
 	        if(this.values) {
-	        	var value = this.values[key];
-	        	this.input.append("<option value='"+value+"'>"+choice+"</option>");
+	        	value = {
+	        		value: this.values[key],
+	        		text: choice
+	        	}
+	        } else if (this.option_lookup && (value = this.option_lookup(choice)) != null) {
+				value = _.clone(value);
 	        } else {
-	        	this.input.append("<option>"+choice+"</option>");
+	        	value = {
+					text: choice
+	        	};
 	        }
+			if (this.option_default == choice) {
+				value.selected = true;
+			}
+			this.input.append($('<option>', value ));
+			
 	    }
+
 	}else if(type==Field.MULTI_CHOICE) {
 		this.input = $('<select>', {
 			class: "multi-choice",
@@ -272,10 +309,7 @@ function Field(name, type, options, index) {
 	this.value = function(val) {
 		var that = this;
 		this.input = this.input || $("#"+this.id);
-		if(this.type==Field.CHOICE && this.id.lastIndexOf("educationalFramework")==-1) {
-			this.input = this.input.next();
-		}
-		else if(this.type==Field.TREE_CHOICE || this.type==Field.STANDARDS_TREE_CHOICE) {
+		if(this.type==Field.TREE_CHOICE || this.type==Field.STANDARDS_TREE_CHOICE) {
 			this.input = this.treeMenu.input;
 			this.treeMenu.setSelected(val);
 		} else if(val !== undefined && (this.type==Field.GROUPED_MULTI_CHOICE || this.type==Field.MULTI_CHOICE)) {
@@ -299,6 +333,10 @@ function Field(name, type, options, index) {
 				}
 			}, {input:this.input});
 			val = remaped_val;
+		} else if (val!==undefined && this.type==Field.CHOICE && this.option_lookup) {
+			var lookup = this.option_lookup(val);
+			if (lookup)
+				val = lookup.value;
 		}
 
 		if(val || val=="") {

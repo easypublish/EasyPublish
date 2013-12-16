@@ -24,12 +24,20 @@ function EasyPublish() {
 		numRows:0
 	};
 
+    this.bindings = {};
 	var alignmentCount = 1;
 	var authorCount = 1;
 
 	var dialogPosition  = {my: "top", at: "top", of: $("#middleCol")};
 
+    this.bind = function(event, callback){
+        this.bindings[event] = this.bindings[event] || [];
+        this.bindings[event].push(callback);
+    }
 
+    this.fireEvent = function(event, data) {
+        _.each(this.bindings[event], function(cb){ cb(this.data) }, {data: data})
+    }
 
 	this.buildForm = function(name, fields) {
 		var formSection = $("#"+name+"Form");
@@ -39,16 +47,12 @@ function EasyPublish() {
 			var nextRow = new FieldEditorRow(nextField);
 			if(name=="author") {
 				$("#addAuthor").before(nextRow.elem);
-			} else if(name=="alignment") {
-				$("#addAlignment").before(nextRow.elem);
-			}  else {	
+			} else {	
 				nextRow.elem.appendTo(formSection);	
 			}
 			//have to construct combo boxes after they've been added to DOM
 			if(nextField.type==Field.CHOICE) {
-				if(nextField.id!=="educationalFramework") {
-					$("#"+nextField.id).autocombobox();
-				}
+
             }else if (nextField.type==Field.MULTI_CHOICE || nextField.type==Field.GROUPED_MULTI_CHOICE){
                 
 			}else if (nextField.type==Field.TREE_CHOICE || nextField.type==Field.STANDARDS_TREE_CHOICE) {
@@ -57,24 +61,18 @@ function EasyPublish() {
 		}
         // enable multi-choice ui
         $(".multi-choice").chosen({width:"375px"});
-		// $("#ELA-StandardRow").hide();
-		// $("#Math-StandardRow").hide();
 	}
 
 	this.addAuthor = function () {
 		authorCount++;
 		$("#addAuthor").before('<div class="sublegend">Author '+authorCount+'</div>');
-		for(var i=0; i<3; i++) {
+		for(var i=0; i<4; i++) {
 			var nextField = that.fieldManager.authorFields[i];
 			var clone = nextField.clone(authorCount);
 			that.fieldManager.fieldDictionary[clone.id] = clone;
 			that.fieldManager.authorFields.push(clone);
 			var nextRow = new FieldEditorRow(clone, authorCount);
 			$("#addAuthor").before(nextRow.elem);
-			//have to construct combo boxes after they've been added to DOM
-			if(clone.type==Field.CHOICE) {
-				$("#"+clone.id).autocombobox();
-			}
 		}
 	}
 
@@ -108,6 +106,7 @@ function EasyPublish() {
     	}
     	buildDataSelections();
     	that.setCurrentImportData(that.importIndex);
+        that.fireEvent("fileDropped");
     }
 
     function buildDataSelections() {
@@ -212,9 +211,9 @@ function EasyPublish() {
     	var indexTest = /([\w]*)_(\d+)$/;
     	var authorTest = /[\w]*author[\w]*/;
     	var alignmentTest = /[\w]*(alignmentType|educationalFramework|Standard)[\w]*/;
-
-    	for(var key in that.fieldManager.fieldDictionary) {
-            var val = data[key] || "";
+        
+    	_.each(_.union(_.keys(that.fieldManager.fieldDictionary), _.keys(data)), function (key) {
+            
         	if(key.match(indexTest)) {
         		match = indexTest.exec(key);
         		var base = match[1];
@@ -232,11 +231,18 @@ function EasyPublish() {
         	}
             var field = that.fieldManager.fieldDictionary[key];
             if (field) {
+                var default_val = "";
+                if (field.option_default && field.option_lookup) {
+                    var lookup = field.option_lookup(field.option_default);
+                    if (lookup)
+                        default_val = lookup.value; 
+                }
+                var val = data[key] || default_val;
                 field.value(val);
             } else {
-            	console.log("no field found for key: " + key + ", val: " +  val);
+            	console.log("no field found for key: " + key);
             }
-    	}
+    	});
     }
 
     function clearFields() {
@@ -285,17 +291,19 @@ function EasyPublish() {
 	this.getAuthors = function() {
 		var authors = [];
 		var author0 = {
-		    name: [this.getValue("author_name")],
-            url:  [this.getValue("author_url")],
-            email:  [this.getValue("author_email")]
+            "@type": this.getValue("author_type"),
+		    name: this.getValue("author_name"),
+            url:  this.getValue("author_url"),
+            email:  this.getValue("author_email")
 		}
 		authors[0] = author0;
 		if(authorCount>1) {
 			for(var i=2; i<=authorCount; i++) {
 				var author = {
-				    name: [this.getValue("author_name_"+i)],
-		            url:  [this.getValue("author_url_"+i)],
-		            email:  [this.getValue("author_email_"+i)]
+                    "@type": this.getValue("author_type_"+i),
+				    name: this.getValue("author_name_"+i),
+		            url:  this.getValue("author_url_"+i),
+		            email:  this.getValue("author_email_"+i)
 				}
 				authors[i-1] = author;
 			}

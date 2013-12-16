@@ -50,6 +50,7 @@
 		<script type="text/javascript" src="js/jquery/chosen.jquery.js"></script>
 		<script type="text/javascript" src="js/jquery/jquery.ellipsis.min.js"></script>
 		<script type="text/javascript" src="js/jquery/jquery.fancytree.js"></script>
+		<script type="text/javascript" src="js/jquery/jquery.selectText.js"></script>
 
 		<!-- both are needed for file upload for some reason -->
 		<script type="text/javascript" src="js/lib/oauth.js"></script>
@@ -193,42 +194,8 @@
 			var Create = require("lib/views/create").Create;
 			var create = new Create();
 
-			var Confirm = require("lib/views/confirm").Confirm;
 
-			var Settings = Backbone.View.extend({
-				el: '.page',
-				render: function () {
-					if (!storedCredentials) {
-						router.navigate('login', {trigger:true});
-					} else {
-						var template = _.template($('#settings-template').html(), {});
-						this.$el.html(template);
-					}
-				},
-				events: {
-					'click .purgeAll': 'purgeAll'
-				},
-				purgeAll: function(event) {
-					event.preventDefault();
-					var confirm = new Confirm({ 
-						confirm_cb: function(conf_yes) {
-							if (conf_yes == "yes") {
-								var model;
-								while (model = Items.first()) {
-								  model.destroy();
-								}
-								Items.reset();
-
-								router.navigate('', {trigger: true});
-							}
-						}, 
-						msg: "<p>Are you sure you want to purge all published items from your browser?</p> <p>This does not remove anything already published on the node. You should export your data before doing this.</p>", 
-						title: "Confirm Purge"
-					});
-					confirm.render();
-
-				}
-			});
+			var Settings = require("lib/views/settings").Settings;
 			var settings = new Settings();
 
 
@@ -273,7 +240,7 @@
 
 		<!-- templates -->
 		<script type="text/template" id="credentials-template">
-			<h1>Enter Your Credentials</h1>
+			<h1>Click "Sign in" to Login or Create an account.</h1>
 			<div id="browserid" class="control-row">
 				<div class="login">
 					<img src="/_browserid/sign_in_blue.png">
@@ -296,8 +263,9 @@
 					<button class="button" id="sync">Sync from registry</button>
 					<a href="#help" class="help round-btn">Help</a>
 				</div>
-
+				
 				<% if (data.length > 0) { %>
+
 				<div class="filterButtons control-row">
 					Show:
 					<button type="button" class="showAll selected">All</button><!-- no gap
@@ -306,6 +274,8 @@
 					--><button type="button" class="showModified">Modified</button><!-- no gap
 					--><button type="button" class="showErrors">Errors</button>
 				</div>
+				<div class="localStorageUsage"></div>
+				<div class="clear"></div>
 				<div class="control-row">
 					Select <button type="button" class="selectall button-link" data-checkboxes="items">All</button> |
 					<button type="button" class="selectnone button-link" data-checkboxes="items">None</button>
@@ -565,9 +535,120 @@
 			</div>
 		</script>
 
+		<script id="submitter-template" type="text/template">
+		<% if (username && vanityname) { %>
+			&quot;<%= vanityname %> &lt;<%= username %>&gt;&quot;
+		<% } else if (username) { %>
+			&quot;<%= username %>&quot;
+		<% } else { %>
+			<span class="error">Error: Username not set</span>
+		<% } %>
+		</script>
 
 		<script type="text/template" id="settings-template">
-			<button class="button purgeAll">Purge Everything</button>
+			<fieldset>
+				<legend>Browser Local Storage</legend>
+				<p>EZ Publish stores all of the content you edit into your browsers local storage. Many browsers limit this capacity to 5MB. Firefox permits you to modify the default value by going to <a href="about:config" target="">about:config</a> and search for "dom.storage.default_quota" option. This value is in kilobytes.</p>
+				<div class="localStorageUsed">Unknown KB Used</div>
+				<div class="localStorageRemain">Unknown KB Remaining</div>
+				<div class="control-row">
+					<button class="calc-ls button">Calculate Remaining</button>
+				</div>
+			</fieldset>
+			<fieldset>
+				<legend>Full Name for Submitter field</legend>
+				
+				<div class="fieldRow">
+					<label class="preview">Preview</label>
+					<br/>
+					<div class="submitter-display"></div>
+					<br/>
+				</div>
+				<div class="fieldRow">
+					<label for="submitter">Full Name</label>
+					<br/>
+					<input type="text" class="submitter" name="submitter">
+					<br/>
+				</div>
+				<div class="control-row">
+					<button class="update-submitter button" type="button">Save</button>
+				</div>
+				
+			</fieldset>
+			<fieldset>
+				<legend>Basic Authentication Password</legend>
+				<p>Setting a password here is not required, but if you wish to publish to the node using the API directly, you may want to set a password here.</p>
+				<div class="fieldRow">
+					<label class="passwordSet">Is Password Set?</label>
+					<div class="passwordSet"></div>
+					<br>
+					<br class="clear">
+				</div>
+				<div class="fieldRow pwdmsg">
+				</div>
+				<div class="fieldRow">
+					<label for="password1">Password</label><br>
+					<input name="password1" type="password" class="password">
+					<div class="field-icon">
+						<div class="pwdok"></div>
+					</div>
+					<br class="clear">
+
+					<label for="password2">Repeat Password</label><br>
+					<input name="password2" type="password" class="password verify">
+					<div class="field-icon">
+						<div class="pwdok"></div>
+					</div>
+					<br class="clear">
+				</div>
+				<div class="control-row">
+					<button type="button" class="button save-password">Save</button>
+				</div>
+			</fieldset>
+			<fieldset>
+				<legend>OAuth 1.0a Configuration</legend>
+				<p>EZ Publish uses OAuth authorization and authentication to publish resources into the node. You may also use these same credentials from your own application to publish directly to this node. In some cases you might need to regenerate your authorization secrets, you can do that by clicking regenerate below.</p>
+				<% for(var key in userObj.oauth.consumer_keys) { %>
+				<div class="fieldRow">
+					<label for="consumerKey">Consumer Key</label>
+					<br>
+					<div id="consumerKey" class="oauth-info"><%= key %></div>
+					<br>
+				</div>
+				<div class="fieldRow">
+					<label for="consumerSecret">Consumer Secret</label>
+					<br>
+					<div id="consumerSecret" class="oauth-info"><%= userObj.oauth.consumer_keys[key] %></div>
+					<br>
+				</div>
+				<% } %>
+				<% for(var token in userObj.oauth.tokens) { %>
+				<div class="fieldRow">
+					<label for="token">Token</label>
+					<br>
+					<div id="token" class="oauth-info"><%=token%></div>
+					<br>
+				</div>
+				<div class="fieldRow">
+					<label for="tokenSecret">Token Secret</label>
+					<br>
+					<div id="tokenSecret" class="oauth-info"><%=userObj.oauth.tokens[token]%></div>
+					<br>
+				</div>
+				<% } %>
+				<div class="control-row">
+					<button class="button regenOAuth">Regenerate</button>
+				</div>
+			</fieldset>
+			<fieldset>
+				<legend>Other Options</legend>
+				<div class="fieldRow">
+					<p>This deletes all resources from EZ Publish local storage.  It does not remove anything that has been published into the Learning Registry itself. This should be used when you wish to remove previous work and need to start over from scratch.</p>
+				</div>
+				<div class="control-row">
+					<button class="button purgeAll">Purge All Local Records</button>
+				</div>
+			</fieldset>
 			<div class="control-row">
 				<a href="#" id="Back">Back to item list</a>
 			</div>
