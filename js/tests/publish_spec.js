@@ -195,6 +195,17 @@ describe("Schema Validation", function(){
 
     });
 
+
+    function addNodeSuppliedFields(envelope){
+        return _.extend({
+            doc_ID: "123456",
+            publishing_node: "publishingNodeID",
+            node_timestamp: "2013-12-12T00:00:00Z",
+            create_timestamp: "2013-12-12T00:00:00Z",
+            update_timestamp: "2013-12-12T00:00:00Z",
+        }, envelope);
+    }
+
     it("should validate this simple schema", function(){
         var json = {};
         var schema = {"type":"object"};
@@ -204,25 +215,22 @@ describe("Schema Validation", function(){
 
 
     it("should validate a delete ", function(){
-        var json = {
+        var json = addNodeSuppliedFields({
             replaces: [ "ABC123" ],
             doc_version: "0.49.0",
             doc_type: "resource_data",
-            doc_ID: "123456",
             resource_data_type: "deletion",
             active: true,
             identity: {
                 submitter_type: "user",
                 submitter: "foo@example.com"
             },
-            publishing_node: "publishingNodeID",
-            node_timestamp: "2013-12-12T00:00:00Z",
-            create_timestamp: "2013-12-12T00:00:00Z",
-            update_timestamp: "2013-12-12T00:00:00Z",
             TOS: {
                 submission_TOS: "I Agree Not to be Evil"
             }
-        };
+        });
+
+
 
         // JSV doesn't handle the reference extensions right 
         // (at least not my modified variant) so we need to
