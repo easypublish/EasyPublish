@@ -22,34 +22,46 @@ Installation
 
 3.  Install `Kanso Tools`_.
 
-4.  Clone Easy Publish:
+4.  Clone Easy Publish Data Service:
     
     .. code-block:: bash
     
-        git clone https://github.com/jimklo/EasyPublish.git
-        cd EasyPublish
-        git checkout -b couchapp origin/couchapp       
+        git clone https://github.com/easypublish/EasyPublish-DataServices.git
 
-5.  Install Kanso dependencies
+5.  Clone Easy Publish:
+    
+    .. code-block:: bash
+    
+        git clone https://github.com/easypublish/EasyPublish.git     
+
+6.  Install Kanso dependencies
 
     .. code-block:: bash
 
+        cd EasyPublish-DataServices
+        kanso install
+        cd ../EasyPublish
         kanso install
 
-6.  Create an ssh connection to your `Learning Registry Node`_ ensuring you have a 
-    local port forward mapping to the CouchDB on the node.
+7.  Create an ssh connection to your `Learning Registry Node`_ ensuring you have a 
+    local port forward mapping to the CouchDB on the node. You should probably use a different
+    terminal session to do this.
 
     .. code-block:: bash
 
         ssh lradmin@lrdev.local -L8984:localhost:5984
 
-7.  Install Kanso app
+8.  Install Kanso app
 
     .. code-block:: bash
 
+        cd ../EasyPublish-DataServices
+        kanso push http://localhost:8984/resource_data
+        cd ../EasyPublish
         kanso push http://localhost:8984/apps
 
-8.  Access Easy Publish in your web browser
+
+9.  Access Easy Publish in your web browser
 
     .. code-block:: bash
 
