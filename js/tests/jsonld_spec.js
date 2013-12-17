@@ -182,4 +182,12 @@ describe("JSON-LD", function() {
         expect(htmlmicrodata).toEqual(result);
     });
 
+    it("should always return only the resource data as HTML Microdata", function(){
+        var result = jsonldUtil.getResourceDataAsMicrodata({ "resource_data": jsonld, "payload_schema":["JSON-LD"] }),
+            result2 = jsonldUtil.getResourceDataAsMicrodata({ "resource_data": htmlmicrodata, "payload_schema": ["application/microdata+json"] });
+
+        expect(result).toEqual(htmlmicrodata);
+        expect(result2).toEqual(htmlmicrodata);
+    });
+
 });
