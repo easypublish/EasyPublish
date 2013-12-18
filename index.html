@@ -346,7 +346,9 @@
 			<% 
 				var envelope = item.get('data')[0],
 					replacing = item.get('replacing'),
-					properties = envelope.resource_data.items[0].properties; 
+					jsonldUtil = require('lib/jsonldUtil'),
+					resource_data = jsonldUtil.getResourceDataAsMicrodata(envelope),
+					properties = resource_data.items[0].properties; 
 			%>
 			<td>
 				<% if (item.get('status') != 'Published' 

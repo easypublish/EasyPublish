@@ -1,3 +1,4 @@
+
 function DataManager(easyPub) {
 
     function stripEmptyProperties(properties) {
@@ -218,8 +219,12 @@ function DataManager(easyPub) {
         return fullAuthorsArray;
     }
 
-    this.makeEnvelope = function() {
+    this.makeEnvelope = function(useJSON_LD) {
         var payload = makePayload();
+        if (useJSON_LD) {
+            var jsonldUtil = require("lib/jsonldUtil");
+            payload = jsonldUtil.convertToJSONLD(payload);
+        }
         var envelope = {
             "doc_type": "resource_data",
             "doc_version": "0.49.0",
@@ -237,19 +242,22 @@ function DataManager(easyPub) {
             "resource_locator": easyPub.getValue("url"),
             "keys": ["EZPublish-1.0"]
         }
+        if (useJSON_LD) {}
+            envelope["payload_schema"].push("JSON-LD");
+        
         stripEmptyValues(envelope);
         return envelope;
     }
 
-    this.makeAllEnvelopes = function() {
+    this.makeAllEnvelopes = function(useJSON_LD) {
         var envelopes = [];
         var numRows = easyPub.getNumImportRows();
         if(numRows==0) {
-            envelopes.push(this.makeEnvelope());
+            envelopes.push(this.makeEnvelope(useJSON_LD));
         } else { 
             for(var i=0; i<numRows; i++) {
                 easyPub.setCurrentImportData(i);
-                var envelope = this.makeEnvelope();
+                var envelope = this.makeEnvelope(useJSON_LD);
                 envelopes.push(envelope);
             }
         }

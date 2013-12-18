@@ -203,8 +203,15 @@ function EasyPublish() {
     	}
     }
 
+    this.convertToMicrodata = function(lrmidata) {
+        var jsonldUtil = require("lib/jsonldUtil");
+        return jsonldUtil.getResourceDataAsMicrodata(lrmidata);
+    };
+
     this.setEditData = function(lrmidata) {
-    	data = this.dataManager.mapPayloadToFields(lrmidata.resource_data.items[0].properties);
+
+        var resource_data = this.convertToMicrodata(lrmidata);
+    	data = this.dataManager.mapPayloadToFields(resource_data.items[0].properties);
 
         var mathTest = /[\w]*Math[\w]*/;
         var elaTest = /[\w]*Language[\w]*/;
