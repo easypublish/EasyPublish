@@ -82,6 +82,23 @@ function FieldManager() {
 		this.englishNameDictionary[field.name] = field.id;
 	}
 
+	var accessibilityFeature = ["alternativeText", "annotations", "audioControl", "audioDescription", "bookmarks", "braille", "captions", "ChemML", "displayTransformability", "highContrastAudio", "highContrastDisplay", "index", "largePrint", "latex", "longDescription", "MathML", "printPageNumbers", "readingOrder", "signLanguage", "structuralNavigation", "tableOfContents", "taggedPDF", "tactileGraphic", "tactileObject", "timingControl", "transcript", "videoControl"]
+	var accessibilityHazard = ["flashing", "noFlashingHazard", "motionSimulation", "noMotionSimulationHazard", "sound", "noSoundHazard"];
+	var accessibilityAPI = ["AndroidAccessibility", "ARIA", "ATK", "AT-SPI", "BlackberryAccessibility", "iAccessible2", "iOSAccessibility", "JavaAccessibility", "MacOSXAccessibility", "MSAA", "UIAutomation"];
+	var accessibilityControl = ["fullKeyboardControl", "fullMouseControl", "fullSwitchControl", "fullTouchControl", "fullVoiceControl"];
+	this.a11yFields = [
+		new Field("Accessiblity Feature", Field.MULTI_CHOICE, {objectName:"accessibilityFeature", choices:accessibilityFeature, csvParser:split_cell_comma}),
+		new Field("Accessiblity Hazzard", Field.MULTI_CHOICE, {objectName:"accessibilityHazard", choices:accessibilityHazard, csvParser:split_cell_comma}),
+		new Field("Accessiblity API", Field.MULTI_CHOICE, {objectName:"accessibilityAPI", choices:accessibilityAPI, csvParser:split_cell_comma}),
+		new Field("Accessiblity Control", Field.MULTI_CHOICE, {objectName:"accessibilityControl", choices:accessibilityControl, csvParser:split_cell_comma})
+	];
+	for(key in this.a11yFields) {
+		var field = this.a11yFields[key];
+		this.fieldDictionary[field.id] = field;
+		this.englishNameDictionary[field.name] = field.id;
+	}
+
+
 	this.authorFields = [
 		new Field("Author Type", Field.CHOICE, {objectName:"author_type", choices:_.keys(author_types), option_lookup:author_lookup, option_default:"Person" }),
 		new Field("Author Name", Field.STRING, {objectName:"author_name"}),

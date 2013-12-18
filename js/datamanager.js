@@ -86,6 +86,11 @@ function DataManager(easyPub) {
                             }
                         }
                     ],
+                    accessibilityFeature: easyPub.getValue("accessibilityFeature"),
+                    accessibilityHazard: easyPub.getValue("accessibilityHazard"),
+                    accessibilityAPI: easyPub.getValue("accessibilityAPI"),
+                    accessibilityControl: easyPub.getValue("accessibilityControl")
+                    
                 }
             }]
         };
