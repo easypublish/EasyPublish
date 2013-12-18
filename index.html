@@ -281,8 +281,9 @@
 					<button type="button" class="selectnone button-link" data-checkboxes="items">None</button>
 					<span class="inline-form">
 						<select name="bulkmenu" class="bulkmenu">
-							<option value="delete">Delete</option>
 							<option value="publish">Publish</option>
+							<option value="delete-local">Delete</option>
+							<option value="delete-published">Delete Published</option>
 						</select>
 						<button type="button" class="button bulkactionsbtn">Go</button>
 					</span>
@@ -305,8 +306,9 @@
 					<button type="button" class="selectnone button-link" data-checkboxes="items">None</button>
 					<span class="inline-form">
 						<select name="bulkmenu">
-							<option value="delete">Delete</option>
 							<option value="publish">Publish</option>
+							<option value="delete-local">Delete</option>
+							<option value="delete-published">Delete Published</option>
 						</select>
 						<button type="button" class="button .bulkactionsbtn">Go</button>
 					</span>
@@ -351,11 +353,7 @@
 					properties = resource_data.items[0].properties; 
 			%>
 			<td>
-				<% if (item.get('status') != 'Published' 
-					&& item.get('status') != 'Modified') { %>
-					<!-- for now, no modifying published items -->
-					<input name="items" type="checkbox" data-item="<%= item.get('id') %>" />
-				<% } %>
+				<input name="items" type="checkbox" data-item="<%= item.get('id') %>" />
 			</td>
 			<td>
 				<% if (properties.name != undefined) { %>
@@ -388,8 +386,11 @@
 				<% } else if (item.get('status') == 'Published'
 					|| item.get('status') == 'Modified') { %>
 					<button class="edit button" data-item="<%= item.get('id') %>">Edit</button>
+					<button class="delete button delete-local" data-item="<%= item.get('id') %>" data-delpub="false">Delete</button>
+					<% if (item.get('status') == 'Modified') { %>
 					<button class="publish button" data-item="<%= item.get('id') %>">Replace Published</button>
-					<button class="delete button" data-item="<%= item.get('id') %>"> Delete Published</button>
+					<% } %>
+					<button class="delete button delete-published" data-item="<%= item.get('id') %>" data-delpub="true">Delete Published</button>
 				<% } %>
 			</td>
 		</script>
