@@ -99,7 +99,7 @@ describe("JSON-LD", function() {
                 },
                 {
                     "lrmi": "http://lrmi.net/the-specification#",
-                    "useRightsUrl": {"@id": "lrmi:userRightsUrl", "@type": "@id"}
+                    "useRightsUrl": {"@id": "lrmi:useRightsUrl", "@type": "@id"}
                 }
             ],
             "@type": "CreativeWork",
