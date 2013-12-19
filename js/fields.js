@@ -88,7 +88,7 @@ function FieldManager() {
 	var accessibilityControl = ["fullKeyboardControl", "fullMouseControl", "fullSwitchControl", "fullTouchControl", "fullVoiceControl"];
 	this.a11yFields = [
 		new Field("Accessiblity Feature", Field.MULTI_CHOICE, {objectName:"accessibilityFeature", choices:accessibilityFeature, csvParser:split_cell_comma}),
-		new Field("Accessiblity Hazzard", Field.MULTI_CHOICE, {objectName:"accessibilityHazard", choices:accessibilityHazard, csvParser:split_cell_comma}),
+		new Field("Accessiblity Hazard", Field.MULTI_CHOICE, {objectName:"accessibilityHazard", choices:accessibilityHazard, csvParser:split_cell_comma}),
 		new Field("Accessiblity API", Field.MULTI_CHOICE, {objectName:"accessibilityAPI", choices:accessibilityAPI, csvParser:split_cell_comma}),
 		new Field("Accessiblity Control", Field.MULTI_CHOICE, {objectName:"accessibilityControl", choices:accessibilityControl, csvParser:split_cell_comma})
 	];
