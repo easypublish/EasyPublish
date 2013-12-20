@@ -128,6 +128,7 @@
 		var Preference =  models.Preference;
 		var PreferenceList = models.PreferenceList;
 		var Preferences = new PreferenceList();
+		Preferences.fetch();
 		
 		$(function () {
 			var users = require("users");
@@ -598,7 +599,10 @@
 					<input type="text" class="csv-cell-delim csv-pref" name="csv-cell-delim">
 					<br>
 				</div>
-				<div class="control-row"><button class="save-csv button" type="button">Save</button></div>
+				<div class="control-row">
+					<button class="save-csv button" type="button">Save</button>
+					<button class="reset-csv button">Defaults</button>
+				</div>
 			</fieldset>
 			<fieldset>
 				<legend>Full Name for Submitter field</legend>
