@@ -348,7 +348,7 @@ function DataManager(easyPub) {
             for(var rowIndex=1; rowIndex<arrData.length; rowIndex++) {
                 colData[rowIndex-1] = arrData[rowIndex][colIndex];
                 // handle wonky cells that could contain another dimension.
-                if (fieldDictionary[fieldBaseKey].csvParser) {
+                if (fieldDictionary[fieldBaseKey] && !!fieldDictionary[fieldBaseKey].csvParser) {
                     colData[rowIndex-1] = fieldDictionary[fieldBaseKey].csvParser(colData[rowIndex-1]);
                 }
             }
