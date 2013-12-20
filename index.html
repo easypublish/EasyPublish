@@ -124,6 +124,10 @@
 		var Item = models.Item;
 		var ItemList = models.ItemList;
 		var Items = new ItemList();
+
+		var Preference =  models.Preference;
+		var PreferenceList = models.PreferenceList;
+		var Preferences = new PreferenceList();
 		
 		$(function () {
 			var users = require("users");
@@ -560,6 +564,41 @@
 				<div class="control-row">
 					<button class="calc-ls button">Calculate Remaining</button>
 				</div>
+			</fieldset>
+			<fieldset>
+				<legend>CSV Preferences</legend>
+				<p>If you would like to customize the way CSV files are formatted for import and export, modify the values in this section and click save.</p>
+				<div class="fieldRow">
+					<label for="csv-quote-char">Quote Character</label>
+					<br>
+					<input type="text" class="csv-quote-char csv-pref" name="csv-quote-char">
+					<br>
+				</div>
+				<div class="fieldRow">
+					<label for="csv-row-delim">Row Delimeter</label>
+					<br>
+					<input type="text" class="csv-row-delim csv-pref" name="csv-row-delim">
+					<br>
+				</div>
+				<div class="fieldRow">
+					<label for="csv-col-delim">Column Delimeter</label>
+					<br>
+					<input type="text" class="csv-col-delim csv-pref" name="csv-col-delim">
+					<br>
+				</div>
+				<div class="fieldRow">
+					<label for="csv-cell-delim">Export Cell Delimeter</label>
+					<br>
+					<input type="text" class="export-csv-cell-delim csv-pref" name="export-csv-cell-delim">
+					<br>
+				</div>
+				<div class="fieldRow">
+					<label for="csv-cell-delim">Import Cell Delimeter Regular Expression</label>
+					<br>
+					<input type="text" class="csv-cell-delim csv-pref" name="csv-cell-delim">
+					<br>
+				</div>
+				<div class="control-row"><button class="save-csv button" type="button">Save</button></div>
 			</fieldset>
 			<fieldset>
 				<legend>Full Name for Submitter field</legend>

@@ -4,6 +4,12 @@ function split_cell_comma(celldata) {
 	return [].concat(celldata.split(/\s*,\r?\n\s*/));
 }
 
+function split_cell(celldata) {
+	var cell_delim = Preferences.getPreference("csv-cell-delim", ",\\r?\\n");
+	var re = new RegExp("\\s*"+cell_delim.get('value')+"\\s*");
+	return [].concat(celldata.split(re));
+}
+
 function std_lookup(key) {
 	var found = gen_standards.find(key);
 	if (found)
@@ -51,14 +57,14 @@ function FieldManager() {
 		new Field("Resource Title", Field.STRING, {required:true, objectName:"title"}),
 		new Field("Resource URL", Field.URL, {required:true, objectName:"url"}),
 		new Field("Description", Field.LONG_STRING, {objectName:"description"}),
-		new Field("Subject", Field.GROUPED_MULTI_CHOICE, {objectName:"keywords", choices:subjectsData, csvParser:split_cell_comma}),
-		new Field("Grade", Field.MULTI_CHOICE, {objectName:"grade", choices:gradeChoices, csvParser:split_cell_comma}),
+		new Field("Subject", Field.GROUPED_MULTI_CHOICE, {objectName:"keywords", choices:subjectsData, csvParser:split_cell}),
+		new Field("Grade", Field.MULTI_CHOICE, {objectName:"grade", choices:gradeChoices, csvParser:split_cell}),
 		new Field("Date Created", Field.DATE,  {tip:"Date the resource was originally created, Format: YYYY_MM_DD", objectName:"dateCreated"}),
 		new Field("Date Modified", Field.DATE,  {tip:"Date the resource was most recently modified, Format: YYYY_MM_DD", objectName:"dateModified"}),
 		new Field("Language", Field.STRING, {objectName:"language"}),
-		new Field("Media Type", Field.MULTI_CHOICE, {objectName:"mediaType", choices:mediaTypes, csvParser:split_cell_comma}),
-		new Field("Learning Resource Type", Field.MULTI_CHOICE, {objectName:"learningResourceType", choices:learningResourceTypes, csvParser:split_cell_comma}),
-		new Field("Interactivity", Field.MULTI_CHOICE, {objectName:"interactivityType", choices:interactivityTypes, csvParser:split_cell_comma}),
+		new Field("Media Type", Field.MULTI_CHOICE, {objectName:"mediaType", choices:mediaTypes, csvParser:split_cell}),
+		new Field("Learning Resource Type", Field.MULTI_CHOICE, {objectName:"learningResourceType", choices:learningResourceTypes, csvParser:split_cell}),
+		new Field("Interactivity", Field.MULTI_CHOICE, {objectName:"interactivityType", choices:interactivityTypes, csvParser:split_cell}),
 		new Field("Use Rights URL", Field.URL, {objectName:"useRightsUrl"}),
 		new Field("Is based on URL", Field.URL, {objectName:"isBasedOnUrl"}),
 	];
@@ -70,11 +76,11 @@ function FieldManager() {
 
 	this.alignmentFields = [
 		new Field("This Resource Assesses", Field.MULTI_CHOICE, 
-			{cat_name:"alignmentType", cat_val:"assesses", choices:[], option_lookup:std_lookup, csvParser:split_cell_comma}),
+			{cat_name:"alignmentType", cat_val:"assesses", choices:[], option_lookup:std_lookup, csvParser:split_cell}),
 		new Field("This Resource Teaches", Field.MULTI_CHOICE, 
-			{cat_name:"alignmentType", cat_val:"teaches", choices:[], option_lookup:std_lookup, csvParser:split_cell_comma}),
+			{cat_name:"alignmentType", cat_val:"teaches", choices:[], option_lookup:std_lookup, csvParser:split_cell}),
 		new Field("This Resource Requires", Field.MULTI_CHOICE, 
-			{cat_name:"alignmentType", cat_val:"requires", choices:[], option_lookup:std_lookup, csvParser:split_cell_comma})
+			{cat_name:"alignmentType", cat_val:"requires", choices:[], option_lookup:std_lookup, csvParser:split_cell})
 	];
 	for(key in this.alignmentFields) {
 		var field = this.alignmentFields[key];
@@ -87,10 +93,10 @@ function FieldManager() {
 	var accessibilityAPI = ["AndroidAccessibility", "ARIA", "ATK", "AT-SPI", "BlackberryAccessibility", "iAccessible2", "iOSAccessibility", "JavaAccessibility", "MacOSXAccessibility", "MSAA", "UIAutomation"];
 	var accessibilityControl = ["fullKeyboardControl", "fullMouseControl", "fullSwitchControl", "fullTouchControl", "fullVoiceControl"];
 	this.a11yFields = [
-		new Field("Accessiblity Feature", Field.MULTI_CHOICE, {objectName:"accessibilityFeature", choices:accessibilityFeature, csvParser:split_cell_comma}),
-		new Field("Accessiblity Hazard", Field.MULTI_CHOICE, {objectName:"accessibilityHazard", choices:accessibilityHazard, csvParser:split_cell_comma}),
-		new Field("Accessiblity API", Field.MULTI_CHOICE, {objectName:"accessibilityAPI", choices:accessibilityAPI, csvParser:split_cell_comma}),
-		new Field("Accessiblity Control", Field.MULTI_CHOICE, {objectName:"accessibilityControl", choices:accessibilityControl, csvParser:split_cell_comma})
+		new Field("Accessiblity Feature", Field.MULTI_CHOICE, {objectName:"accessibilityFeature", choices:accessibilityFeature, csvParser:split_cell}),
+		new Field("Accessiblity Hazard", Field.MULTI_CHOICE, {objectName:"accessibilityHazard", choices:accessibilityHazard, csvParser:split_cell}),
+		new Field("Accessiblity API", Field.MULTI_CHOICE, {objectName:"accessibilityAPI", choices:accessibilityAPI, csvParser:split_cell}),
+		new Field("Accessiblity Control", Field.MULTI_CHOICE, {objectName:"accessibilityControl", choices:accessibilityControl, csvParser:split_cell})
 	];
 	for(key in this.a11yFields) {
 		var field = this.a11yFields[key];

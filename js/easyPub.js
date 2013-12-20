@@ -92,8 +92,11 @@ function EasyPublish() {
 
 
 	this.fileDropped = function(fileData) {
+        var quote_char = Preferences.getPreference("csv-quote-char", "\"").escapedValue(),
+            col_delim = Preferences.getPreference("csv-col-delim", ",").escapedValue(),
+            row_delim = Preferences.getPreference("csv-row-delim", "\\n").escapedValue();
         // var arrData = this.dataManager.CSVToArray(fileData);
-        var arrData = fileData.csvToArray({rSep:'\n', trim:true});
+        var arrData = fileData.csvToArray({fSep: col_delim, rSep:row_delim, quot:quote_char, trim:true});
         var objData = this.dataManager.twoDArrayToObjectArray(arrData, this.fieldManager);
 		var rowCount = objData.numRows;
         $("#dropStatus2").append("Found " + rowCount + " row(s) of data");
