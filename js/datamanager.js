@@ -27,7 +27,7 @@ function DataManager(easyPub) {
             if (properties.length == 0)
                 return true;
 
-        } 
+        }
         // If properties is an object, remove any empty keys, if object then has no keys, singnal
         // calling method to delete empty object.
         else if (Object.prototype.toString.call(properties) === '[object Object]') {
@@ -39,11 +39,11 @@ function DataManager(easyPub) {
                 return true;
             }
 
-        } 
+        }
         // If properties is null or empty (or some special variant), signal calling method to delete.
         else if(properties===null || properties===undefined || properties==="" || properties==="null") {
                 return true;
-            
+
         }
 
         return false;
@@ -90,7 +90,7 @@ function DataManager(easyPub) {
                     accessibilityHazard: easyPub.getValue("accessibilityHazard"),
                     accessibilityAPI: easyPub.getValue("accessibilityAPI"),
                     accessibilityControl: easyPub.getValue("accessibilityControl")
-                    
+
                 }
             }]
         };
@@ -103,7 +103,7 @@ function DataManager(easyPub) {
     }
 
     // Remap data from payload to csv field names
-    // Ideally we wouldn't need this because we'd use the same objects and names everywhere 
+    // Ideally we wouldn't need this because we'd use the same objects and names everywhere
     this.mapPayloadToFields = function (data, index) {
         var fieldData = {}
         for(var key in data) {
@@ -127,10 +127,10 @@ function DataManager(easyPub) {
                             fieldData['alignmentType_'+properties.alignmentType]=
                                 _.union(fieldData['alignmentType_'+properties.alignmentType], properties.targetName);
                         } else if (properties.targetUrl && properties.targetUrl.length > 0) {
-                            fieldData['alignmentType_'+properties.alignmentType] = 
+                            fieldData['alignmentType_'+properties.alignmentType] =
                                 _.union(fieldData['alignmentType_'+properties.alignmentType], properties.targetUrl);
                         }
-                        
+
                         continue;
                     } else if (key == 'author') {
                         properties = {
@@ -169,7 +169,7 @@ function DataManager(easyPub) {
         _.each(easyPub.getValue("grade"), function(gradeLevel, idx, list){
 
             if(gradeLevel!="") {
-                var educationLevelAlignment = 
+                var educationLevelAlignment =
                 {
                     type: ["http://schema.org/AlignmentObject"],
                     properties: {
@@ -178,12 +178,12 @@ function DataManager(easyPub) {
                         targetName: [gradeLevel]
                     }
                 };
-            
+
                 fullAlignmentsArray.push(educationLevelAlignment);
             }
 
         });
-        
+
 
         for(var i=0; i<alignmentsArray.length; i++) {
             var nextFullAlignment = {
@@ -224,6 +224,7 @@ function DataManager(easyPub) {
         return fullAuthorsArray;
     }
 
+
     this.makeEnvelope = function(useJSON_LD) {
         var payload = makePayload();
         if (useJSON_LD) {
@@ -232,7 +233,7 @@ function DataManager(easyPub) {
         }
         var envelope = {
             "doc_type": "resource_data",
-            "doc_version": "0.49.0",
+            "doc_version": "0.51.0",
             "resource_data_type": "metadata",
             "resource_data": payload,
             "active": true,
@@ -249,7 +250,7 @@ function DataManager(easyPub) {
         }
         if (useJSON_LD) {}
             envelope["payload_schema"].push("JSON-LD");
-        
+
         stripEmptyValues(envelope);
         return envelope;
     }
@@ -259,7 +260,7 @@ function DataManager(easyPub) {
         var numRows = easyPub.getNumImportRows();
         if(numRows==0) {
             envelopes.push(this.makeEnvelope(useJSON_LD));
-        } else { 
+        } else {
             for(var i=0; i<numRows; i++) {
                 easyPub.setCurrentImportData(i);
                 var envelope = this.makeEnvelope(useJSON_LD);
@@ -318,7 +319,7 @@ function DataManager(easyPub) {
         //console.log("remapDictionary:");
         //console.log(remapDictionary);
         var objArray = {},
-            remapDictionary = fieldManager.englishNameDictionary, 
+            remapDictionary = fieldManager.englishNameDictionary,
             fieldDictionary = fieldManager.fieldDictionary;
         var indexTest = /(.*...+) (\d+)$/;
         objArray.numRows = arrData.length-1;
