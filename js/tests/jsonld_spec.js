@@ -7,6 +7,7 @@ describe("JSON-LD", function() {
             "id": "http://www.example.com/1",
             "properties": {
                 "isBasedOnUrl": ["http://www.example.com/basedUpon/1"],
+				"thumbnailUrl":["Thumbnail Url"], //new
                 "interactivityType": ["interactive"],
                 "name": ["Example Resource modified again"],
                 "language": ["English"],
@@ -84,7 +85,12 @@ describe("JSON-LD", function() {
                 }],
                 "learningResourceType": ["Activity"],
                 "keywords": ["Artists", "Music", "Blues, Gospel, Folk"],
+				"typicalAgeRange":[ //new
+					"12-14",
+					"14-16"
+				],
                 "useRightsUrl": ["http://www.example.com/useRights/1"],
+				"accessRights": ["http://www.example.com/accessRights/1"], //new
                 "dateModified": ["2013-12-02"],
                 "description": ["This is a description"]
             }
@@ -105,9 +111,15 @@ describe("JSON-LD", function() {
             "@type": "CreativeWork",
             "@id": "http://www.example.com/1",
             "isBasedOnUrl": "http://www.example.com/basedUpon/1",
+			"accessRights": "http://www.example.com/accessRights/1", //new
+			"thumbnailUrl": "http://www.example.com/somefile.jpg", //new
             "interactivityType": "interactive",
             "name": "Example Resource modified again",
             "language": "English",
+			"typicalAgeRange": //new
+					"12-14",
+					"14-16"
+				,
             "author": {
                 "@type": "Person",   
                 "url": "http://example.com/author/joe_example",

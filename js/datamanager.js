@@ -53,7 +53,6 @@ function DataManager(easyPub) {
     //This needs big cleanup. It's a little hacky right now and kind of defeats the original purpose of the
     //field dictionary
     function makePayload() {
-
         var fullAuthorsArray = buildFullAuthorsArray();
         var fullAlignmentsArray = buildFullAlignmentsArray();
         var payload = {
@@ -62,8 +61,10 @@ function DataManager(easyPub) {
                 id: easyPub.getID(),
                 properties: {
                     name: [easyPub.getValue("title")],
+					thumbnailUrl: [easyPub.getValue("thumbnailUrl")],
                     url: [easyPub.getValue("url")],
                     description: [easyPub.getValue("description")],
+					typicalAgeRange: [easyPub.getValue("typicalAgeRange")],
                     keywords: easyPub.getValue("keywords"),
             		educationalAlignment:fullAlignmentsArray,
                     dateCreated: [easyPub.getValue("dateCreated")],
@@ -73,6 +74,7 @@ function DataManager(easyPub) {
             		learningResourceType: easyPub.getValue("learningResourceType"),
                     interactivityType: easyPub.getValue("interactivityType"),
                     useRightsUrl: [easyPub.getValue("useRightsUrl")],
+					accessRights: [easyPub.getValue("accessRights")],
                     isBasedOnUrl: [easyPub.getValue("isBasedOnUrl")],
                     author: fullAuthorsArray,
                     publisher: [
@@ -107,10 +109,8 @@ function DataManager(easyPub) {
     this.mapPayloadToFields = function (data, index) {
         var fieldData = {}
         for(var key in data) {
-            var val = data[key];
+			var val = data[key];
             if (key == 'educationalAlignment' || key == 'author' || key == 'publisher') {
-
-
                 // run through things with mutliple values recursively, making sure the names map correctly
                 for (var i=0,l=val.length; i<l; i++) {
                     var properties = val[i].properties;
@@ -133,6 +133,7 @@ function DataManager(easyPub) {
 
                         continue;
                     } else if (key == 'author') {
+
                         properties = {
                             'author_type':val[i].type[0],
                             'author_name':properties.name,

@@ -105,7 +105,11 @@ function Validator() {
                     }
                 }
             } else {
-		      var value = input.val().trim();
+				if (!input.val()) {
+					var value = "";
+				} else {
+					var value = input.val().trim();
+				}
             }
         }
 
@@ -115,8 +119,8 @@ function Validator() {
     		} else {
                 return "";
             }
+			
         }
-
 		if(field.validation) {
 			if(!field.validation(value)) {
                 if(field.tip) {

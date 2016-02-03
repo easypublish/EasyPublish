@@ -97,6 +97,7 @@ function EasyPublish() {
             row_delim = Preferences.getPreference("csv-row-delim", "\\n").escapedValue();
         // var arrData = this.dataManager.CSVToArray(fileData);
         var arrData = fileData.csvToArray({fSep: col_delim, rSep:row_delim, quot:quote_char, trim:true});
+		console.log(arrData);
         var objData = this.dataManager.twoDArrayToObjectArray(arrData, this.fieldManager);
 		var rowCount = objData.numRows;
         $("#dropStatus2").append("Found " + rowCount + " row(s) of data");
@@ -212,7 +213,6 @@ function EasyPublish() {
     };
 
     this.setEditData = function(lrmidata) {
-
         var resource_data = this.convertToMicrodata(lrmidata);
     	data = this.dataManager.mapPayloadToFields(resource_data.items[0].properties);
 
@@ -273,12 +273,20 @@ function EasyPublish() {
     		var rowMessages = {valid:true};
 	    	for(key in fields) {
 				var nextField = fields[key];
+				
+				if (typeof that.importedData[key] != 'undefined'){
 				var message = validator.validateField(nextField, that.importedData[key][i]);
+				} else if (nextField.required == true) {
+					rowMessages.valid = false;
+				}
+			
 				if(message!="") {
 					rowMessages[key] = message;
 					rowMessages.valid = false;
 				}
-			}
+				
+				}
+			
 			messages.push(rowMessages);
 			if (rowMessages.valid) {
 				totalValidRows++;
@@ -286,6 +294,7 @@ function EasyPublish() {
 				totalErrorRows++;
 			}
 		}
+		
 		return {
 			totalValidRows: totalValidRows,
 			totalErrorRows: totalErrorRows,
@@ -300,8 +309,31 @@ function EasyPublish() {
 
 	this.getAuthors = function() {
 		var authors = [];
+		
+		//If user uploads author type, convert to full id - can now upload type or full id
+		var authorFinal = this.getValue("author_type");
+
+		var converted = false;
+		
+		var orgDictionary = ["Organization" ,"organization" ,"ORGANIZATION"];
+		var personDictionary = ["Person", "person","PERSON"];
+		
+		for (j=0; j <= personDictionary.length; j++){
+			
+			if (authorFinal == orgDictionary[j])  {
+					authorFinal = "http://schema.org/Organization";
+					converted = true;
+			}
+			else if (authorFinal == personDictionary[j]) {
+				authorFinal = "http://schema.org/Person";
+				converted = true;
+			} else if (converted == false){
+				authorFinal = "http://schema.org/Person"; //Sends over Person which is the default option instead of null value.
+			}
+		}
+		
 		var author0 = {
-            "@type": this.getValue("author_type"),
+            "@type": authorFinal,
 		    name: this.getValue("author_name"),
             url:  this.getValue("author_url"),
             email:  this.getValue("author_email")
@@ -309,8 +341,24 @@ function EasyPublish() {
 		authors[0] = author0;
 		if(authorCount>1) {
 			for(var i=2; i<=authorCount; i++) {
+				
+			converted = false;
+			var authorFinalTwo = this.getValue("author_type_"+i);
+			
+			for (j=0; j <= personDictionary.length; j++){
+				if (authorFinalTwo == orgDictionary[j])  {
+					authorFinalTwo = "http://schema.org/Organization";
+					converted = true;
+				}
+				else if (authorFinalTwo == personDictionary[j]) {
+					authorFinalTwo = "http://schema.org/Person";
+					converted = true;
+				} else if (converted == false) {
+					authorFinalTwo = "http://schema.org/Person"; //Sends over Person which is the default option instead of null value.
+				}
+			}
 				var author = {
-                    "@type": this.getValue("author_type_"+i),
+                    "@type": authorFinalTwo,
 				    name: this.getValue("author_name_"+i),
 		            url:  this.getValue("author_url_"+i),
 		            email:  this.getValue("author_email_"+i)
@@ -325,11 +373,8 @@ function EasyPublish() {
 
         var fieldWrappers = this.fieldManager.alignmentFields;
         var alignments = [];
-
         _.each(fieldWrappers, function(fieldWrapper) {
             var fieldValues = fieldWrapper.value();    
-            
-
             _.each(fieldValues, function(fieldVal) {
                 var align_info = gen_standards.find(fieldVal);
                 if (align_info) {

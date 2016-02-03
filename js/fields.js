@@ -11,6 +11,18 @@ function split_cell(celldata) {
 }
 
 function std_lookup(key) {
+	
+	
+	// Quick fix for the standards having the wrong case - this is not ideal
+	key = key.replace("LITERACY","Literacy");
+	key = key.replace("MATH","Math");
+	
+	key = key.replace("literacy","Literacy");
+	key = key.replace("math","Math");
+	
+	key = key.replace("CONTENT","Content");
+	key = key.replace("content","Content")
+	
 	var found = gen_standards.find(key);
 	if (found)
 		return { text: found.dotnotation, value: found.uri };
@@ -24,6 +36,7 @@ var author_objs = [
 var author_map = {},
 	author_types = {};
 for (var idx in author_objs) {
+
 	author_types[author_objs[idx].text] = author_objs[idx];
 	author_map[author_objs[idx].text] = author_objs[idx];
 	author_map[author_objs[idx].value] = author_objs[idx];
@@ -31,12 +44,12 @@ for (var idx in author_objs) {
 
 function author_lookup(key) {
 	var found = author_map[key];
+
 	if (found) {
 		return found;
 	}
 	return null;
 }
-
 
 function FieldManager() {
 
@@ -44,28 +57,31 @@ function FieldManager() {
 	var edRoles = ["Administrator", "Mentor", "Parent", "Peer Tutor", "Specialist", "Student", "Teacher", "Team"];
 	var edUses = ["Activity", "Analogies", "Assessment", "Auditory", "Brainstorming", "Classifying", "Comparing", "Cooperative Learning", "Creative Response", "Demonstration", "Differentiation ", "Discovery Learning", "Discussion/Debate", "Drill & Practice", "Experiential", "Field Trip", "Game", "Generating hypotheses", "Guided questions ", "Hands-on", "Homework", "Identify similarities & differences", "Inquiry", "Interactive", "Interview/Survey", "Interviews", "Introduction", "Journaling ", "Kinesthetic", "Laboratory", "Lecture", "Metaphors", "Model & Simulation", "Musical", "Nonlinguistic ", "Note taking ", "Peer Coaching", "Peer Response", "Play", "Presentation", "Problem Solving", "Problem-based", "Project", "Questioning ", "Reading", "Reciprocal teaching ", "Reflection", "Reinforcement", "Research", "Review", "Role Playing", "Service learning ", "Simulations", "Summarizing ", "Technology ", "Testing hypotheses", "Thematic instruction ", "Visual/Spatial", "Word association", "Writing"];
 	var interactivityTypes = ["interactive", "passive", "social", "programmatic (machine-human interaction)", "one-on-one", "async", "sync", "group"];
-	var learningResourceTypes = ["Activity", "Assessment", "Audio", "Calculator", "Demonstration", "Game", "Interview", "Lecture",
-								 "Lesson Plan", "Simulation", "Presentation", "Other"];
+	var learningResourceTypes = ["Alternate Assessment","Assessment Item","Course","Demonstration/Simulation","Educator Curriculum Guide","Formative Assessment","Images/Visuals","Interim/Summative Assessment","Learning Activity","Lesson","Primary Source","Rubric Scoring Guide","Self Assessment","Text","Textbook","Unit"];
 	var groupTypes = ["Class", "Community", "Grade", "Group- large (6+ members)", "Group- small (3-5 members)", "Individual", "Inter-Generational", "Multiple Class", "Pair", "School", "State/Province", "World"];
 	var gradeChoices = ["No school completed", "Preschool", "Kindergarten", "First grade", "Second grade", "Third grade", "Fourth grade", "Fifth grade", "Sixth grade", "Seventh grade", "Eighth grade", "Ninth grade", "Tenth grade", "Eleventh Grade", "12th grade, no diploma", "High school diploma", "High school completers (e.g., certificate of attendance)", "High school equivalency (e.g., GED)", "Career and Technical Education certificate", "Grade 13", "Some college but no degree", "Formal award, certificate or diploma (less than one year)", "Formal award, certificate or diploma (more than or equal to one year)", "Associate's degree (two years or more)", "Adult education certification, endorsement, or degree", "Bachelor's (Baccalaureate) degree", "Master's degree (e.g., M.A., M.S., M. Eng., M.Ed., M.S.W., M.B.A., M.L.S.)", "Specialist's degree (e.g., Ed.S.)", "Post-master's certificate", "Graduate certificate", "Doctoral (Doctor's) degree", "First-professional degree", "Post-professional degree", "Doctor's degree-research/scholarship", "Doctor's degree-professional practice", "Doctor's degree-other", "Doctor's degree-research/scholarship", "Other"];
 	var edGovSubjects = ["Arts & Music", "Artists", "Music", "Blues, Gospel, Folk", "Jazz", "Sheet Music", "Other Music", "Theatre & Film", "Visual arts", "Architecture", "Drawing & Prints", "Painting", "Photography", "Sculpture", "Other Visual arts", "Other Arts & Music", "Health & Phys Ed", "Phys ed, exercise", "Substance abuse", "Other Health", "Language Arts", "Literature & Writers", "American Literature", "Poetry", "Other Literature", "Reading", "Other Language Arts", "Math", "Algebra", "Data Analysis", "Geometry", "Measurement", "Number & Operations", "Other Math", "Science", "Applied Sciences", "Computers/Tech", "Engineering", "Earth Sciences", "Climate Change", "Environment", "Geology", "Oceans", "Other Earth Sciences", "Life Sciences", "Animals/Zoology", "Botany", "Cells", "Diseases", "Genes, Evolution", "Human Body", "Interdependence", "Medicine", "Other Life Sciences", "Physical Sciences", "Chemistry", "Energy", "Physics", "Other Physical Sciences", "Space Sciences", "Aeronautics/Flight", "Astronomy", "Other Space Sciences", "Other Science", "World Studies", "Countries & Continents", "Africa", "Arctic, Antarctica", "Other Countries & Continents", "Foreign Languages", "World History", "China", "Europe", "Russia, Soviet Union", "Other World History", "Other World Studies", "U.S. History Topics", "Business & Work", "Business", "Careers", "Economics", "Entrepreneurship", "Labor", "Ethnic Groups", "African Americans", "Asian Americans", "Hispanic Americans", "Native Americans", "Famous People", "Explorers", "Inventors", "Leaders", "Scientists", "Others", "Government", "Congress", "Courts", "Elections", "Military", "Presidents", "U.S. Constitution", "Other", "Movements", "Civil Rights", "Immigration & Migration", "Transportation", "Women's History", "States & Regions", "California", "Massachusetts", "Midwest", "New Mexico", "New York", "Northeast", "Pennsylvania", "South", "Virginia", "West", "Others", "Wars", "American Revolution", "Civil War", "World War I", "World War II", "Other Wars", "Other History & Soc Studies", "Anthropology", "Geography", "Natural Disasters", "Religion & Society", "Slavery", "Other Resources", "U.S. Time Periods", "-1607: Three Worlds Meet", "1607-1763: Colonization", "1763-1815: Revolution", "1801-1861: Expansion", "1850-1877: Civil War & Reconstruction", "1865-1920: Modern America", "1914-1945: World Wars", "1945-Present: Contemporary America", "Other History & Social Studies: U.S. History Time Periods"];
-
+    var typicalAgeRanges = ["0-4","5-8","9-12","13-18","Post-Secondary","Adults"];
+	
 	this.fieldDictionary = {};
 	this.englishNameDictionary = {};
 
 	this.mainFields = [
 		new Field("Resource Title", Field.STRING, {required:true, objectName:"title"}),
+		new Field("Thumbnail URL", Field.URL, {objectName:"thumbnailUrl"}),
 		new Field("Resource URL", Field.URL, {required:true, objectName:"url"}),
-		new Field("Description", Field.LONG_STRING, {objectName:"description"}),
+		new Field("Description", Field.LONG_STRING, {required:true, objectName:"description"}),
 		new Field("Subject", Field.GROUPED_MULTI_CHOICE, {objectName:"keywords", choices:subjectsData, csvParser:split_cell}),
 		new Field("Grade", Field.MULTI_CHOICE, {objectName:"grade", choices:gradeChoices, csvParser:split_cell}),
-		new Field("Date Created", Field.DATE,  {tip:"Date the resource was originally created, Format: YYYY_MM_DD", objectName:"dateCreated"}),
-		new Field("Date Modified", Field.DATE,  {tip:"Date the resource was most recently modified, Format: YYYY_MM_DD", objectName:"dateModified"}),
+		new Field ("Typical Age Range", Field.CHOICE, {objectName:"typicalAgeRange", choices:typicalAgeRanges, csvParser:split_cell}),
+		new Field("Date Created", Field.DATE,  {tip:"Date the resource was originally created, Format: YYYY-MM-DD", objectName:"dateCreated"}),
+		new Field("Date Modified", Field.DATE,  {tip:"Date the resource was most recently modified, Format: YYYY-MM-DD", objectName:"dateModified"}),
 		new Field("Language", Field.STRING, {objectName:"language"}),
 		new Field("Media Type", Field.MULTI_CHOICE, {objectName:"mediaType", choices:mediaTypes, csvParser:split_cell}),
 		new Field("Learning Resource Type", Field.MULTI_CHOICE, {objectName:"learningResourceType", choices:learningResourceTypes, csvParser:split_cell}),
 		new Field("Interactivity", Field.MULTI_CHOICE, {objectName:"interactivityType", choices:interactivityTypes, csvParser:split_cell}),
-		new Field("Use Rights URL", Field.URL, {objectName:"useRightsUrl"}),
+		new Field("Use Rights URL", Field.URL, {required:true, objectName:"useRightsUrl"}),
+		new Field ("Access Rights URL", Field.URL, {objectName:"accessRights"}),
 		new Field("Is based on URL", Field.URL, {objectName:"isBasedOnUrl"}),
 	];
 	for(key in this.mainFields) {
@@ -88,10 +104,10 @@ function FieldManager() {
 		this.englishNameDictionary[field.name] = field.id;
 	}
 
-	var accessibilityFeature = ["alternativeText", "annotations", "audioControl", "audioDescription", "bookmarks", "braille", "captions", "ChemML", "displayTransformability", "highContrastAudio", "highContrastDisplay", "index", "largePrint", "latex", "longDescription", "MathML", "printPageNumbers", "readingOrder", "signLanguage", "structuralNavigation", "tableOfContents", "taggedPDF", "tactileGraphic", "tactileObject", "timingControl", "transcript", "videoControl"]
-	var accessibilityHazard = ["flashing", "noFlashingHazard", "motionSimulation", "noMotionSimulationHazard", "sound", "noSoundHazard"];
-	var accessibilityAPI = ["AndroidAccessibility", "ARIA", "ATK", "AT-SPI", "BlackberryAccessibility", "iAccessible2", "iOSAccessibility", "JavaAccessibility", "MacOSXAccessibility", "MSAA", "UIAutomation"];
-	var accessibilityControl = ["fullKeyboardControl", "fullMouseControl", "fullSwitchControl", "fullTouchControl", "fullVoiceControl"];
+	var accessibilityFeature = ["Alternative Text","Annotations","Audio Description","Book Marks","Braille","Captions","Chemical Markup Language","Described Math","Display Transformability","High Contrast Audio","High Contract Display","Index","Large Print","Latex","Long Description","Math ML","None","Print Page Number","Reading Order","Sign Language","Structural Navigation","Table of Contents","Tactile Graphic","Tactile Object","Tagged PDF","Timing Control","Transcript","TTS Markup","Unlocked"];
+	var accessibilityHazard = ["Flashing","No Flashing Hazard","Motion Simulation","No Motion Simulation Hazard","Sound","No Sound Hazard"];
+	var accessibilityAPI = ["AndroidAccessibility", "ARIA", "ATK", "AT-SPI", "BlackberryAccessibility", "iAccessible2", "iOSAccessibility", "JavaAccess","Android Accessibility","ARIA","ATK","AT-SPI","Blackberry Accessibility","iAccessible2","iOS Accessibility","Java","Accessibility","Mac OSX Accessibility","MSAA","UI Automation"];
+	var accessibilityControl = ["Full Keyboard Control","Full Mouse Control","Full Switch Control","Full Touch Control","Full Video Control","Full Voice Control"];
 	this.a11yFields = [
 		new Field("Accessiblity Feature", Field.MULTI_CHOICE, {objectName:"accessibilityFeature", choices:accessibilityFeature, csvParser:split_cell}),
 		new Field("Accessiblity Hazard", Field.MULTI_CHOICE, {objectName:"accessibilityHazard", choices:accessibilityHazard, csvParser:split_cell}),
@@ -118,7 +134,7 @@ function FieldManager() {
 	}
 
 	this.publisherFields = [
-		new Field("Publisher Name", Field.STRING, {objectName:"publisher_name"}),
+		new Field("Publisher Name", Field.STRING, {required:true, objectName:"publisher_name"}),
 		new Field("Publisher URL", Field.URL, {objectName:"publisher_url"}),
 		new Field("Publisher Email Address", Field.EMAIL, {objectName:"publisher_email"})
 	];

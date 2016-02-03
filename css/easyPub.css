@@ -14,7 +14,7 @@ body {
 
 .optgroup {
 	font-weight: bold;
-	font-style: oblique;
+	#font-style: oblique;
 }
 
 .chosen-container .chosen-results li.group-option .depth-1 {
