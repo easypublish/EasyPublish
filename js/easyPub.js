@@ -90,14 +90,24 @@ function EasyPublish() {
     	}
 	}
 
+	// For global replacement of row delimiters 
+	String.prototype.replaceAll = function(expression, result) {
+		var textToSearch = this;
+		return textToSearch.replace(new RegExp(expression, 'g'), result);
+	};
 
 	this.fileDropped = function(fileData) {
         var quote_char = Preferences.getPreference("csv-quote-char", "\"").escapedValue(),
             col_delim = Preferences.getPreference("csv-col-delim", ",").escapedValue(),
             row_delim = Preferences.getPreference("csv-row-delim", "\\n").escapedValue();
         // var arrData = this.dataManager.CSVToArray(fileData);
-        var arrData = fileData.csvToArray({fSep: col_delim, rSep:row_delim, quot:quote_char, trim:true});
-		console.log(arrData);
+		
+		
+		// Convert rows to just an "\n" delimiter
+		var rowParsed = fileData.replaceAll("\\r","\\n");
+		rowParsed = fileData.replaceAll("\\n\\n","\\n");
+		
+        var arrData = rowParsed.csvToArray({fSep: col_delim, rSep:row_delim, quot:quote_char, trim:true});
         var objData = this.dataManager.twoDArrayToObjectArray(arrData, this.fieldManager);
 		var rowCount = objData.numRows;
         $("#dropStatus2").append("Found " + rowCount + " row(s) of data");
@@ -311,29 +321,31 @@ function EasyPublish() {
 		var authors = [];
 		
 		//If user uploads author type, convert to full id - can now upload type or full id
-		var authorFinal = this.getValue("author_type");
+		var authorConverted = this.getValue("author_type");
 
+		// Flag for whether or not an author has been converted, if it hasn't, it sends the default option, Person over to the form.
 		var converted = false;
 		
+		// Dictionaries for what other options to look for in Author
 		var orgDictionary = ["Organization" ,"organization" ,"ORGANIZATION"];
 		var personDictionary = ["Person", "person","PERSON"];
 		
 		for (j=0; j <= personDictionary.length; j++){
 			
-			if (authorFinal == orgDictionary[j])  {
-					authorFinal = "http://schema.org/Organization";
+			if (authorConverted == orgDictionary[j])  {
+					authorConverted = "http://schema.org/Organization";
 					converted = true;
 			}
-			else if (authorFinal == personDictionary[j]) {
-				authorFinal = "http://schema.org/Person";
+			else if (authorConverted == personDictionary[j]) {
+				authorConverted = "http://schema.org/Person";
 				converted = true;
 			} else if (converted == false){
-				authorFinal = "http://schema.org/Person"; //Sends over Person which is the default option instead of null value.
+				authorConverted = "http://schema.org/Person"; //Sends over Person which is the default option instead of null value.
 			}
 		}
 		
 		var author0 = {
-            "@type": authorFinal,
+            "@type": authorConverted,
 		    name: this.getValue("author_name"),
             url:  this.getValue("author_url"),
             email:  this.getValue("author_email")
@@ -343,22 +355,22 @@ function EasyPublish() {
 			for(var i=2; i<=authorCount; i++) {
 				
 			converted = false;
-			var authorFinalTwo = this.getValue("author_type_"+i);
+			var authorConvertedSecond = this.getValue("author_type_"+i);
 			
 			for (j=0; j <= personDictionary.length; j++){
-				if (authorFinalTwo == orgDictionary[j])  {
-					authorFinalTwo = "http://schema.org/Organization";
+				if (authorConvertedSecond == orgDictionary[j])  {
+					authorConvertedSecond = "http://schema.org/Organization";
 					converted = true;
 				}
-				else if (authorFinalTwo == personDictionary[j]) {
-					authorFinalTwo = "http://schema.org/Person";
+				else if (authorConvertedSecond == personDictionary[j]) {
+					authorConvertedSecond = "http://schema.org/Person";
 					converted = true;
 				} else if (converted == false) {
-					authorFinalTwo = "http://schema.org/Person"; //Sends over Person which is the default option instead of null value.
+					aauthorConvertedSecond = "http://schema.org/Person"; //Sends over Person which is the default option instead of null value.
 				}
 			}
 				var author = {
-                    "@type": authorFinalTwo,
+                    "@type": authorConvertedSecond,
 				    name: this.getValue("author_name_"+i),
 		            url:  this.getValue("author_url_"+i),
 		            email:  this.getValue("author_email_"+i)

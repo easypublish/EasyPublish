@@ -5,23 +5,34 @@ function split_cell_comma(celldata) {
 }
 
 function split_cell(celldata) {
-	var cell_delim = Preferences.getPreference("csv-cell-delim", ",\\r?\\n");
-	var re = new RegExp("\\s*"+cell_delim.get('value')+"\\s*");
-	return [].concat(celldata.split(re));
+	var breaksRemoved= celldata.replaceAll("\\n","");
+	return [].concat(breaksRemoved.split(","));
 }
+
+// For line break replacement in split_cell
+String.prototype.replaceAll = function(expression, result) {
+    var textToSearch = this;
+    return textToSearch.replace(new RegExp(expression, 'g'), result);
+};
 
 function std_lookup(key) {
 	
+	// For standard alignments, converts strings to accepted values
+	ccssLiteracyDictionary = ["LITERACY","literacy"];
+	ccssMathDictionary = ["MATH","math"];
+	ccssContentDictionary = ["CONTENT","content"];
 	
-	// Quick fix for the standards having the wrong case - this is not ideal
-	key = key.replace("LITERACY","Literacy");
-	key = key.replace("MATH","Math");
+	for (k = 0; k <= ccssLiteracyDictionary.length; k++) {
+		key = key.replace(ccssLiteracyDictionary[k],"Literacy");
+	}
 	
-	key = key.replace("literacy","Literacy");
-	key = key.replace("math","Math");
+	for (k = 0; k <= ccssMathDictionary.length; k++) {
+		key = key.replace(ccssLiteracyDictionary[k],"Math");
+	}
 	
-	key = key.replace("CONTENT","Content");
-	key = key.replace("content","Content")
+	for (k = 0; k <= ccssContentDictionary.length; k++) {
+		key = key.replace(ccssLiteracyDictionary[k],"Content");
+	}
 	
 	var found = gen_standards.find(key);
 	if (found)
@@ -35,8 +46,8 @@ var author_objs = [
 ];
 var author_map = {},
 	author_types = {};
+	
 for (var idx in author_objs) {
-
 	author_types[author_objs[idx].text] = author_objs[idx];
 	author_map[author_objs[idx].text] = author_objs[idx];
 	author_map[author_objs[idx].value] = author_objs[idx];
@@ -54,10 +65,10 @@ function author_lookup(key) {
 function FieldManager() {
 
 	var mediaTypes = ["Audio", "Document", "Image", "Video", "Other"]; 
-	var edRoles = ["Administrator", "Mentor", "Parent", "Peer Tutor", "Specialist", "Student", "Teacher", "Team"];
-	var edUses = ["Activity", "Analogies", "Assessment", "Auditory", "Brainstorming", "Classifying", "Comparing", "Cooperative Learning", "Creative Response", "Demonstration", "Differentiation ", "Discovery Learning", "Discussion/Debate", "Drill & Practice", "Experiential", "Field Trip", "Game", "Generating hypotheses", "Guided questions ", "Hands-on", "Homework", "Identify similarities & differences", "Inquiry", "Interactive", "Interview/Survey", "Interviews", "Introduction", "Journaling ", "Kinesthetic", "Laboratory", "Lecture", "Metaphors", "Model & Simulation", "Musical", "Nonlinguistic ", "Note taking ", "Peer Coaching", "Peer Response", "Play", "Presentation", "Problem Solving", "Problem-based", "Project", "Questioning ", "Reading", "Reciprocal teaching ", "Reflection", "Reinforcement", "Research", "Review", "Role Playing", "Service learning ", "Simulations", "Summarizing ", "Technology ", "Testing hypotheses", "Thematic instruction ", "Visual/Spatial", "Word association", "Writing"];
-	var interactivityTypes = ["interactive", "passive", "social", "programmatic (machine-human interaction)", "one-on-one", "async", "sync", "group"];
-	var learningResourceTypes = ["Alternate Assessment","Assessment Item","Course","Demonstration/Simulation","Educator Curriculum Guide","Formative Assessment","Images/Visuals","Interim/Summative Assessment","Learning Activity","Lesson","Primary Source","Rubric Scoring Guide","Self Assessment","Text","Textbook","Unit"];
+	var edRoles = ["administrator","general public","mentor","parent","peer/tutor","professional","student","teacher/education specialist"];
+	var edUses = ["assessment","instruction","professional development"];
+	var interactivityTypes = ["active","expositive","mixed"];
+	var learningResourceTypes = ["alternate assessment","assessment item","course","demonstration/simulation","educator curriculum guide","formative assessment","images/visuals","interim/summative assessment","learning activity","lesson","primary source","rubric scoring guide","self assessment","text","textbook","unit"];
 	var groupTypes = ["Class", "Community", "Grade", "Group- large (6+ members)", "Group- small (3-5 members)", "Individual", "Inter-Generational", "Multiple Class", "Pair", "School", "State/Province", "World"];
 	var gradeChoices = ["No school completed", "Preschool", "Kindergarten", "First grade", "Second grade", "Third grade", "Fourth grade", "Fifth grade", "Sixth grade", "Seventh grade", "Eighth grade", "Ninth grade", "Tenth grade", "Eleventh Grade", "12th grade, no diploma", "High school diploma", "High school completers (e.g., certificate of attendance)", "High school equivalency (e.g., GED)", "Career and Technical Education certificate", "Grade 13", "Some college but no degree", "Formal award, certificate or diploma (less than one year)", "Formal award, certificate or diploma (more than or equal to one year)", "Associate's degree (two years or more)", "Adult education certification, endorsement, or degree", "Bachelor's (Baccalaureate) degree", "Master's degree (e.g., M.A., M.S., M. Eng., M.Ed., M.S.W., M.B.A., M.L.S.)", "Specialist's degree (e.g., Ed.S.)", "Post-master's certificate", "Graduate certificate", "Doctoral (Doctor's) degree", "First-professional degree", "Post-professional degree", "Doctor's degree-research/scholarship", "Doctor's degree-professional practice", "Doctor's degree-other", "Doctor's degree-research/scholarship", "Other"];
 	var edGovSubjects = ["Arts & Music", "Artists", "Music", "Blues, Gospel, Folk", "Jazz", "Sheet Music", "Other Music", "Theatre & Film", "Visual arts", "Architecture", "Drawing & Prints", "Painting", "Photography", "Sculpture", "Other Visual arts", "Other Arts & Music", "Health & Phys Ed", "Phys ed, exercise", "Substance abuse", "Other Health", "Language Arts", "Literature & Writers", "American Literature", "Poetry", "Other Literature", "Reading", "Other Language Arts", "Math", "Algebra", "Data Analysis", "Geometry", "Measurement", "Number & Operations", "Other Math", "Science", "Applied Sciences", "Computers/Tech", "Engineering", "Earth Sciences", "Climate Change", "Environment", "Geology", "Oceans", "Other Earth Sciences", "Life Sciences", "Animals/Zoology", "Botany", "Cells", "Diseases", "Genes, Evolution", "Human Body", "Interdependence", "Medicine", "Other Life Sciences", "Physical Sciences", "Chemistry", "Energy", "Physics", "Other Physical Sciences", "Space Sciences", "Aeronautics/Flight", "Astronomy", "Other Space Sciences", "Other Science", "World Studies", "Countries & Continents", "Africa", "Arctic, Antarctica", "Other Countries & Continents", "Foreign Languages", "World History", "China", "Europe", "Russia, Soviet Union", "Other World History", "Other World Studies", "U.S. History Topics", "Business & Work", "Business", "Careers", "Economics", "Entrepreneurship", "Labor", "Ethnic Groups", "African Americans", "Asian Americans", "Hispanic Americans", "Native Americans", "Famous People", "Explorers", "Inventors", "Leaders", "Scientists", "Others", "Government", "Congress", "Courts", "Elections", "Military", "Presidents", "U.S. Constitution", "Other", "Movements", "Civil Rights", "Immigration & Migration", "Transportation", "Women's History", "States & Regions", "California", "Massachusetts", "Midwest", "New Mexico", "New York", "Northeast", "Pennsylvania", "South", "Virginia", "West", "Others", "Wars", "American Revolution", "Civil War", "World War I", "World War II", "Other Wars", "Other History & Soc Studies", "Anthropology", "Geography", "Natural Disasters", "Religion & Society", "Slavery", "Other Resources", "U.S. Time Periods", "-1607: Three Worlds Meet", "1607-1763: Colonization", "1763-1815: Revolution", "1801-1861: Expansion", "1850-1877: Civil War & Reconstruction", "1865-1920: Modern America", "1914-1945: World Wars", "1945-Present: Contemporary America", "Other History & Social Studies: U.S. History Time Periods"];
