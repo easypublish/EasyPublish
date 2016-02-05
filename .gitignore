@@ -3,7 +3,8 @@
 
 /.kansorc
 
-/EasyPublish.sublime-project
-/EasyPublish.sublime-workspace
+*.sublime-*
+._*
 
 /commoncore/node_modules/
+/npm-debug.log
