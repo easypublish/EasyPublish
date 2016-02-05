@@ -363,6 +363,7 @@ function DataManager(easyPub) {
     // arrays. The default delimiter is the comma, but this
     // can be overriden in the second argument.
 
+    /* replaced this with lib/csvToArray
     this.CSVToArray = function(strData, strDelimiter) {
         // Check to see if the delimiter is defined. If not,
         // then default to comma.
@@ -439,6 +440,7 @@ function DataManager(easyPub) {
         // Return the parsed data.
         return (arrData);
     }
+    */
 
     function trim1(str) {
         return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
