@@ -99,13 +99,12 @@ function EasyPublish() {
 	this.fileDropped = function(fileData) {
         var quote_char = Preferences.getPreference("csv-quote-char", "\"").escapedValue(),
             col_delim = Preferences.getPreference("csv-col-delim", ",").escapedValue(),
-            row_delim = "\\n"; // no longer a pref
+            row_delim = "\n"; // no longer a pref
         // var arrData = this.dataManager.CSVToArray(fileData);
 
-
 		// Convert rows to just an "\n" delimiter
-        var rowParsed = fileData.replaceAll("\\r","\\n");
-		rowParsed = rowParsed.replaceAll("\\n\\n","\\n");
+        var rowParsed = fileData.replaceAll("\r","\n");
+        rowParsed = rowParsed.replaceAll("\n\n","\n");
 
         var arrData = rowParsed.csvToArray({fSep: col_delim, rSep:row_delim, quot:quote_char, trim:true});
         var objData = this.dataManager.twoDArrayToObjectArray(arrData, this.fieldManager);
