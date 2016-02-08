@@ -247,7 +247,7 @@ function DataManager(easyPub) {
             "payload_schema": ["schema.org", "lrmi"],
             "payload_placement": "inline",
             "resource_locator": easyPub.getValue("url"),
-            "keys": ["EZPublish-1.0"]
+            "keys": ["EZPublish-1.5","EZPublish"]
         }
         if (useJSON_LD) {}
             envelope["payload_schema"].push("JSON-LD");
@@ -374,7 +374,7 @@ function DataManager(easyPub) {
 
                     arrData[rowIndex][colIndex] = "https://ceds.ed.gov/element/001561#AvailableBySubscription";
 
-                } 
+                }
 
             }
             if (fieldName == 'Date Created'|| fieldName == 'Date Modified') {
@@ -391,7 +391,7 @@ function DataManager(easyPub) {
                 var excelRegex = new RegExp(/^([1-9]|1[0-2])\/([1-9]|1\d|2\d|3[01])\/\d{2}$/);
                 var excelRegexTwo = new RegExp(/^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])\/\d{2}$/);
 
-                // Test for the default Excel formatting when the year has 4 digits. 
+                // Test for the default Excel formatting when the year has 4 digits.
                 var excelRegexThree = new RegExp(/^([1-9]|1[0-2])\/([1-9]|1\d|2\d|3[01])\/\d{4}$/);
                 var excelRegexFour = new RegExp(/^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])\/\d{4}$/);
 
@@ -404,8 +404,8 @@ function DataManager(easyPub) {
                 var excelMatchFour = excelTest.match(excelRegexFour);
 
                 // We will need to convert the strings over depending on whether or not they have a 0 in the month / day
-                var convertedYear = "", 
-                    convertedMonth = "", 
+                var convertedYear = "",
+                    convertedMonth = "",
                     convertedDay = ""
                     convertedDate = "";
 

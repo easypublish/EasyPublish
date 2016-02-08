@@ -1,6 +1,6 @@
 {
     "name": "EasyPublish",
-    "version": "0.0.1",
+    "version": "0.0.5",
     "description": "Easy Publish for Learning Registry",
     "attachments": ["index.html", "tests.html", "css", "js", "img", "template.csv"],
     "modules":["lib"],
