@@ -354,23 +354,23 @@ function DataManager(easyPub) {
 
             if (fieldName == 'Access Rights URL') {
 
-                if (arrData[rowIndex][colIndex] == "Free Access" || arrData[rowIndex][colIndex] == "FreeAccess" || arrData[rowIndex][colIndex] == "free access") {
+                if (arrData[rowIndex][colIndex] == "Free Access" || arrData[rowIndex][colIndex] == "FreeAccess" || arrData[rowIndex][colIndex] == "free access" || arrData[rowIndex][colIndex] == "freeaccess") {
 
                     arrData[rowIndex][colIndex] = "https://ceds.ed.gov/element/001561#FreeAccess";
 
-                } else if (arrData[rowIndex][colIndex] == "Free Access with Registration" || arrData[rowIndex][colIndex] == "FreeAccesswithRegistration" || arrData[rowIndex][colIndex] == "free access with registration") {
+                } else if (arrData[rowIndex][colIndex] == "Free Access with Registration" || arrData[rowIndex][colIndex] == "FreeAccesswithRegistration" || arrData[rowIndex][colIndex] == "free access with registration" || arrData[rowIndex][colIndex] == "freeaccesswithregistration") {
 
                     arrData[rowIndex][colIndex] = "https://ceds.ed.gov/element/001561#FreeAccessWithRegistration";
 
-                } else if (arrData[rowIndex][colIndex] == "Limited Free Access" || arrData[rowIndex][colIndex] == "LimitedFreeAccess" || arrData[rowIndex][colIndex] == "limited free access") {
+                } else if (arrData[rowIndex][colIndex] == "Limited Free Access" || arrData[rowIndex][colIndex] == "LimitedFreeAccess" || arrData[rowIndex][colIndex] == "limited free access" || arrData[rowIndex][colIndex] == "limitedfreeaccess") {
 
                     arrData[rowIndex][colIndex] = "https://ceds.ed.gov/element/001561#LimitedFreeAccess";
 
-                } else if (arrData[rowIndex][colIndex] == "Available for Purchase" || arrData[rowIndex][colIndex] == "AvailableforPurchase" || arrData[rowIndex][colIndex] == "available for purchase") {
+                } else if (arrData[rowIndex][colIndex] == "Available for Purchase" || arrData[rowIndex][colIndex] == "AvailableforPurchase" || arrData[rowIndex][colIndex] == "available for purchase" || arrData[rowIndex][colIndex] == "availableforpurchase") {
 
                     arrData[rowIndex][colIndex] = "https://ceds.ed.gov/element/001561#AvailableForPurchase";
 
-                } else if (arrData[rowIndex][colIndex] == "Available by Subscription" || arrData[rowIndex][colIndex] == "AvailablebySubscription" || arrData[rowIndex][colIndex] == "available by subscription") {
+                } else if (arrData[rowIndex][colIndex] == "Available by Subscription" || arrData[rowIndex][colIndex] == "AvailablebySubscription" || arrData[rowIndex][colIndex] == "available by subscription" || arrData[rowIndex][colIndex] == "availablebysubscription") {
 
                     arrData[rowIndex][colIndex] = "https://ceds.ed.gov/element/001561#AvailableBySubscription";
 
