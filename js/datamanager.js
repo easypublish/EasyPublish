@@ -247,7 +247,7 @@ function DataManager(easyPub) {
             "payload_schema": ["schema.org", "lrmi"],
             "payload_placement": "inline",
             "resource_locator": easyPub.getValue("url"),
-            "keys": ["EZPublish-1.0"]
+            "keys": ["EZPublish-1.5","EZPublish"]
         }
         if (useJSON_LD) {}
             envelope["payload_schema"].push("JSON-LD");
@@ -354,23 +354,23 @@ function DataManager(easyPub) {
 
             if (fieldName == 'Access Rights URL') {
 
-                if (arrData[rowIndex][colIndex] == "Free Access" || "FreeAccess" || "free access") {
+                if (arrData[rowIndex][colIndex] == "Free Access" || arrData[rowIndex][colIndex] == "FreeAccess" || arrData[rowIndex][colIndex] == "free access") {
 
                     arrData[rowIndex][colIndex] = "https://ceds.ed.gov/element/001561#FreeAccess";
 
-                } else if (arrData[rowIndex][colIndex] == "Free Access with Registration" || "FreeAccesswithRegistration" || "free access with registration") {
+                } else if (arrData[rowIndex][colIndex] == "Free Access with Registration" || arrData[rowIndex][colIndex] == "FreeAccesswithRegistration" || arrData[rowIndex][colIndex] == "free access with registration") {
 
                     arrData[rowIndex][colIndex] = "https://ceds.ed.gov/element/001561#FreeAccessWithRegistration";
 
-                } else if (arrData[rowIndex][colIndex] == "Limited Free Access" || "LimitedFreeAccess" || "limited free access") {
+                } else if (arrData[rowIndex][colIndex] == "Limited Free Access" || arrData[rowIndex][colIndex] == "LimitedFreeAccess" || arrData[rowIndex][colIndex] == "limited free access") {
 
                     arrData[rowIndex][colIndex] = "https://ceds.ed.gov/element/001561#LimitedFreeAccess";
 
-                } else if (arrData[rowIndex][colIndex] == "Available for Purchase" || "AvailableforPurchase" || "available for purchase") {
+                } else if (arrData[rowIndex][colIndex] == "Available for Purchase" || arrData[rowIndex][colIndex] == "AvailableforPurchase" || arrData[rowIndex][colIndex] == "available for purchase") {
 
                     arrData[rowIndex][colIndex] = "https://ceds.ed.gov/element/001561#AvailableForPurchase";
 
-                } else if (arrData[rowIndex][colIndex] == "Available by Subscription" || "AvailablebySubscription" || "available by subscription") {
+                } else if (arrData[rowIndex][colIndex] == "Available by Subscription" || arrData[rowIndex][colIndex] == "AvailablebySubscription" || arrData[rowIndex][colIndex] == "available by subscription") {
 
                     arrData[rowIndex][colIndex] = "https://ceds.ed.gov/element/001561#AvailableBySubscription";
 
@@ -391,7 +391,7 @@ function DataManager(easyPub) {
                 var excelRegex = new RegExp(/^([1-9]|1[0-2])\/([1-9]|1\d|2\d|3[01])\/\d{2}$/);
                 var excelRegexTwo = new RegExp(/^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])\/\d{2}$/);
 
-                // Test for the default Excel formatting when the year has 4 digits. 
+                // Test for the default Excel formatting when the year has 4 digits.
                 var excelRegexThree = new RegExp(/^([1-9]|1[0-2])\/([1-9]|1\d|2\d|3[01])\/\d{4}$/);
                 var excelRegexFour = new RegExp(/^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])\/\d{4}$/);
 
@@ -404,8 +404,8 @@ function DataManager(easyPub) {
                 var excelMatchFour = excelTest.match(excelRegexFour);
 
                 // We will need to convert the strings over depending on whether or not they have a 0 in the month / day
-                var convertedYear = "", 
-                    convertedMonth = "", 
+                var convertedYear = "",
+                    convertedMonth = "",
                     convertedDay = ""
                     convertedDate = "";
 

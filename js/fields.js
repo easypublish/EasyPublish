@@ -16,24 +16,24 @@ String.prototype.replaceAll = function(expression, result) {
 };
 
 function std_lookup(key) {
-	
+
 	// For standard alignments, converts strings to accepted values
 	ccssLiteracyDictionary = ["LITERACY","literacy"];
 	ccssMathDictionary = ["MATH","math"];
 	ccssContentDictionary = ["CONTENT","content"];
-	
+
 	for (k = 0; k <= ccssLiteracyDictionary.length; k++) {
 		key = key.replace(ccssLiteracyDictionary[k],"Literacy");
 	}
-	
+
 	for (k = 0; k <= ccssMathDictionary.length; k++) {
 		key = key.replace(ccssLiteracyDictionary[k],"Math");
 	}
-	
+
 	for (k = 0; k <= ccssContentDictionary.length; k++) {
 		key = key.replace(ccssLiteracyDictionary[k],"Content");
 	}
-	
+
 	var found = gen_standards.find(key);
 	if (found)
 		return { text: found.dotnotation, value: found.uri };
@@ -90,16 +90,15 @@ function accessRights_lookup(key) {
 
 function FieldManager() {
 
-	var mediaTypes = ["Audio", "Document", "Image", "Video", "Other"]; 
+	var mediaTypes = ["Audio", "Document", "Image", "Video", "Other"];
 	var edRoles = ["administrator","general public","mentor","parent","peer/tutor","professional","student","teacher/education specialist"];
 	var edUses = ["assessment","instruction","professional development"];
 	var interactivityTypes = ["active","expositive","mixed"];
 	var learningResourceTypes = ["alternate assessment","assessment item","course","demonstration/simulation","educator curriculum guide","formative assessment","images/visuals","interim/summative assessment","learning activity","lesson","primary source","rubric scoring guide","self assessment","text","textbook","unit"];
 	var groupTypes = ["Class", "Community", "Grade", "Group- large (6+ members)", "Group- small (3-5 members)", "Individual", "Inter-Generational", "Multiple Class", "Pair", "School", "State/Province", "World"];
 	var gradeChoices = ["No school completed", "Preschool", "Kindergarten", "First grade", "Second grade", "Third grade", "Fourth grade", "Fifth grade", "Sixth grade", "Seventh grade", "Eighth grade", "Ninth grade", "Tenth grade", "Eleventh Grade", "12th grade, no diploma", "High school diploma", "High school completers (e.g., certificate of attendance)", "High school equivalency (e.g., GED)", "Career and Technical Education certificate", "Grade 13", "Some college but no degree", "Formal award, certificate or diploma (less than one year)", "Formal award, certificate or diploma (more than or equal to one year)", "Associate's degree (two years or more)", "Adult education certification, endorsement, or degree", "Bachelor's (Baccalaureate) degree", "Master's degree (e.g., M.A., M.S., M. Eng., M.Ed., M.S.W., M.B.A., M.L.S.)", "Specialist's degree (e.g., Ed.S.)", "Post-master's certificate", "Graduate certificate", "Doctoral (Doctor's) degree", "First-professional degree", "Post-professional degree", "Doctor's degree-research/scholarship", "Doctor's degree-professional practice", "Doctor's degree-other", "Doctor's degree-research/scholarship", "Other"];
-	var edGovSubjects = ["Arts & Music", "Artists", "Music", "Blues, Gospel, Folk", "Jazz", "Sheet Music", "Other Music", "Theatre & Film", "Visual arts", "Architecture", "Drawing & Prints", "Painting", "Photography", "Sculpture", "Other Visual arts", "Other Arts & Music", "Health & Phys Ed", "Phys ed, exercise", "Substance abuse", "Other Health", "Language Arts", "Literature & Writers", "American Literature", "Poetry", "Other Literature", "Reading", "Other Language Arts", "Math", "Algebra", "Data Analysis", "Geometry", "Measurement", "Number & Operations", "Other Math", "Science", "Applied Sciences", "Computers/Tech", "Engineering", "Earth Sciences", "Climate Change", "Environment", "Geology", "Oceans", "Other Earth Sciences", "Life Sciences", "Animals/Zoology", "Botany", "Cells", "Diseases", "Genes, Evolution", "Human Body", "Interdependence", "Medicine", "Other Life Sciences", "Physical Sciences", "Chemistry", "Energy", "Physics", "Other Physical Sciences", "Space Sciences", "Aeronautics/Flight", "Astronomy", "Other Space Sciences", "Other Science", "World Studies", "Countries & Continents", "Africa", "Arctic, Antarctica", "Other Countries & Continents", "Foreign Languages", "World History", "China", "Europe", "Russia, Soviet Union", "Other World History", "Other World Studies", "U.S. History Topics", "Business & Work", "Business", "Careers", "Economics", "Entrepreneurship", "Labor", "Ethnic Groups", "African Americans", "Asian Americans", "Hispanic Americans", "Native Americans", "Famous People", "Explorers", "Inventors", "Leaders", "Scientists", "Others", "Government", "Congress", "Courts", "Elections", "Military", "Presidents", "U.S. Constitution", "Other", "Movements", "Civil Rights", "Immigration & Migration", "Transportation", "Women's History", "States & Regions", "California", "Massachusetts", "Midwest", "New Mexico", "New York", "Northeast", "Pennsylvania", "South", "Virginia", "West", "Others", "Wars", "American Revolution", "Civil War", "World War I", "World War II", "Other Wars", "Other History & Soc Studies", "Anthropology", "Geography", "Natural Disasters", "Religion & Society", "Slavery", "Other Resources", "U.S. Time Periods", "-1607: Three Worlds Meet", "1607-1763: Colonization", "1763-1815: Revolution", "1801-1861: Expansion", "1850-1877: Civil War & Reconstruction", "1865-1920: Modern America", "1914-1945: World Wars", "1945-Present: Contemporary America", "Other History & Social Studies: U.S. History Time Periods"];
     var typicalAgeRanges = ["0-4","5-8","9-12","13-18","Post-Secondary","Adults"];
-	
+
 	this.fieldDictionary = {};
 	this.englishNameDictionary = {};
 
@@ -128,11 +127,11 @@ function FieldManager() {
 	}
 
 	this.alignmentFields = [
-		new Field("This Resource Assesses", Field.MULTI_CHOICE, 
+		new Field("This Resource Assesses", Field.MULTI_CHOICE,
 			{cat_name:"alignmentType", cat_val:"assesses", choices:[], option_lookup:std_lookup, csvParser:split_cell}),
-		new Field("This Resource Teaches", Field.MULTI_CHOICE, 
+		new Field("This Resource Teaches", Field.MULTI_CHOICE,
 			{cat_name:"alignmentType", cat_val:"teaches", choices:[], option_lookup:std_lookup, csvParser:split_cell}),
-		new Field("This Resource Requires", Field.MULTI_CHOICE, 
+		new Field("This Resource Requires", Field.MULTI_CHOICE,
 			{cat_name:"alignmentType", cat_val:"requires", choices:[], option_lookup:std_lookup, csvParser:split_cell})
 	];
 	for(key in this.alignmentFields) {
@@ -271,8 +270,8 @@ function Field(name, type, options, index) {
 		});
 		this.input.attr("size", "50");
 		this.input.datepicker( {
-			dateFormat:"yy-mm-dd" 
-		});		
+			dateFormat:"yy-mm-dd"
+		});
 	} else if(type==Field.BOOLEAN) {
 		this.input = $('<input>', {
 			type: "checkbox",
@@ -307,7 +306,7 @@ function Field(name, type, options, index) {
 				value.selected = true;
 			}
 			this.input.append($('<option>', value ));
-			
+
 	    }
 
 	}else if(type==Field.MULTI_CHOICE) {
@@ -349,7 +348,7 @@ function Field(name, type, options, index) {
 				return newopt;
 			} else if (this.depth <= 1){
 				var newoptgroup = $("<optgroup>", {
-					label: currentNode.name 
+					label: currentNode.name
 				});
 				var subopts = _.map(currentNode.children, buildOutChoices, {depth:this.depth+1});
 				newoptgroup.append(subopts);
@@ -439,8 +438,8 @@ function Field(name, type, options, index) {
 			dateRegex = new RegExp('^(\\d\\d\\d\\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$)');
 			this.input.match(dateRegex, this.tip);
 		}else if(this.type==Field.DURATION) {
-			durationRegex = new RegExp( 
-				'^(-)?P(?:(\\d+)Y)?(?:(\\d+)M)?(?:(\\d+)D)?' + 
+			durationRegex = new RegExp(
+				'^(-)?P(?:(\\d+)Y)?(?:(\\d+)M)?(?:(\\d+)D)?' +
 				'(T(?:(\\d+)H)?(?:(\\d+)M)?(?:(\\d+(?:\\.\\d+)?)S)?)?$');
 			this.input.match(durationRegex, this.tip);
 			//this.input.assert(Field.durationValidation(this.input.val()), [this.tip ] );
