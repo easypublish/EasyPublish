@@ -20,8 +20,8 @@
 				<ul>
 					<li><a href="#logout" class="signed-in">Log Out</a></li>
 					<li><a href="#settings" class="signed-in">Settings</a></li>
-					<li><a href="http://learningregistry.org/easypublish-docs">Documentation</a></li>
-					<li><a href="http://learningregistry.org">Learning Registry</a></li>
+					<li><a href="http://learningregistry.org/easypublish-docs" target="_blank">Documentation</a></li>
+					<li><a href="http://learningregistry.org" target="_blank">Learning Registry</a></li>
 				</ul>
 			</nav>
 		</header>
@@ -32,7 +32,7 @@
 
 		<footer role="contentinfo">
 			<div id="version-info" class="copy"></div>
-			<div class="copy">&copy; 2013 Learning Registry</div>
+			<div class="copy">&copy; 2016 Learning Registry</div>
 		</footer>
 
 		<div id="dialogContainer" aria-live="polite"></div>
@@ -267,7 +267,7 @@
 					<a href="#create" class="button">Register new item</a>
 					<button class="button" id="bulkUpload">Bulk upload in CSV</button>
 					<button class="button" id="sync">Sync from registry</button>
-					<a href="#help" class="help round-btn">Help</a>
+					<a href="#help" class="help button">Help</a>
 				</div>
 
 				<% if (data.length > 0) { %>
@@ -288,7 +288,7 @@
 					<span class="inline-form">
 						<select name="bulkmenu" class="bulkmenu">
 							<option value="publish">Publish</option>
-							<option value="delete-local">Delete</option>
+							<option value="delete">Delete</option>
 							<option value="delete-published">Delete Published</option>
 						</select>
 						<button type="button" class="button bulkactionsbtn">Go</button>
@@ -313,7 +313,7 @@
 					<span class="inline-form">
 						<select name="bulkmenu" class="bulkmenu">
 							<option value="publish">Publish</option>
-							<option value="delete-local">Delete</option>
+							<option value="delete">Delete</option>
 							<option value="delete-published">Delete Published</option>
 						</select>
 						<button type="button" class="button bulkactionsbtn">Go</button>
@@ -363,12 +363,12 @@
 			</td>
 			<td>
 				<% if (properties.name != undefined) { %>
-					<%= properties.name %>
+					<div id="resource-name"><%= properties.name %></div>
 				<% } %>
 			</td>
 			<td>
 				<% if (properties.url != undefined) { %>
-					<a class="resource-url" href="<%= properties.url %>" target="_blank"><%= properties.url %></a>
+					<div id="resource-url"><a href="<%= properties.url %>" target="_blank"><%= properties.url %></a></div>
 				<% } %>
 				<% if (properties.description != undefined) { %>
 					<div class="description"><%- properties.description %></div>
@@ -494,14 +494,14 @@
 							<legend>Resource Information</legend>
 						</fieldset>
 						<fieldset id="a11yForm">
-							<legend>Accessiblity Information</legend>
+							<legend>Accessibility Information</legend>
 						</fieldset>
 					</form>
 				</div>
 				<div class="control-row">
 					<button id="Save" class="button">Save Data</button>
 					<button id="Submit" class="button">Submit Data To Learning Registry</button>
-					<a href="#" id="Back">Back to item list</a>
+					<a href="#" id="Back" class="button">Back to item list</a>
 				</div>
 			</div>
 		</script>
@@ -688,12 +688,13 @@
 				</div>
 			</fieldset>
 			<div class="control-row">
-				<a href="#" id="Back">Back to item list</a>
+				<a href="#" id="Back" class="button">Back to item list</a>
 			</div>
 		</script>
 
 		<script type="text/template" id="csv-help-template">
 			<p>If you wish to enter data more rapidly, you can submit a CSV file. First click "Download CSV Template" to get a template file. Then add rows of data to that file. Next, import the file by clicking "Select file..."</p>
+			<p>Additional help can be found in the <b>Documentation</b> link in the top bar.</p>
 		</script>
 
 		<script type="text/template" id="version-info-template">

@@ -46,7 +46,7 @@ var author_objs = [
 ];
 var author_map = {},
 	author_types = {};
-	
+
 for (var idx in author_objs) {
 	author_types[author_objs[idx].text] = author_objs[idx];
 	author_map[author_objs[idx].text] = author_objs[idx];
@@ -55,6 +55,32 @@ for (var idx in author_objs) {
 
 function author_lookup(key) {
 	var found = author_map[key];
+
+	if (found) {
+		return found;
+	}
+	return null;
+}
+
+var accessRights_objs = [
+	{ text: "Free Access", value: "https://ceds.ed.gov/element/001561#FreeAccess" },
+	{ text: "Free Access with Registration", value: "https://ceds.ed.gov/element/001561#FreeAccessWithRegistration" },
+	{ text: "Limited Free Access", value: "https://ceds.ed.gov/element/001561#LimitedFreeAccess" },
+	{ text: "Available for Purchase", value: "https://ceds.ed.gov/element/001561#AvailableForPurchase" },
+	{ text: "Available by Subscription", value: "https://ceds.ed.gov/element/001561#AvailableBySubscription" }
+	//{ text: "Publisher Defined", value: "" }
+];
+var accessRights_map = {},
+	accessRights_types = {};
+
+for (var idx in accessRights_objs) {
+	accessRights_types[accessRights_objs[idx].text] = accessRights_objs[idx];
+	accessRights_map[accessRights_objs[idx].text] = accessRights_objs[idx];
+	accessRights_map[accessRights_objs[idx].value] = accessRights_objs[idx];
+}
+
+function accessRights_lookup(key) {
+	var found = accessRights_map[key];
 
 	if (found) {
 		return found;
@@ -84,7 +110,7 @@ function FieldManager() {
 		new Field("Description", Field.LONG_STRING, {required:true, objectName:"description"}),
 		new Field("Subject", Field.GROUPED_MULTI_CHOICE, {objectName:"keywords", choices:subjectsData, csvParser:split_cell}),
 		new Field("Grade", Field.MULTI_CHOICE, {objectName:"grade", choices:gradeChoices, csvParser:split_cell}),
-		new Field ("Typical Age Range", Field.CHOICE, {objectName:"typicalAgeRange", choices:typicalAgeRanges, csvParser:split_cell}),
+		new Field ("Typical Age Range", Field.MULTI_CHOICE, {objectName:"typicalAgeRange", choices:typicalAgeRanges, csvParser:split_cell}),
 		new Field("Date Created", Field.DATE,  {tip:"Date the resource was originally created, Format: YYYY-MM-DD", objectName:"dateCreated"}),
 		new Field("Date Modified", Field.DATE,  {tip:"Date the resource was most recently modified, Format: YYYY-MM-DD", objectName:"dateModified"}),
 		new Field("Language", Field.STRING, {objectName:"language"}),
@@ -92,7 +118,7 @@ function FieldManager() {
 		new Field("Learning Resource Type", Field.MULTI_CHOICE, {objectName:"learningResourceType", choices:learningResourceTypes, csvParser:split_cell}),
 		new Field("Interactivity", Field.MULTI_CHOICE, {objectName:"interactivityType", choices:interactivityTypes, csvParser:split_cell}),
 		new Field("Use Rights URL", Field.URL, {required:true, objectName:"useRightsUrl"}),
-		new Field ("Access Rights URL", Field.URL, {objectName:"accessRights"}),
+		new Field ("Access Rights URL", Field.CHOICE, {objectName:"accessRights", choices:_.keys(accessRights_types), option_lookup:accessRights_lookup}),
 		new Field("Is based on URL", Field.URL, {objectName:"isBasedOnUrl"}),
 	];
 	for(key in this.mainFields) {
@@ -120,10 +146,10 @@ function FieldManager() {
 	var accessibilityAPI = ["AndroidAccessibility", "ARIA", "ATK", "AT-SPI", "BlackberryAccessibility", "iAccessible2", "iOSAccessibility", "JavaAccess","Android Accessibility","ARIA","ATK","AT-SPI","Blackberry Accessibility","iAccessible2","iOS Accessibility","Java","Accessibility","Mac OSX Accessibility","MSAA","UI Automation"];
 	var accessibilityControl = ["Full Keyboard Control","Full Mouse Control","Full Switch Control","Full Touch Control","Full Video Control","Full Voice Control"];
 	this.a11yFields = [
-		new Field("Accessiblity Feature", Field.MULTI_CHOICE, {objectName:"accessibilityFeature", choices:accessibilityFeature, csvParser:split_cell}),
-		new Field("Accessiblity Hazard", Field.MULTI_CHOICE, {objectName:"accessibilityHazard", choices:accessibilityHazard, csvParser:split_cell}),
-		new Field("Accessiblity API", Field.MULTI_CHOICE, {objectName:"accessibilityAPI", choices:accessibilityAPI, csvParser:split_cell}),
-		new Field("Accessiblity Control", Field.MULTI_CHOICE, {objectName:"accessibilityControl", choices:accessibilityControl, csvParser:split_cell})
+		new Field("Accessibility Feature", Field.MULTI_CHOICE, {objectName:"accessibilityFeature", choices:accessibilityFeature, csvParser:split_cell}),
+		new Field("Accessibility Hazard", Field.MULTI_CHOICE, {objectName:"accessibilityHazard", choices:accessibilityHazard, csvParser:split_cell}),
+		new Field("Accessibility API", Field.MULTI_CHOICE, {objectName:"accessibilityAPI", choices:accessibilityAPI, csvParser:split_cell}),
+		new Field("Accessibility Control", Field.MULTI_CHOICE, {objectName:"accessibilityControl", choices:accessibilityControl, csvParser:split_cell})
 	];
 	for(key in this.a11yFields) {
 		var field = this.a11yFields[key];

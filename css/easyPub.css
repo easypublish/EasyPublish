@@ -37,6 +37,10 @@ body {
 	padding-left: 60px;
 }
 
+.chosen-container .chosen-results li.group-option.depth-6 {
+	padding-left: 75px;
+}
+
 #ez-publish-banner {
 	font-size: 2em;
 	float: left;
@@ -492,11 +496,19 @@ legend {
 form.bulkactions table .description
 {
 	max-height: 3.5em;
-	overflow: auto;
+	width: 280;
+	overflow: hidden;
 }
 
+#resource-url {
+	width:280;
+	overflow:hidden;
+}
 
-
+#resource-name {
+	width:150;
+	overflow:hidden;
+}
 /*
  *	jQuery UI overrides
  */

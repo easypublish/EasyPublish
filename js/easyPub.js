@@ -1,4 +1,4 @@
-$(function() { 
+$(function() {
 	// var easyPub = new EasyPublish();
 });
 
@@ -15,8 +15,8 @@ function EasyPublish() {
 	this.fieldManager = new FieldManager();
 	var dnd = new DragAndDrop(this);
     dnd.bind("csvFile");
-    
 	this.dataManager = new DataManager(this);
+
 	var validator = new Validator();
 
 	this.importIndex = 0;
@@ -47,14 +47,14 @@ function EasyPublish() {
 			var nextRow = new FieldEditorRow(nextField);
 			if(name=="author") {
 				$("#addAuthor").before(nextRow.elem);
-			} else {	
-				nextRow.elem.appendTo(formSection);	
+			} else {
+				nextRow.elem.appendTo(formSection);
 			}
 			//have to construct combo boxes after they've been added to DOM
 			if(nextField.type==Field.CHOICE) {
 
             }else if (nextField.type==Field.MULTI_CHOICE || nextField.type==Field.GROUPED_MULTI_CHOICE){
-                
+
 			}else if (nextField.type==Field.TREE_CHOICE || nextField.type==Field.STANDARDS_TREE_CHOICE) {
 				nextField.treeMenu.initGUI();
 			}
@@ -90,7 +90,7 @@ function EasyPublish() {
     	}
 	}
 
-	// For global replacement of row delimiters 
+	// For global replacement of row delimiters
 	String.prototype.replaceAll = function(expression, result) {
 		var textToSearch = this;
 		return textToSearch.replace(new RegExp(expression, 'g'), result);
@@ -99,14 +99,12 @@ function EasyPublish() {
 	this.fileDropped = function(fileData) {
         var quote_char = Preferences.getPreference("csv-quote-char", "\"").escapedValue(),
             col_delim = Preferences.getPreference("csv-col-delim", ",").escapedValue(),
-            row_delim = Preferences.getPreference("csv-row-delim", "\\n").escapedValue();
+            row_delim = "\n"; // no longer a pref
         // var arrData = this.dataManager.CSVToArray(fileData);
-		
-		
 		// Convert rows to just an "\n" delimiter
-		var rowParsed = fileData.replaceAll("\\r","\\n");
-		rowParsed = fileData.replaceAll("\\n\\n","\\n");
-		
+        var rowParsed = fileData.replaceAll("\r","\n");
+        rowParsed = rowParsed.replaceAll("\n\n","\n");
+
         var arrData = rowParsed.csvToArray({fSep: col_delim, rSep:row_delim, quot:quote_char, trim:true});
         var objData = this.dataManager.twoDArrayToObjectArray(arrData, this.fieldManager);
 		var rowCount = objData.numRows;
@@ -187,7 +185,6 @@ function EasyPublish() {
     	var indexTest = /([\w]*)_(\d+)$/;
     	var authorTest = /[\w]*author[\w]*/;
     	var alignmentTest = /[\w]*(alignmentType|educationalFramework|Standard)[\w]*/;
-
     	for(var key in that.importedData) {
     		if(key=="numRows") {
     			continue;
@@ -201,14 +198,16 @@ function EasyPublish() {
         			if(key_index>authorCount) {
         				that.addAuthor();
         			}
-        		} 
+        		}
                 // else if (key.match(alignmentTest)) {
                 //     if(key_index>alignmentCount) {
                 //     	that.addAlignment();
                 //     }
                 // }
         	}
+
             var field = that.fieldManager.fieldDictionary[key];
+
             if (field) {
                 field.value(val);
             } else {
@@ -231,9 +230,9 @@ function EasyPublish() {
     	var indexTest = /([\w]*)_(\d+)$/;
     	var authorTest = /[\w]*author[\w]*/;
     	var alignmentTest = /[\w]*(alignmentType|educationalFramework|Standard)[\w]*/;
-        
+
     	_.each(_.union(_.keys(that.fieldManager.fieldDictionary), _.keys(data)), function (key) {
-            
+
         	if(key.match(indexTest)) {
         		match = indexTest.exec(key);
         		var base = match[1];
@@ -242,7 +241,7 @@ function EasyPublish() {
         			if(key_index>authorCount) {
         				that.addAuthor();
         			}
-        		} 
+        		}
                 // else if (key.match(alignmentTest)) {
         		// 	if(key_index>alignmentCount) {
         		// 		that.addAlignment();
@@ -255,7 +254,7 @@ function EasyPublish() {
                 if (field.option_default && field.option_lookup) {
                     var lookup = field.option_lookup(field.option_default);
                     if (lookup)
-                        default_val = lookup.value; 
+                        default_val = lookup.value;
                 }
                 var val = data[key] || default_val;
                 field.value(val);
@@ -279,24 +278,25 @@ function EasyPublish() {
     	var messages = [];
     	var totalValidRows = 0;
     	var totalErrorRows = 0;
+
+
     	for (var i=0; i<that.importedData.numRows; i++) {
     		var rowMessages = {valid:true};
 	    	for(key in fields) {
 				var nextField = fields[key];
-				
 				if (typeof that.importedData[key] != 'undefined'){
 				var message = validator.validateField(nextField, that.importedData[key][i]);
 				} else if (nextField.required == true) {
 					rowMessages.valid = false;
 				}
-			
+
 				if(message!="") {
 					rowMessages[key] = message;
 					rowMessages.valid = false;
 				}
-				
+
 				}
-			
+
 			messages.push(rowMessages);
 			if (rowMessages.valid) {
 				totalValidRows++;
@@ -304,7 +304,7 @@ function EasyPublish() {
 				totalErrorRows++;
 			}
 		}
-		
+
 		return {
 			totalValidRows: totalValidRows,
 			totalErrorRows: totalErrorRows,
@@ -319,19 +319,19 @@ function EasyPublish() {
 
 	this.getAuthors = function() {
 		var authors = [];
-		
+
 		//If user uploads author type, convert to full id - can now upload type or full id
 		var authorConverted = this.getValue("author_type");
 
 		// Flag for whether or not an author has been converted, if it hasn't, it sends the default option, Person over to the form.
 		var converted = false;
-		
+
 		// Dictionaries for what other options to look for in Author
 		var orgDictionary = ["Organization" ,"organization" ,"ORGANIZATION"];
 		var personDictionary = ["Person", "person","PERSON"];
-		
+
 		for (j=0; j <= personDictionary.length; j++){
-			
+
 			if (authorConverted == orgDictionary[j])  {
 					authorConverted = "http://schema.org/Organization";
 					converted = true;
@@ -343,7 +343,7 @@ function EasyPublish() {
 				authorConverted = "http://schema.org/Person"; //Sends over Person which is the default option instead of null value.
 			}
 		}
-		
+
 		var author0 = {
             "@type": authorConverted,
 		    name: this.getValue("author_name"),
@@ -351,12 +351,13 @@ function EasyPublish() {
             email:  this.getValue("author_email")
 		}
 		authors[0] = author0;
+
 		if(authorCount>1) {
 			for(var i=2; i<=authorCount; i++) {
-				
+
 			converted = false;
 			var authorConvertedSecond = this.getValue("author_type_"+i);
-			
+
 			for (j=0; j <= personDictionary.length; j++){
 				if (authorConvertedSecond == orgDictionary[j])  {
 					authorConvertedSecond = "http://schema.org/Organization";
@@ -386,7 +387,7 @@ function EasyPublish() {
         var fieldWrappers = this.fieldManager.alignmentFields;
         var alignments = [];
         _.each(fieldWrappers, function(fieldWrapper) {
-            var fieldValues = fieldWrapper.value();    
+            var fieldValues = fieldWrapper.value();
             _.each(fieldValues, function(fieldVal) {
                 var align_info = gen_standards.find(fieldVal);
                 if (align_info) {
