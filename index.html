@@ -288,7 +288,7 @@
 					<span class="inline-form">
 						<select name="bulkmenu" class="bulkmenu">
 							<option value="publish">Publish</option>
-							<option value="delete-local">Delete</option>
+							<option value="delete">Delete</option>
 							<option value="delete-published">Delete Published</option>
 						</select>
 						<button type="button" class="button bulkactionsbtn">Go</button>
@@ -313,7 +313,7 @@
 					<span class="inline-form">
 						<select name="bulkmenu" class="bulkmenu">
 							<option value="publish">Publish</option>
-							<option value="delete-local">Delete</option>
+							<option value="delete">Delete</option>
 							<option value="delete-published">Delete Published</option>
 						</select>
 						<button type="button" class="button bulkactionsbtn">Go</button>
@@ -363,12 +363,12 @@
 			</td>
 			<td>
 				<% if (properties.name != undefined) { %>
-					<%= properties.name %>
+					<div id="resource-name"><%= properties.name %></div>
 				<% } %>
 			</td>
 			<td>
 				<% if (properties.url != undefined) { %>
-					<a class="resource-url" href="<%= properties.url %>" target="_blank"><%= properties.url %></a>
+					<div id="resource-url"><a href="<%= properties.url %>" target="_blank"><%= properties.url %></a></div>
 				<% } %>
 				<% if (properties.description != undefined) { %>
 					<div class="description"><%- properties.description %></div>
@@ -494,7 +494,7 @@
 							<legend>Resource Information</legend>
 						</fieldset>
 						<fieldset id="a11yForm">
-							<legend>Accessiblity Information</legend>
+							<legend>Accessibility Information</legend>
 						</fieldset>
 					</form>
 				</div>

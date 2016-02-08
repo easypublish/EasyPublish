@@ -15,8 +15,8 @@ function EasyPublish() {
 	this.fieldManager = new FieldManager();
 	var dnd = new DragAndDrop(this);
     dnd.bind("csvFile");
-
 	this.dataManager = new DataManager(this);
+
 	var validator = new Validator();
 
 	this.importIndex = 0;
@@ -101,7 +101,6 @@ function EasyPublish() {
             col_delim = Preferences.getPreference("csv-col-delim", ",").escapedValue(),
             row_delim = "\n"; // no longer a pref
         // var arrData = this.dataManager.CSVToArray(fileData);
-
 		// Convert rows to just an "\n" delimiter
         var rowParsed = fileData.replaceAll("\r","\n");
         rowParsed = rowParsed.replaceAll("\n\n","\n");
@@ -186,7 +185,6 @@ function EasyPublish() {
     	var indexTest = /([\w]*)_(\d+)$/;
     	var authorTest = /[\w]*author[\w]*/;
     	var alignmentTest = /[\w]*(alignmentType|educationalFramework|Standard)[\w]*/;
-
     	for(var key in that.importedData) {
     		if(key=="numRows") {
     			continue;
@@ -207,7 +205,9 @@ function EasyPublish() {
                 //     }
                 // }
         	}
+
             var field = that.fieldManager.fieldDictionary[key];
+
             if (field) {
                 field.value(val);
             } else {
@@ -278,11 +278,12 @@ function EasyPublish() {
     	var messages = [];
     	var totalValidRows = 0;
     	var totalErrorRows = 0;
+
+
     	for (var i=0; i<that.importedData.numRows; i++) {
     		var rowMessages = {valid:true};
 	    	for(key in fields) {
 				var nextField = fields[key];
-
 				if (typeof that.importedData[key] != 'undefined'){
 				var message = validator.validateField(nextField, that.importedData[key][i]);
 				} else if (nextField.required == true) {
@@ -350,6 +351,7 @@ function EasyPublish() {
             email:  this.getValue("author_email")
 		}
 		authors[0] = author0;
+
 		if(authorCount>1) {
 			for(var i=2; i<=authorCount; i++) {
 
