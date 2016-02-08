@@ -61,8 +61,8 @@ function author_lookup(key) {
 	}
 	return null;
 }
-
-var accessRights_objs = [
+// Block for making the accessRights a Choice, would restrict to only CEDS options.
+/*var accessRights_objs = [
 	{ text: "Free Access", value: "https://ceds.ed.gov/element/001561#FreeAccess" },
 	{ text: "Free Access with Registration", value: "https://ceds.ed.gov/element/001561#FreeAccessWithRegistration" },
 	{ text: "Limited Free Access", value: "https://ceds.ed.gov/element/001561#LimitedFreeAccess" },
@@ -86,7 +86,7 @@ function accessRights_lookup(key) {
 		return found;
 	}
 	return null;
-}
+}*/
 
 function FieldManager() {
 
@@ -117,7 +117,7 @@ function FieldManager() {
 		new Field("Learning Resource Type", Field.MULTI_CHOICE, {objectName:"learningResourceType", choices:learningResourceTypes, csvParser:split_cell}),
 		new Field("Interactivity", Field.MULTI_CHOICE, {objectName:"interactivityType", choices:interactivityTypes, csvParser:split_cell}),
 		new Field("Use Rights URL", Field.URL, {required:true, objectName:"useRightsUrl"}),
-		new Field ("Access Rights URL", Field.CHOICE, {objectName:"accessRights", choices:_.keys(accessRights_types), option_lookup:accessRights_lookup}),
+		new Field ("Access Rights URL", Field.URL, {objectName:"accessRights"}),
 		new Field("Is based on URL", Field.URL, {objectName:"isBasedOnUrl"}),
 	];
 	for(key in this.mainFields) {
