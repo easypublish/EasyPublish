@@ -88,6 +88,32 @@ function accessRights_lookup(key) {
 	return null;
 }*/
 
+var accessRights_objs = [
+	{ text: "Free Access", value: "https://ceds.ed.gov/element/001561#FreeAccess" },
+	{ text: "Free Access with Registration", value: "https://ceds.ed.gov/element/001561#FreeAccessWithRegistration" },
+	{ text: "Limited Free Access", value: "https://ceds.ed.gov/element/001561#LimitedFreeAccess" },
+	{ text: "Available for Purchase", value: "https://ceds.ed.gov/element/001561#AvailableForPurchase" },
+	{ text: "Available by Subscription", value: "https://ceds.ed.gov/element/001561#AvailableBySubscription" }
+	//{ text: "Publisher Defined", value: "" }
+];
+var accessRights_map = {},
+	accessRights_types = {};
+
+for (var idx in accessRights_objs) {
+	accessRights_types[accessRights_objs[idx].text] = accessRights_objs[idx];
+	accessRights_map[accessRights_objs[idx].text] = accessRights_objs[idx];
+	accessRights_map[accessRights_objs[idx].value] = accessRights_objs[idx];
+}
+
+function accessRights_lookup(key) {
+	var found = accessRights_map[key];
+
+	if (found) {
+		return found;
+	}
+	return null;
+}
+
 function FieldManager() {
 
 	var mediaTypes = ["Audio", "Document", "Image", "Video", "Other"];
@@ -117,7 +143,7 @@ function FieldManager() {
 		new Field("Learning Resource Type", Field.MULTI_CHOICE, {objectName:"learningResourceType", choices:learningResourceTypes, csvParser:split_cell}),
 		new Field("Interactivity", Field.MULTI_CHOICE, {objectName:"interactivityType", choices:interactivityTypes, csvParser:split_cell}),
 		new Field("Use Rights URL", Field.URL, {required:true, objectName:"useRightsUrl"}),
-		new Field ("Access Rights URL", Field.URL, {objectName:"accessRights"}),
+		new Field ("Access Rights URL", Field.CHOICE, {objectName:"accessRights", choices:_.keys(accessRights_types), option_lookup:accessRights_lookup}),
 		new Field("Is based on URL", Field.URL, {objectName:"isBasedOnUrl"}),
 	];
 	for(key in this.mainFields) {

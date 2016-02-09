@@ -374,7 +374,7 @@ function DataManager(easyPub) {
 
                     arrData[rowIndex][colIndex] = "https://ceds.ed.gov/element/001561#AvailableBySubscription";
 
-                }
+                } 
 
             }
             if (fieldName == 'Date Created'|| fieldName == 'Date Modified') {
