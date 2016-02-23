@@ -323,26 +323,27 @@ function EasyPublish() {
 		//If user uploads author type, convert to full id - can now upload type or full id
 		var authorConverted = this.getValue("author_type");
 
-		// Flag for whether or not an author has been converted, if it hasn't, it sends the default option, Person over to the form.
+		// Flag for whether or not an author has been converted, if it hasn't, it sends the default option
 		var converted = false;
+        var default_author_type = "http://schema.org/Organization";
 
 		// Dictionaries for what other options to look for in Author
-		var orgDictionary = ["Organization" ,"organization" ,"ORGANIZATION"];
-		var personDictionary = ["Person", "person","PERSON"];
+		var orgDictionary = ["Organization", "organization", "ORGANIZATION"];
+		var personDictionary = ["Person", "person", "PERSON"];
 
 		for (j=0; j <= personDictionary.length; j++){
-
 			if (authorConverted == orgDictionary[j])  {
-					authorConverted = "http://schema.org/Organization";
-					converted = true;
+				authorConverted = "http://schema.org/Organization";
+				converted = true;
 			}
 			else if (authorConverted == personDictionary[j]) {
 				authorConverted = "http://schema.org/Person";
 				converted = true;
-			} else if (converted == false){
-				authorConverted = "http://schema.org/Person"; //Sends over Person which is the default option instead of null value.
 			}
 		}
+        if (converted == false){
+            authorConverted = default_author_type; //Sends over the default option instead of null value.
+        }
 
 		var author0 = {
             "@type": authorConverted,
@@ -355,21 +356,24 @@ function EasyPublish() {
 		if(authorCount>1) {
 			for(var i=2; i<=authorCount; i++) {
 
-			converted = false;
-			var authorConvertedSecond = this.getValue("author_type_"+i);
+    			converted = false;
+    			var authorConvertedSecond = this.getValue("author_type_"+i);
 
-			for (j=0; j <= personDictionary.length; j++){
-				if (authorConvertedSecond == orgDictionary[j])  {
-					authorConvertedSecond = "http://schema.org/Organization";
-					converted = true;
-				}
-				else if (authorConvertedSecond == personDictionary[j]) {
-					authorConvertedSecond = "http://schema.org/Person";
-					converted = true;
-				} else if (converted == false) {
-					aauthorConvertedSecond = "http://schema.org/Person"; //Sends over Person which is the default option instead of null value.
-				}
-			}
+    			for (j=0; j <= personDictionary.length; j++){
+    				if (authorConvertedSecond == orgDictionary[j])  {
+    					authorConvertedSecond = "http://schema.org/Organization";
+    					converted = true;
+    				}
+    				else if (authorConvertedSecond == personDictionary[j]) {
+    					authorConvertedSecond = "http://schema.org/Person";
+    					converted = true;
+    				}
+    			}
+
+                if (converted == false) {
+                    authorConvertedSecond = default_author_type; //Sends over the default option instead of null value.
+                }
+
 				var author = {
                     "@type": authorConvertedSecond,
 				    name: this.getValue("author_name_"+i),
