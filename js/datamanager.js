@@ -345,142 +345,139 @@ function DataManager(easyPub) {
                 }
             }
 
-           console.log("remapping: " + fieldName + " to: " + fieldKey);
+            //console.log("remapping: " + fieldName + " to: " + fieldKey);
             var colData = [];
 
             for(var rowIndex=1; rowIndex<arrData.length; rowIndex++) {
 
-            if (typeof fieldName != 'undefined') {
+                if (typeof fieldName != 'undefined') {
 
-            if (fieldName == "Author Type" || fieldName == "Author Type 2") {
-                console.log(fieldName + " before is " + arrData[rowIndex][colIndex]);
-                if (arrData[rowIndex][colIndex] == "Person" ||  arrData[rowIndex][colIndex] == "person" || arrData[rowIndex][colIndex] == "PERSON") {
-                    arrData[rowIndex][colIndex] = "http://schema.org/Person";
-                } else if (arrData[rowIndex][colIndex] == "Organization" ||  arrData[rowIndex][colIndex] == "organization" || arrData[rowIndex][colIndex] == "ORGANIZATION") {
-                    arrData[rowIndex][colIndex] = "http://schema.org/Organization";
-                }
-                console.log(fieldName + " after is " + arrData[rowIndex][colIndex]);
-            }
-
-            if (fieldName == 'Access Rights URL') {
-                console.log(fieldName + " before is " + arrData[rowIndex][colIndex]);
-                accessVal = arrData[rowIndex][colIndex].replace(/\s+/g, '').toLowerCase();;
-                console.log(fieldName + " after normalized is " + accessVal);
-
-                if (arrData[rowIndex][colIndex] == "Free Access" || arrData[rowIndex][colIndex] == "FreeAccess" || arrData[rowIndex][colIndex] == "free access" || arrData[rowIndex][colIndex] == "freeaccess") {
-
-                    arrData[rowIndex][colIndex] = "https://ceds.ed.gov/element/001561#FreeAccess";
-
-                } else if (arrData[rowIndex][colIndex] == "Free Access with Registration" || arrData[rowIndex][colIndex] == "FreeAccesswithRegistration" || arrData[rowIndex][colIndex] == "free access with registration" || arrData[rowIndex][colIndex] == "freeaccesswithregistration") {
-
-                    arrData[rowIndex][colIndex] = "https://ceds.ed.gov/element/001561#FreeAccessWithRegistration";
-
-                } else if (arrData[rowIndex][colIndex] == "Limited Free Access" || arrData[rowIndex][colIndex] == "LimitedFreeAccess" || arrData[rowIndex][colIndex] == "limited free access" || arrData[rowIndex][colIndex] == "limitedfreeaccess") {
-
-                    arrData[rowIndex][colIndex] = "https://ceds.ed.gov/element/001561#LimitedFreeAccess";
-
-                } else if (arrData[rowIndex][colIndex] == "Available for Purchase" || arrData[rowIndex][colIndex] == "AvailableforPurchase" || arrData[rowIndex][colIndex] == "available for purchase" || arrData[rowIndex][colIndex] == "availableforpurchase") {
-
-                    arrData[rowIndex][colIndex] = "https://ceds.ed.gov/element/001561#AvailableForPurchase";
-
-                } else if (arrData[rowIndex][colIndex] == "Available by Subscription" || arrData[rowIndex][colIndex] == "AvailablebySubscription" || arrData[rowIndex][colIndex] == "available by subscription" || arrData[rowIndex][colIndex] == "availablebysubscription") {
-
-                    arrData[rowIndex][colIndex] = "https://ceds.ed.gov/element/001561#AvailableBySubscription";
-
-                }
-                console.log(fieldName + " after replacing is " + arrData[rowIndex][colIndex]);
-            }
-            if (fieldName == 'Date Created'|| fieldName == 'Date Modified') {
-
-                // Pulls the current year to determine 20/21c
-                var year = new Date().getFullYear();
-                // We only want the last two digits to compare to Excel's data
-                year = year.toString().substr(2,2);
-
-                // Converts val to a string so that we can evaluate it with RegExp
-                var excelTest = arrData[rowIndex][colIndex];
-
-                // Tests for the default Excel formatting when the year only has two digits.
-                var excelRegex = new RegExp(/^([1-9]|1[0-2])\/([1-9]|1\d|2\d|3[01])\/\d{2}$/);
-                var excelRegexTwo = new RegExp(/^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])\/\d{2}$/);
-
-                // Test for the default Excel formatting when the year has 4 digits.
-                var excelRegexThree = new RegExp(/^([1-9]|1[0-2])\/([1-9]|1\d|2\d|3[01])\/\d{4}$/);
-                var excelRegexFour = new RegExp(/^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])\/\d{4}$/);
-
-                // Matches regular expressions for dates with 2 digit years
-                var excelMatch = excelTest.match(excelRegex);
-                var excelMatchTwo = excelTest.match(excelRegexTwo);
-
-                // Matches Regular expressions for dates with 4 digit years
-                var excelMatchThree = excelTest.match(excelRegexThree);
-                var excelMatchFour = excelTest.match(excelRegexFour);
-
-                // We will need to convert the strings over depending on whether or not they have a 0 in the month / day
-                var convertedYear = "",
-                    convertedMonth = "",
-                    convertedDay = ""
-                    convertedDate = "";
-
-                // If data matches Excel's default formatting with two digit years
-                if (excelMatch != null || excelMatchTwo != null) {
-                    var splitString = excelTest.split("/");
-
-                    //Convert year from ## to ####
-                    if (splitString[2] > year) {
-                        convertedYear = "19" + splitString[2];
-                    } else {
-                        convertedYear = "20" + splitString[2];
+                    if (fieldName == "Author Type" || fieldName == "Author Type 2") {
+                        authTypeVal = arrData[rowIndex][colIndex].replace(/\s+/g, '').toLowerCase();;
+                        if (authTypeVal == "person" || arrData[rowIndex][colIndex] == "http://schema.org/person") {
+                            arrData[rowIndex][colIndex] = "http://schema.org/Person";
+                        } else if (authTypeVal == "organization" || arrData[rowIndex][colIndex] == "http://schema.org/organization") {
+                            arrData[rowIndex][colIndex] = "http://schema.org/Organization";
+                        }
                     }
 
-                    //Convert day < 10 to 0# format
-                    if (splitString[1] < 10 && splitString[1].length < 2) {
-                        convertedDay = "0" + splitString[1];
-                    } else {
-                         convertedDay = splitString[1];
-                    }
+                    if (fieldName == 'Access Rights URL') {
+                        accessVal = arrData[rowIndex][colIndex].replace(/\s+/g, '').toLowerCase();;
 
-                    //Convert month < 10 to 0# format
-                     if (splitString[0] < 10 && splitString[0].length < 2) {
-                        convertedMonth = "0" + splitString[0];
-                    } else {
-                        convertedMonth = splitString[0];
-                    }
-                    //Put the proper format together and submit
-                    convertedDate = convertedYear + "-" + convertedMonth + "-" + convertedDay;
-                    //field.value(convertedDate);
-                    arrData[rowIndex][colIndex] = convertedDate;
+                        switch (accessVal)
+                        {
+                            case "freeaccess": arrData[rowIndex][colIndex] = "https://ceds.ed.gov/element/001561#FreeAccess";
+                            break;
 
-                    // If data matches Excel's default formatting with four digit years
-                    } else if (excelMatchThree != null || excelMatchFour != null) {
+                            case "freeaccesswithregistration": arrData[rowIndex][colIndex] = "https://ceds.ed.gov/element/001561#FreeAccesswithRegistration";
+                            break;
 
-                        var splitString = excelTest.split("/");
+                            case "limitedfreeaccess": arrData[rowIndex][colIndex] = "https://ceds.ed.gov/element/001561#LimitedFreeAccess";
+                            break;
 
-                        //Convert day < 10 to 0# format
-                        if (splitString[1] < 10 && splitString[1].length < 2) {
-                            convertedDay = "0" + splitString[1];
-                        } else {
-                            convertedDay = splitString[1];
+                            case "availableforpurchase": arrData[rowIndex][colIndex] = "https://ceds.ed.gov/element/001561#AvailableforPurchase";
+                            break;
+
+                            case "availablebysubscription": arrData[rowIndex][colIndex] = "https://ceds.ed.gov/element/001561#AvailablebySubscription";
+                            break;
+
+                            default: console.log("unmatched accessRights value: " + accessVal);
+
                         }
 
-                         //Convert month < 10 to 0# format
-                        if (splitString[0] < 10 && splitString[0].length < 2) {
-                            convertedMonth = "0" + splitString[0];
-                        } else {
-                            convertedMonth = splitString[0];
-                        }
-                        //Put the proper format together and submit
-                        convertedDate = splitString[2] + "-" + convertedMonth + "-" + convertedDay;
-
-                        //field.value(convertedDate);
-                        arrData[rowIndex][colIndex] = convertedDate;
                     }
-                }
-            }
-                colData[rowIndex-1] = arrData[rowIndex][colIndex];
+
+                    if (fieldName == 'Date Created'|| fieldName == 'Date Modified') {
+
+                        // Pulls the current year to determine 20/21c
+                        var year = new Date().getFullYear();
+                        // We only want the last two digits to compare to Excel's data
+                        year = year.toString().substr(2,2);
+
+                        // Converts val to a string so that we can evaluate it with RegExp
+                        var excelTest = arrData[rowIndex][colIndex];
+
+                        // Tests for the default Excel formatting when the year only has two digits.
+                        var excelRegex = new RegExp(/^([1-9]|1[0-2])\/([1-9]|1\d|2\d|3[01])\/\d{2}$/);
+                        var excelRegexTwo = new RegExp(/^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])\/\d{2}$/);
+
+                        // Test for the default Excel formatting when the year has 4 digits.
+                        var excelRegexThree = new RegExp(/^([1-9]|1[0-2])\/([1-9]|1\d|2\d|3[01])\/\d{4}$/);
+                        var excelRegexFour = new RegExp(/^(0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])\/\d{4}$/);
+
+                        // Matches regular expressions for dates with 2 digit years
+                        var excelMatch = excelTest.match(excelRegex);
+                        var excelMatchTwo = excelTest.match(excelRegexTwo);
+
+                        // Matches Regular expressions for dates with 4 digit years
+                        var excelMatchThree = excelTest.match(excelRegexThree);
+                        var excelMatchFour = excelTest.match(excelRegexFour);
+
+                        // We will need to convert the strings over depending on whether or not they have a 0 in the month / day
+                        var convertedYear = "",
+                            convertedMonth = "",
+                            convertedDay = ""
+                            convertedDate = "";
+
+                        // If data matches Excel's default formatting with two digit years
+                        if (excelMatch != null || excelMatchTwo != null) {
+                            var splitString = excelTest.split("/");
+
+                            //Convert year from ## to ####
+                            if (splitString[2] > year) {
+                                convertedYear = "19" + splitString[2];
+                            } else {
+                                convertedYear = "20" + splitString[2];
+                            }
+
+                            //Convert day < 10 to 0# format
+                            if (splitString[1] < 10 && splitString[1].length < 2) {
+                                convertedDay = "0" + splitString[1];
+                            } else {
+                                 convertedDay = splitString[1];
+                            }
+
+                            //Convert month < 10 to 0# format
+                             if (splitString[0] < 10 && splitString[0].length < 2) {
+                                convertedMonth = "0" + splitString[0];
+                            } else {
+                                convertedMonth = splitString[0];
+                            }
+                            //Put the proper format together and submit
+                            convertedDate = convertedYear + "-" + convertedMonth + "-" + convertedDay;
+                            //field.value(convertedDate);
+                            arrData[rowIndex][colIndex] = convertedDate;
+
+                            // If data matches Excel's default formatting with four digit years
+                            } else if (excelMatchThree != null || excelMatchFour != null) {
+
+                                var splitString = excelTest.split("/");
+
+                                //Convert day < 10 to 0# format
+                                if (splitString[1] < 10 && splitString[1].length < 2) {
+                                    convertedDay = "0" + splitString[1];
+                                } else {
+                                    convertedDay = splitString[1];
+                                }
+
+                                 //Convert month < 10 to 0# format
+                                if (splitString[0] < 10 && splitString[0].length < 2) {
+                                    convertedMonth = "0" + splitString[0];
+                                } else {
+                                    convertedMonth = splitString[0];
+                                }
+                                //Put the proper format together and submit
+                                convertedDate = splitString[2] + "-" + convertedMonth + "-" + convertedDay;
+
+                                //field.value(convertedDate);
+                                arrData[rowIndex][colIndex] = convertedDate;
+                            }
+                        }
+                    }
+                    colData[rowIndex-1] = arrData[rowIndex][colIndex];
 
                 // handle wonky cells that could contain another dimension.
-            if (fieldDictionary[fieldBaseKey] && !!fieldDictionary[fieldBaseKey].csvParser) {
+                if (fieldDictionary[fieldBaseKey] && !!fieldDictionary[fieldBaseKey].csvParser) {
                     colData[rowIndex-1] = fieldDictionary[fieldBaseKey].csvParser(colData[rowIndex-1]);
                 }
 
