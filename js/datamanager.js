@@ -352,6 +352,14 @@ function DataManager(easyPub) {
 
             if (typeof fieldName != 'undefined') {
 
+            if (fieldName == "Author Type" || fieldName == "Author Type 2") {
+                if (arrData[rowIndex][colIndex] == "Person" ||  arrData[rowIndex][colIndex] == "person" || arrData[rowIndex][colIndex] == "PERSON") {
+                    arrData[rowIndex][colIndex] = "http://schema.org/Person";
+                } 
+                if (arrData[rowIndex][colIndex] == "Organization" ||  arrData[rowIndex][colIndex] == "organization" || arrData[rowIndex][colIndex] == "ORGANIZATION") {
+                    arrData[rowIndex][colIndex] = "http://schema.org/Organization";
+                }
+            }
             if (fieldName == 'Access Rights URL') {
 
                 if (arrData[rowIndex][colIndex] == "Free Access" || arrData[rowIndex][colIndex] == "FreeAccess" || arrData[rowIndex][colIndex] == "free access" || arrData[rowIndex][colIndex] == "freeaccess") {
@@ -464,7 +472,6 @@ function DataManager(easyPub) {
                     }
                 }
             }
-
                 colData[rowIndex-1] = arrData[rowIndex][colIndex];
 
                 // handle wonky cells that could contain another dimension.
