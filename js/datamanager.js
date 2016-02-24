@@ -345,7 +345,7 @@ function DataManager(easyPub) {
                 }
             }
 
-           // console.log("remapping: " + fieldName + " to: " + fieldKey);
+           console.log("remapping: " + fieldName + " to: " + fieldKey);
             var colData = [];
 
             for(var rowIndex=1; rowIndex<arrData.length; rowIndex++) {
@@ -353,14 +353,19 @@ function DataManager(easyPub) {
             if (typeof fieldName != 'undefined') {
 
             if (fieldName == "Author Type" || fieldName == "Author Type 2") {
+                console.log(fieldName + " before is " + arrData[rowIndex][colIndex]);
                 if (arrData[rowIndex][colIndex] == "Person" ||  arrData[rowIndex][colIndex] == "person" || arrData[rowIndex][colIndex] == "PERSON") {
                     arrData[rowIndex][colIndex] = "http://schema.org/Person";
-                } 
-                if (arrData[rowIndex][colIndex] == "Organization" ||  arrData[rowIndex][colIndex] == "organization" || arrData[rowIndex][colIndex] == "ORGANIZATION") {
+                } else if (arrData[rowIndex][colIndex] == "Organization" ||  arrData[rowIndex][colIndex] == "organization" || arrData[rowIndex][colIndex] == "ORGANIZATION") {
                     arrData[rowIndex][colIndex] = "http://schema.org/Organization";
                 }
+                console.log(fieldName + " after is " + arrData[rowIndex][colIndex]);
             }
+
             if (fieldName == 'Access Rights URL') {
+                console.log(fieldName + " before is " + arrData[rowIndex][colIndex]);
+                accessVal = arrData[rowIndex][colIndex].replace(/\s+/g, '').toLowerCase();;
+                console.log(fieldName + " after normalized is " + accessVal);
 
                 if (arrData[rowIndex][colIndex] == "Free Access" || arrData[rowIndex][colIndex] == "FreeAccess" || arrData[rowIndex][colIndex] == "free access" || arrData[rowIndex][colIndex] == "freeaccess") {
 
@@ -382,8 +387,8 @@ function DataManager(easyPub) {
 
                     arrData[rowIndex][colIndex] = "https://ceds.ed.gov/element/001561#AvailableBySubscription";
 
-                } 
-
+                }
+                console.log(fieldName + " after replacing is " + arrData[rowIndex][colIndex]);
             }
             if (fieldName == 'Date Created'|| fieldName == 'Date Modified') {
 
