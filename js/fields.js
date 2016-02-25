@@ -135,7 +135,7 @@ function FieldManager() {
 		new Field("Description", Field.LONG_STRING, {required:true, objectName:"description"}),
 		new Field("Subject", Field.GROUPED_MULTI_CHOICE, {objectName:"keywords", choices:subjectsData, csvParser:split_cell}),
 		new Field("Grade", Field.MULTI_CHOICE, {objectName:"grade", choices:gradeChoices, csvParser:split_cell}),
-		new Field ("Typical Age Range", Field.MULTI_CHOICE, {objectName:"typicalAgeRange", choices:typicalAgeRanges, csvParser:split_cell}),
+		new Field("Typical Age Range", Field.MULTI_CHOICE, {objectName:"typicalAgeRange", choices:typicalAgeRanges, csvParser:split_cell}),
 		new Field("Date Created", Field.DATE,  {tip:"Date the resource was originally created, Format: YYYY-MM-DD", objectName:"dateCreated"}),
 		new Field("Date Modified", Field.DATE,  {tip:"Date the resource was most recently modified, Format: YYYY-MM-DD", objectName:"dateModified"}),
 		new Field("Language", Field.STRING, {objectName:"language"}),
@@ -143,7 +143,7 @@ function FieldManager() {
 		new Field("Learning Resource Type", Field.MULTI_CHOICE, {objectName:"learningResourceType", choices:learningResourceTypes, csvParser:split_cell}),
 		new Field("Interactivity", Field.MULTI_CHOICE, {objectName:"interactivityType", choices:interactivityTypes, csvParser:split_cell}),
 		new Field("Use Rights URL", Field.URL, {required:true, objectName:"useRightsUrl"}),
-		new Field ("Access Rights URL", Field.CHOICE, {objectName:"accessRights", choices:_.keys(accessRights_types), option_lookup:accessRights_lookup}),
+		new Field("Access Rights URL", Field.CHOICE, {required:true,objectName:"accessRights", choices:_.keys(accessRights_types), option_lookup:accessRights_lookup}),
 		new Field("Is based on URL", Field.URL, {objectName:"isBasedOnUrl"}),
 	];
 	for(key in this.mainFields) {
