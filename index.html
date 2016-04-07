@@ -8,7 +8,6 @@
 		<link href="css/skin-lion/ui.fancytree.css" rel="stylesheet" />
 		<link href="css/chosen.css" rel="stylesheet">
 		<link href="css/easyPub.css" rel="stylesheet" />
-		<link href="/_browserid/style.css" rel="stylesheet">
 	</head>
 
 	<body>
@@ -56,8 +55,6 @@
 		<script type="text/javascript" src="js/lib/oauth.js"></script>
 		<script type="text/javascript" src="js/lib/json2.js"></script>
 		<script type="text/javascript" src="js/datamanager.js"></script>
-		<script type="text/javascript" src="/_browserid/include.js"></script>
-		<script type="text/javascript" src="/_browserid/main.js"></script>
 
 		<!-- used in add/edit page -->
 		<script type="text/javascript" src="js/jquery/autoCombobox.js"></script>
@@ -134,8 +131,6 @@
 		$(function () {
 			var users = require("users");
 
-
-
 			function checkSession(event){
 				if (storedCredentials) {
 					users.get(storedCredentials.name, function(err, userObj, info){
@@ -151,6 +146,7 @@
 
 			var w = undefined;
 
+/* old Persona login code
 
 			// login and logout event handlers
 			$.couch.browserid.login(function (event, error, user) {
@@ -176,6 +172,8 @@
 				}
 
 			});
+
+*/
 
 			// Views
 			var Credentials = require("lib/views/credentials").Credentials;
@@ -246,13 +244,19 @@
 
 		<!-- templates -->
 		<script type="text/template" id="credentials-template">
-			<h1>Click "Sign in" to Login or Create an account.</h1>
-			<div id="browserid" class="control-row">
-				<div class="login">
-					<img src="/_browserid/sign_in_blue.png">
-				</div>
-				<div class="picture"></div>
+			<h1>Login</h1>
+
+			<div class="credentials">
+				<p>If you do not already have an approved account, you will be redirected to a registration form.</p>
+
+				<a href="#" data-provider="google"><img border="0" alt="Sign in with Google" src="img/btn_google_signin_dark_normal_web.png"/></a>
+				<a href="#" data-provider="amazon"><img border="0" alt="Login with Amazon" src="https://images-na.ssl-images-amazon.com/images/G/01/lwa/btnLWA_gold_195x46.png" width="195" height="46"/></a>
+				<a href="#" data-provider="microsoft"><img border="0" alt="Sign in with Microsoft" src="https://placeholdit.imgix.net/~text?txtsize=21&bg=0078d7&txtclr=ffffff&txt=Sign+in+with+Microsoft&w=195&h=46&txttrack=0" width="195" height="46"/></a>
+
 			</div>
+
+			<p>&nbsp;</p>
+
 		</script>
 
 		<script type="text/template" id="list-template">
