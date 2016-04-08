@@ -89,7 +89,7 @@ describe("JSON-LD", function() {
 					"12-14",
 					"14-16"
 				],
-                "useRightsUrl": ["http://www.example.com/useRights/1"],
+                "license": ["http://www.example.com/license/1"],
 				"accessRights": ["http://www.example.com/accessRights/1"], //new
                 "dateModified": ["2013-12-02"],
                 "description": ["This is a description"]
@@ -102,16 +102,13 @@ describe("JSON-LD", function() {
                 {
                     "@vocab": "http://schema.org/",
                     "url": { "@type": "@id" }
-                },
-                {
-                    "lrmi": "http://lrmi.net/the-specification#",
-                    "useRightsUrl": {"@id": "lrmi:useRightsUrl", "@type": "@id"}
                 }
             ],
             "@type": "CreativeWork",
             "@id": "http://www.example.com/1",
             "isBasedOnUrl": "http://www.example.com/basedUpon/1",
-			"accessRights": "http://www.example.com/accessRights/1", //new
+			"license": "http://creativecommons.org/licenses/by/3.0/us/", //new
+            "accessRights": "http://www.example.com/accessRights/1", //new
 			"thumbnailUrl": "http://www.example.com/somefile.jpg", //new
             "interactivityType": "interactive",
             "name": "Example Resource modified again",
@@ -121,10 +118,10 @@ describe("JSON-LD", function() {
 					"14-16"
 				,
             "author": {
-                "@type": "Person",   
+                "@type": "Person",
                 "url": "http://example.com/author/joe_example",
                 "name": "Joe Example",
-                "email": "joe@example.com"      
+                "email": "joe@example.com"
             },
             "url": "http://www.example.com/1",
             "publisher": {
@@ -137,12 +134,12 @@ describe("JSON-LD", function() {
             "dateCreated": "2013-12-02",
             "educationalAlignment": [
                 {
-                    "@type": "AlignmentObject",    
+                    "@type": "AlignmentObject",
                     "alignmentType": "educationLevel",
                     "educationalFramework": "US K-12 Grade Levels",
                     "targetName": "First grade"
                 }, {
-                    "@type": "AlignmentObject",    
+                    "@type": "AlignmentObject",
                     "alignmentType": "educationLevel",
                     "educationalFramework": "US K-12 Grade Levels",
                     "targetName": "Second grade"
@@ -152,7 +149,7 @@ describe("JSON-LD", function() {
                     "educationalFramework": "Common Core State Standards for English Language Arts",
                     "targetName": "CCSS.ELA-Literacy.CCRA.R.2",
                     "targetUrl": "http://corestandards.org/ELA-Literacy/CCRA/R/2"
-                }, { 
+                }, {
                     "@type": "AlignmentObject",
                     "alignmentType": "teaches",
                     "educationalFramework": "Common Core State Standards for English Language Arts",
@@ -164,7 +161,7 @@ describe("JSON-LD", function() {
                     "educationalFramework": "Common Core State Standards for English Language Arts",
                     "targetName": "CCSS.ELA-Literacy.CCRA.R.3",
                     "targetUrl": "http://corestandards.org/ELA-Literacy/CCRA/R/3"
-                }, { 
+                }, {
                     "@type": "AlignmentObject",
                     "alignmentType": "requires",
                     "educationalFramework": "Common Core State Standards for English Language Arts",
@@ -182,10 +179,10 @@ describe("JSON-LD", function() {
         var result = jsonldUtil.convertToJSONLD(htmlmicrodata);
         // console.log(JSON.stringify(result));
         // console.log(JSON.stringify(jsonld));
-        
+
         expect(jsonld["@context"]).toEqual(result["@context"]);
         expect(jsonld).toEqual(result);
-        
+
     });
 
     it("should convert JSON-LD to HTML Microdata", function() {

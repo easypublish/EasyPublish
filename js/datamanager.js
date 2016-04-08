@@ -73,7 +73,7 @@ function DataManager(easyPub) {
                     mediaType: easyPub.getValue("mediaType"), //this is not an actual field in the CreativeWork schema
             		learningResourceType: easyPub.getValue("learningResourceType"),
                     interactivityType: easyPub.getValue("interactivityType"),
-                    useRightsUrl: [easyPub.getValue("useRightsUrl")],
+                    license: [easyPub.getValue("license")],
 					accessRights: [easyPub.getValue("accessRights")],
                     isBasedOnUrl: [easyPub.getValue("isBasedOnUrl")],
                     author: fullAuthorsArray,
