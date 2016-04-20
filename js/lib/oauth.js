@@ -230,7 +230,7 @@ OAuth.setProperties(OAuth, // utility functions
     /** Fill in parameters to help construct a request message.
         This function doesn't fill in every parameter.
         The accessor object should be like:
-        {consumerKey:'foo', consumerSecret:'bar', accessorSecret:'nurn', token:'krelm', tokenSecret:'blah'}
+        {consumer_key:'foo', consumer_secret:'bar', accessorSecret:'nurn', oauth_token:'krelm', token_secret:'blah'}
         The accessorSecret property is optional.
      */
     completeRequest: function completeRequest(message, accessor) {
@@ -239,10 +239,10 @@ OAuth.setProperties(OAuth, // utility functions
         }
         var map = OAuth.getParameterMap(message.parameters);
         if (map.oauth_consumer_key == null) {
-            OAuth.setParameter(message, "oauth_consumer_key", accessor.consumerKey || "");
+            OAuth.setParameter(message, "oauth_consumer_key", accessor.consumer_key || "");
         }
-        if (map.oauth_token == null && accessor.token != null) {
-            OAuth.setParameter(message, "oauth_token", accessor.token);
+        if (map.oauth_token == null && accessor.oauth_token != null) {
+            OAuth.setParameter(message, "oauth_token", accessor.oauth_token);
         }
         if (map.oauth_version == null) {
             OAuth.setParameter(message, "oauth_version", "1.0");
@@ -286,8 +286,8 @@ OAuth.setProperties(OAuth, // utility functions
                 header += ',' + OAuth.percentEncode(name) + '="' + OAuth.percentEncode(parameter[1]) + '"';
             }
         }
-        console.log("oauth header: ");
-        console.log(header);
+        //console.log("oauth header: ");
+        //console.log(header);
         return header;
     }
 ,
@@ -342,22 +342,22 @@ OAuth.setProperties(OAuth.SignatureMethod.prototype, // instance members
 ,
     /** Set the key string for signing. */
     initialize: function initialize(name, accessor) {
-        var consumerSecret;
+        var consumer_secret;
         if (accessor.accessorSecret != null
             && name.length > 9
             && name.substring(name.length-9) == "-Accessor")
         {
-            consumerSecret = accessor.accessorSecret;
+            consumer_secret = accessor.accessorSecret;
         } else {
-            consumerSecret = accessor.consumerSecret;
+            consumer_secret = accessor.consumer_secret;
         }
-        this.key = OAuth.percentEncode(consumerSecret)
-             +"&"+ OAuth.percentEncode(accessor.tokenSecret);
+        this.key = OAuth.percentEncode(consumer_secret)
+             +"&"+ OAuth.percentEncode(accessor.token_secret);
     }
 });
 
 /* SignatureMethod expects an accessor object to be like this:
-   {tokenSecret: "lakjsdflkj...", consumerSecret: "QOUEWRI..", accessorSecret: "xcmvzc..."}
+   {token_secret: "lakjsdflkj...", consumer_secret: "QOUEWRI..", accessorSecret: "xcmvzc..."}
    The accessorSecret property is optional.
  */
 // Class members:
@@ -409,7 +409,7 @@ OAuth.setProperties(OAuth.SignatureMethod, // class members
         var superClass = OAuth.SignatureMethod;
         var subClass = function() {
             superClass.call(this);
-        }; 
+        };
         subClass.prototype = new superClass();
         // Delete instance variables from prototype:
         // delete subclass.prototype... There aren't any.
