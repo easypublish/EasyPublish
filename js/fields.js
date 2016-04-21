@@ -142,7 +142,7 @@ function FieldManager() {
 		new Field("Media Type", Field.MULTI_CHOICE, {objectName:"mediaType", choices:mediaTypes, csvParser:split_cell}),
 		new Field("Learning Resource Type", Field.MULTI_CHOICE, {objectName:"learningResourceType", choices:learningResourceTypes, csvParser:split_cell}),
 		new Field("Interactivity", Field.MULTI_CHOICE, {objectName:"interactivityType", choices:interactivityTypes, csvParser:split_cell}),
-		new Field("License URL", Field.URL, {required:true,objectName:"license"}),
+		new Field("License URL", Field.URL, {required:false,objectName:"license"}),
 		new Field("Access Rights URL", Field.CHOICE, {objectName:"accessRights", choices:_.keys(accessRights_types), option_lookup:accessRights_lookup}),
 		new Field("Is based on URL", Field.URL, {objectName:"isBasedOnUrl"}),
 	];
