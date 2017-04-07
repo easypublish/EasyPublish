@@ -120,10 +120,10 @@ function CCSS() {
 					}
 
 				}
-			} 
+			}
 		}
 
-		console.log(standardsTree);
-		console.log(JSON.stringify(standardsTree));
+		// console.log(standardsTree);
+		// console.log(JSON.stringify(standardsTree));
 	}
 }

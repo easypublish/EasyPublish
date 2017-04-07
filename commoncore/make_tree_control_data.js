@@ -17,7 +17,7 @@ var work_files = [
 
 ];
 
-var all_exports = { 
+var all_exports = {
     map: {},
     data: [],
     frameworks:[]
@@ -33,7 +33,7 @@ function processContents(data) {
     var raw_json = JSON.parse(data),
         tree_data = makeFancyTreeData(raw_json);
 
-    console.log(JSON.stringify(tree_data, null, 4));
+    // console.log(JSON.stringify(tree_data, null, 4));
     return tree_data;
 }
 
@@ -51,7 +51,7 @@ function makeFancyTreeData(current_set) {
     var tree_data = [];
     _.each(current_set, function(parent){
 
-        
+
         var std_uri = parent.id;
         var std_dotnotation = false;
         var std_text = parent.text;
@@ -77,7 +77,7 @@ function makeFancyTreeData(current_set) {
             std_grade_level.push(parent.dcterms_educationLevel.prefLabel);
         }
 
-        
+
 
         var nodedata = {
             title: _.template(node_template, {dotnotation: std_dotnotation, text: std_text}).trim(),
@@ -88,13 +88,13 @@ function makeFancyTreeData(current_set) {
             }
         }
         addMapping(nodedata);
-        
+
         if (parent.children && parent.children.length>0) {
             nodedata.children = makeFancyTreeData(parent.children);
         }
 
         tree_data.push(nodedata);
-    
+
 
     });
     return tree_data;
@@ -102,7 +102,7 @@ function makeFancyTreeData(current_set) {
 
 
 _.each(work_files, function(work, index){
-    
+
     fs.readFile(work.source, null, function(err, data){
         current_framework = all_exports.frameworks.push(work.label) - 1;
 
